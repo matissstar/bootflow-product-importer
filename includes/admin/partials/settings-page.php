@@ -108,7 +108,10 @@ $security_settings = get_option('wc_xml_csv_ai_import_security_settings', array(
 ?>
 
 <div class="wrap">
-    <h1><?php esc_html_e('XML/CSV AI Smart Import - Settings', 'bootflow-product-importer'); ?></h1>
+    <div class="bootflow-header-row">
+        <h1><?php esc_html_e('XML/CSV AI Smart Import - Settings', 'bootflow-product-importer'); ?></h1>
+        <?php $this->render_language_switcher(); ?>
+    </div>
     
     <?php $current_tier = WC_XML_CSV_AI_Import_License::get_tier(); ?>
     <nav class="nav-tab-wrapper">

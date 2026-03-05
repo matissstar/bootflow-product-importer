@@ -1,0 +1,14 @@
+Missing translations for lv (4 strings):
+
+1. [includes/admin/partials/step-2-mapping.php]
+   EN: $parent_description . " | " . $value
+
+2. [includes/admin/partials/step-2-mapping.php]
+   EN: e.g., "Size: " . $value . " - " . $parent_description
+
+3. [includes/admin/partials/step-2-mapping.php]
+   EN: e.g., explode(",", $value)
+
+4. [includes/admin/partials/step-2-mapping.php]
+   EN: e.g., str_replace("small", "large", $value)
+

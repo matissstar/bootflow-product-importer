@@ -106,7 +106,7 @@ if (!empty($import['file_path']) && file_exists($import['file_path'])) {
             </tr>
             <tr>
                 <th><?php esc_html_e('Created', 'bootflow-product-importer'); ?></th>
-                <td><?php echo esc_html(date_i18n(get_option('date_format') . ' ' . get_option('time_format'), strtotime($import['created_at']))); ?></td>
+                <td><?php echo esc_html(WC_XML_CSV_AI_Import_i18n::localize_date(get_option('date_format') . ' ' . get_option('time_format'), strtotime($import['created_at']))); ?></td>
             </tr>
             <tr>
                 <th><?php esc_html_e('Last Run', 'bootflow-product-importer'); ?></th>
@@ -127,7 +127,7 @@ if (!empty($import['file_path']) && file_exists($import['file_path'])) {
                             $ago_text = sprintf(__('%d days ago', 'bootflow-product-importer'), intval($ago_seconds / 86400));
                         }
                         ?>
-                        <?php echo esc_html(date_i18n('d.m.Y H:i:s', $last_run_ts)); ?>
+                        <?php echo esc_html(WC_XML_CSV_AI_Import_i18n::localize_date('d.m.Y H:i:s', $last_run_ts)); ?>
                         <span style="color:#888; margin-left:8px;">(<?php echo esc_html($ago_text); ?>)</span>
                         <?php
                         // Show next scheduled run

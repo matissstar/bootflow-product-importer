@@ -1847,3 +1847,109 @@
     border-radius: 4px;
     margin-bottom: 4px;
 }
+
+/* ===== Language Switcher ===== */
+.bootflow-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.bootflow-header-row h1 {
+    margin: 0;
+    padding: 0;
+    flex: 1;
+}
+
+.bootflow-lang-switcher {
+    position: relative;
+    z-index: 100;
+}
+
+.bootflow-lang-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    line-height: 1.4;
+    color: #1d2327;
+    transition: all 0.15s ease;
+}
+
+.bootflow-lang-btn:hover {
+    background: #f6f7f7;
+    border-color: #8c8f94;
+    color: #1d2327;
+}
+
+.bootflow-lang-btn .dashicons {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+    line-height: 14px;
+    transition: transform 0.2s;
+}
+
+.bootflow-lang-btn.open .dashicons {
+    transform: rotate(180deg);
+}
+
+.bootflow-lang-flag {
+    font-size: 16px;
+    line-height: 1;
+}
+
+.bootflow-lang-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 4px;
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    min-width: 200px;
+    max-height: 380px;
+    overflow-y: auto;
+}
+
+.bootflow-lang-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    text-decoration: none;
+    color: #1d2327;
+    font-size: 13px;
+    border-bottom: 1px solid #f0f0f1;
+    transition: background 0.1s;
+}
+
+.bootflow-lang-option:last-child {
+    border-bottom: none;
+}
+
+.bootflow-lang-option:hover {
+    background: #f0f6fc;
+    color: #1d2327;
+}
+
+.bootflow-lang-option.active {
+    background: #f0f6fc;
+    font-weight: 600;
+    color: #2271b1;
+}
+
+.bootflow-lang-option.active::after {
+    content: '✓';
+    margin-left: auto;
+    color: #2271b1;
+}

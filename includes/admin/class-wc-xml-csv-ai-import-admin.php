@@ -122,6 +122,29 @@ class WC_XML_CSV_AI_Import_Admin {
                     'no_products_found' => __('No products found to delete.', 'bootflow-product-importer'),
                     // translators: %d is the number of products deleted
                     'all_products_deleted' => __('All %d products deleted successfully!', 'bootflow-product-importer'),
+                    // File preview navigation
+                    'prev' => __('← Prev', 'bootflow-product-importer'),
+                    'next' => __('Next →', 'bootflow-product-importer'),
+                    'go' => __('Go', 'bootflow-product-importer'),
+                    'go_to_product' => __('Go to product:', 'bootflow-product-importer'),
+                    // translators: %1$d is the current product number, %2$d is the total number of products
+                    'product_x_of_y' => __('Product %1$d of %2$d', 'bootflow-product-importer'),
+                    // File preview group headers
+                    'basic_info' => __('Basic Info', 'bootflow-product-importer'),
+                    'pricing' => __('Pricing', 'bootflow-product-importer'),
+                    'inventory' => __('Inventory', 'bootflow-product-importer'),
+                    'shipping' => __('Shipping', 'bootflow-product-importer'),
+                    'identifiers' => __('Identifiers', 'bootflow-product-importer'),
+                    'other_fields' => __('Other Fields', 'bootflow-product-importer'),
+                    // Expandable fields
+                    'items' => __('items', 'bootflow-product-importer'),
+                    'click_to_expand' => __('(click to expand)', 'bootflow-product-importer'),
+                    'click' => __('(click)', 'bootflow-product-importer'),
+                    'object_fields' => __('Object (%d fields)', 'bootflow-product-importer'),
+                    'all_items' => __('All %d items', 'bootflow-product-importer'),
+                    'nested_fields' => __('+ %d nested/complex fields (attributes, variations, etc.) available in dropdown', 'bootflow-product-importer'),
+                    'preview' => __('Preview:', 'bootflow-product-importer'),
+                    'variable_product_detected' => __('Variable Product Detected', 'bootflow-product-importer'),
                 )
             )
         );
@@ -157,6 +180,56 @@ class WC_XML_CSV_AI_Import_Admin {
             wp_safe_redirect($redirect_url);
             exit;
         }
+    }
+    
+    /**
+     * Render language switcher dropdown for admin pages.
+     *
+     * @since    1.0.0
+     */
+    private function render_language_switcher() {
+        $locales = WC_XML_CSV_AI_Import_i18n::get_supported_locales();
+        $current = WC_XML_CSV_AI_Import_i18n::get_admin_locale();
+        $user_override = get_user_meta(get_current_user_id(), 'bootflow_admin_language', true);
+        $is_auto = empty($user_override) || $user_override === 'auto';
+        
+        // Flag emoji map
+        $flags = array(
+            'en_US' => '🇬🇧', 'lv' => '🇱🇻', 'es_ES' => '🇪🇸', 'de_DE' => '🇩🇪',
+            'fr_FR' => '🇫🇷', 'pt_BR' => '🇧🇷', 'ja' => '🇯🇵', 'it_IT' => '🇮🇹',
+            'nl_NL' => '🇳🇱', 'ru_RU' => '🇷🇺', 'zh_CN' => '🇨🇳', 'pl_PL' => '🇵🇱',
+            'tr_TR' => '🇹🇷', 'sv_SE' => '🇸🇪', 'id_ID' => '🇮🇩', 'ar' => '🇸🇦',
+        );
+        
+        $current_flag = isset($flags[$current]) ? $flags[$current] : '🌐';
+        $current_name = isset($locales[$current]) ? $locales[$current] : 'English';
+        
+        echo '<div class="bootflow-lang-switcher">';
+        echo '<button type="button" class="bootflow-lang-btn" id="bootflow-lang-toggle">';
+        echo '<span class="bootflow-lang-flag">' . $current_flag . '</span>';
+        echo '<span class="bootflow-lang-name">' . esc_html($current_name) . '</span>';
+        echo '<span class="dashicons dashicons-arrow-down-alt2"></span>';
+        echo '</button>';
+        echo '<div class="bootflow-lang-dropdown" id="bootflow-lang-dropdown" style="display:none;">';
+        
+        // Auto option
+        $auto_class = $is_auto ? ' active' : '';
+        echo '<a href="#" class="bootflow-lang-option' . $auto_class . '" data-locale="auto">';
+        echo '<span class="bootflow-lang-flag">🌐</span>';
+        echo '<span class="bootflow-lang-name">Auto (WordPress)</span>';
+        echo '</a>';
+        
+        foreach ($locales as $locale => $name) {
+            $flag = isset($flags[$locale]) ? $flags[$locale] : '🌐';
+            $active_class = (!$is_auto && $current === $locale) ? ' active' : '';
+            echo '<a href="#" class="bootflow-lang-option' . $active_class . '" data-locale="' . esc_attr($locale) . '">';
+            echo '<span class="bootflow-lang-flag">' . $flag . '</span>';
+            echo '<span class="bootflow-lang-name">' . esc_html($name) . '</span>';
+            echo '</a>';
+        }
+        
+        echo '</div></div>';
+        echo '<input type="hidden" id="bootflow-lang-nonce" value="' . esc_attr(wp_create_nonce('bootflow_switch_language')) . '" />';
     }
     
     /**
@@ -252,7 +325,10 @@ class WC_XML_CSV_AI_Import_Admin {
         $step = isset($_GET['step']) ? intval($_GET['step']) : 1;
         
         echo '<div class="wrap wc-xml-csv-import-wrap">';
+        echo '<div class="bootflow-header-row">';
         echo '<h1>' . esc_html__('Bootflow – WooCommerce XML & CSV Importer', 'bootflow-product-importer') . '</h1>';
+        $this->render_language_switcher();
+        echo '</div>';
         
         // Progress indicator
         $this->display_progress_indicator($step);
@@ -540,7 +616,10 @@ class WC_XML_CSV_AI_Import_Admin {
         }
         
         echo '<div class="wrap">';
+        echo '<div class="bootflow-header-row">';
         echo '<h1>' . esc_html__('Import History', 'bootflow-product-importer') . '</h1>';
+        $this->render_language_switcher();
+        echo '</div>';
         
         // Get imports
         $imports = $wpdb->get_results(
@@ -594,7 +673,7 @@ class WC_XML_CSV_AI_Import_Admin {
                 echo '<td title="' . esc_attr(sprintf(__('In database: %1$d, Processed: %2$d, In file: %3$d', 'bootflow-product-importer'), $actual_product_count, $import['processed_products'], $import['total_products'])) . '">' . esc_html($actual_product_count) . ' <small style="color:#666;">(' . esc_html($import['processed_products']) . '/' . esc_html($import['total_products']) . ')</small></td>';
                 echo '<td>' . esc_html(ucfirst($import['status'])) . '</td>';
                 echo '<td>' . esc_html($schedule_label) . '</td>';
-                echo '<td>' . esc_html(date_i18n(get_option('date_format') . ' ' . get_option('time_format'), strtotime($import['created_at']))) . '</td>';
+                echo '<td>' . esc_html(WC_XML_CSV_AI_Import_i18n::localize_date(get_option('date_format') . ' ' . get_option('time_format'), strtotime($import['created_at']))) . '</td>';
                 echo '<td>';
                 if ($import['last_run']) {
                     $last_run_ts = strtotime($import['last_run']);
@@ -610,7 +689,7 @@ class WC_XML_CSV_AI_Import_Admin {
                     } else {
                         $ago_text = sprintf(__('%d days ago', 'bootflow-product-importer'), intval($ago_seconds / 86400));
                     }
-                    echo esc_html(date_i18n('d.m.Y H:i:s', $last_run_ts));
+                    echo esc_html(WC_XML_CSV_AI_Import_i18n::localize_date('d.m.Y H:i:s', $last_run_ts));
                     echo '<br><small style="color:#888;">(' . esc_html($ago_text) . ')</small>';
                     // Show next scheduled run
                     if (!empty($import['schedule_type']) && $import['schedule_type'] !== 'none' && $import['schedule_type'] !== 'disabled') {
@@ -3385,7 +3464,10 @@ class WC_XML_CSV_AI_Import_Admin {
         global $wpdb;
         ?>
         <div class="wrap wc-xml-csv-import">
-            <h1><?php echo esc_html__('Import Logs', 'bootflow-product-importer'); ?></h1>
+            <div class="bootflow-header-row">
+                <h1><?php echo esc_html__('Import Logs', 'bootflow-product-importer'); ?></h1>
+                <?php $this->render_language_switcher(); ?>
+            </div>
             
             <?php
             // Get imports for dropdown
@@ -3560,7 +3642,10 @@ class WC_XML_CSV_AI_Import_Admin {
         $upgrade_url = WC_XML_CSV_AI_Import_License::get_upgrade_url();
         ?>
         <div class="wrap wc-xml-csv-import">
-            <h1><?php echo esc_html__('Import Logs', 'bootflow-product-importer'); ?></h1>
+            <div class="bootflow-header-row">
+                <h1><?php echo esc_html__('Import Logs', 'bootflow-product-importer'); ?></h1>
+                <?php $this->render_language_switcher(); ?>
+            </div>
             
             <div style="max-width: 700px; margin: 40px auto; text-align: center;">
                 <!-- PRO Feature Card -->

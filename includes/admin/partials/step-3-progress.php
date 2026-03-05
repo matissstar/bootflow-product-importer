@@ -257,12 +257,12 @@ $percentage = $import->total_products > 0 ? round(($import->processed_products /
                 </tr>
                 <tr>
                     <td><strong><?php esc_html_e('Started:', 'bootflow-product-importer'); ?></strong></td>
-                    <td><?php echo esc_html(date_i18n(get_option('date_format') . ' ' . get_option('time_format'), strtotime($import->created_at))); ?></td>
+                    <td><?php echo esc_html(WC_XML_CSV_AI_Import_i18n::localize_date(get_option('date_format') . ' ' . get_option('time_format'), strtotime($import->created_at))); ?></td>
                 </tr>
                 <?php if ($import->last_run): ?>
                 <tr>
                     <td><strong><?php esc_html_e('Last Activity:', 'bootflow-product-importer'); ?></strong></td>
-                    <td><?php echo esc_html(date_i18n(get_option('date_format') . ' ' . get_option('time_format'), strtotime($import->last_run))); ?></td>
+                    <td><?php echo esc_html(WC_XML_CSV_AI_Import_i18n::localize_date(get_option('date_format') . ' ' . get_option('time_format'), strtotime($import->last_run))); ?></td>
                 </tr>
                 <?php endif; ?>
                 <tr>

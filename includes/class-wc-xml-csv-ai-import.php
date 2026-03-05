@@ -173,6 +173,8 @@ class WC_XML_CSV_AI_Import {
     private function set_locale() {
         $plugin_i18n = new WC_XML_CSV_AI_Import_i18n();
         $this->loader->add_action('plugins_loaded', $plugin_i18n, 'load_plugin_textdomain');
+        // Reload with user's language preference (user is not yet known at plugins_loaded)
+        $this->loader->add_action('admin_init', $plugin_i18n, 'reload_textdomain_for_user');
     }
 
     /**
@@ -228,6 +230,9 @@ class WC_XML_CSV_AI_Import {
         
         // Delete products with progress
         $this->loader->add_action('wp_ajax_wc_xml_csv_ai_import_delete_products_batch', $plugin_admin, 'ajax_delete_products_batch');
+        
+        // Language switcher
+        $this->loader->add_action('wp_ajax_bootflow_switch_language', 'WC_XML_CSV_AI_Import_i18n', 'ajax_switch_language');
         $this->loader->add_action('wp_ajax_wc_xml_csv_ai_import_get_products_count', $plugin_admin, 'ajax_get_products_count');
         
         // Process batch endpoint (for async re-run)

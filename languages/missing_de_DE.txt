@@ -1,0 +1,530 @@
+Missing translations for de_DE (176 strings):
+
+1. [includes/admin/partials/step-2-mapping.php]
+   EN: $parent_description . " | " . $value
+
+2. [includes/admin/partials/step-2-mapping.php]
+   EN: $value * 1.21
+
+3. [includes/admin/class-wc-xml-csv-ai-import-admin.php]
+   EN: (click to expand)
+
+4. [includes/admin/class-wc-xml-csv-ai-import-admin.php]
+   EN: (click)
+
+5. [includes/admin/class-wc-xml-csv-ai-import-admin.php]
+   EN: + %d nested/complex fields (attributes, variations, etc.) available in dropdown
+
+6. [includes/admin/partials/step-2-mapping.php]
+   EN: 0.01
+
+7. [includes/admin/partials/step-2-mapping.php]
+   EN: 0.05
+
+8. [includes/admin/partials/step-2-mapping.php]
+   EN: 0.10
+
+9. [includes/admin/partials/step-2-mapping.php]
+   EN: 0.50
+
+10. [includes/admin/partials/step-2-mapping.php]
+   EN: .95
+
+11. [includes/admin/partials/step-2-mapping.php]
+   EN: .99
+
+12. [includes/admin/partials/step-2-mapping.php]
+   EN: 1.00
+
+13. [includes/admin/partials/step-2-mapping.php]
+   EN: <strong>Required for Map mode!</strong> The XML element name inside &lt;attributes&gt;.
+
+14. [includes/admin/class-wc-xml-csv-ai-import-admin.php]
+   EN: AI auto-mapping requires an AI API key. Please configure one in Settings.
+
+15. [includes/admin/class-wc-xml-csv-ai-import-admin.php]
+   EN: AI mapped %1$d fields, auto-filled %2$d fields. Total: %3$d of %4$d fields mapped.
+
+16. [includes/admin/partials/step-2-mapping.php]
+   EN: Access product data: <code>$product['field']</code> or <code>$value</code> for source field
+
+17. [includes/admin/partials/step-1-upload.php]
+   EN: Action will only affect products that were last updated by THIS import. Products updated by other imports will not be affected.
+
+18. [includes/admin/partials/step-2-mapping.php]
+   EN: Add attributes that will be shown on product pages. These are informational only.
+
+19. [includes/admin/partials/settings-page.php]
+   EN: Add this cron job to your server to trigger scheduled imports. The import will process ALL products until complete in one request.
+
+20. [includes/admin/class-wc-xml-csv-ai-import-admin.php]
+   EN: All %d items
+
+21. [includes/admin/partials/settings-page.php]
+   EN: All features unlocked including AI Auto-Mapping, templates, and scheduled imports!
+
+22. [includes/admin/partials/step-2-mapping.php]
+   EN: Attribute Name: "Material" → Source: select the XML/CSV field containing material values
+
+23. [includes/admin/partials/step-2-mapping.php]
+   EN: Auto-assign shipping classes based on product weight, category, price, or any XML field
+
+24. [includes/admin/partials/settings-page.php]
+   EN: Automate your imports with scheduled cron jobs. Run imports automatically every 15 minutes, hourly, daily, or weekly.
+
+25. [includes/admin/partials/step-1-upload.php]
+   EN: Automated scheduled imports are available in the PRO version. Run imports automatically every 15 minutes, hourly, daily, or weekly.
+
+26. [includes/admin/partials/import-edit.php]
+   EN: Automatically continues until complete. No server cron needed. Requires website traffic.
+
+27. [includes/admin/partials/step-2-mapping.php]
+   EN: Automatically map XML/CSV fields to WooCommerce product fields using artificial intelligence. Save hours of manual mapping work.
+
+28. [includes/admin/partials/step-2-mapping.php]
+   EN: Automatically re-import from URL on a schedule. Requires server cron to be configured.
+
+29. [includes/admin/partials/settings-page.php]
+   EN: Automatically sanitize imported data to prevent XSS and other security issues.
+
+30. [includes/admin/class-wc-xml-csv-ai-import-admin.php]
+   EN: Basic Info
+
+31. [includes/admin/partials/step-2-mapping.php]
+   EN: Calculate final prices by applying markup rules to the base price from XML
+
+32. [includes/admin/partials/step-1-upload.php]
+   EN: Choose how often this import should run automatically. Manual imports can be run at any time.
+
+33. [includes/admin/partials/settings-page.php]
+   EN: Configure API keys and settings for AI providers used in smart field processing.
+
+34. [includes/admin/partials/settings-page.php]
+   EN: Configure performance-related settings to optimize import speed and memory usage.
+
+35. [includes/admin/partials/settings-page.php]
+   EN: Configure security settings for PHP formula execution and data validation.
+
+36. [includes/admin/partials/settings-page.php]
+   EN: Copy and paste this command into your server's crontab (via SSH or your hosting control panel):
+
+37. [includes/class-wc-xml-csv-ai-import-license.php]
+   EN: Could not connect to the license server. Please check your internet connection and try again.
+
+38. [includes/admin/partials/step-2-mapping.php]
+   EN: Create complex field transformation formulas. String manipulation, conditionals, and more.
+
+39. [includes/admin/partials/step-2-mapping.php]
+   EN: Define attributes used for variations (e.g., Size, Color). Each unique combination creates a product variation.
+
+40. [includes/admin/partials/step-2-mapping.php]
+   EN: Downloadable products give access to files after purchase (e.g., ebooks, software)
+
+41. [includes/admin/partials/step-2-mapping.php]
+   EN: Enable Shipping Class Rules above to automatically assign shipping classes based on product data
+
+42. [includes/admin/partials/step-2-mapping.php]
+   EN: Enable stock management at variation level (track inventory for each variation separately)
+
+43. [includes/admin/class-wc-xml-csv-ai-import-admin.php, includes/admin/partials/step-2-mapping.php]
+   EN: Enter image URLs or use placeholders: {image} = first image, {image[1]} = first, {image[2]} = second, {image*} = all images. Separate multiple values with commas.
+
+44. [includes/admin/partials/settings-page.php]
+   EN: Enter your license key below to activate PRO features. Without a license, the plugin runs in free mode.
+
+45. [includes/admin/partials/step-2-mapping.php]
+   EN: Example: if XML has <code>&lt;attributes&gt;&lt;size&gt;S&lt;/size&gt;&lt;/attributes&gt;</code> → enter <code>size</code>
+
+46. [includes/class-wc-xml-csv-ai-import-importer.php]
+   EN: External products require PRO license. Importing "%s" as Simple product.
+
+47. [includes/admin/partials/step-2-mapping.php]
+   EN: Filter products during import based on field values, price ranges, stock status, and more.
+
+48. [includes/admin/partials/step-2-mapping.php]
+   EN: Filter products during import based on field values, regex patterns, and conditional logic. Only import products that match your criteria.
+
+49. [includes/admin/partials/import-edit.php, includes/admin/partials/step-2-mapping.php]
+   EN: Filter which products to import based on field values. Products that don't match will be skipped.
+
+50. [includes/admin/partials/step-2-mapping.php]
+   EN: Filters will be applied during import. Products that don't match will be skipped.
+
+51. [includes/admin/partials/step-2-mapping.php]
+   EN: For CSV files, variable products require Parent SKU and Type columns to link variations to parent products.
+
+52. [includes/admin/partials/step-2-mapping.php]
+   EN: For XML files where attribute name and value are in separate fields (e.g., BigBuy format with attribute1/value1, attribute2/value2).
+
+53. [includes/admin/partials/settings-page.php]
+   EN: Full manual import tool. Upgrade to PRO for automation, templates, and AI features!
+
+54. [includes/admin/partials/settings-page.php]
+   EN: Get scheduled imports, AI auto-mapping, advanced formulas, selective field updates, and more.
+
+55. [includes/admin/class-wc-xml-csv-ai-import-admin.php]
+   EN: Go
+
+56. [includes/admin/class-wc-xml-csv-ai-import-admin.php]
+   EN: Go to product:
+
+57. [includes/class-wc-xml-csv-ai-import-importer.php]
+   EN: Grouped products require PRO license. Importing "%s" as Simple product.
+
+58. [includes/admin/class-wc-xml-csv-ai-import-admin.php]
+   EN: Identifiers
+
+59. [includes/admin/partials/step-2-mapping.php]
+   EN: If re-running import, existing products that no longer match filters will be set to Draft status.
+
+60. [includes/admin/partials/step-2-mapping.php]
+   EN: Image URL for this attribute (e.g., color swatch, size chart). For variations, use variation image mapping below.
+
+61. [includes/admin/partials/step-2-mapping.php]
+   EN: Import directly from remote URLs. Perfect for supplier feeds that are hosted online.
+
+62. [includes/admin/partials/step-2-mapping.php]
+   EN: Import products with variations - sizes, colors, materials, and more. Full support for WooCommerce variable product structure.
+
+63. [includes/admin/partials/step-3-progress.php]
+   EN: Importing "%s" - Please keep this page open until the import is complete.
+
+64. [includes/admin/class-wc-xml-csv-ai-import-admin.php]
+   EN: Inventory
+
+65. [includes/admin/partials/step-2-mapping.php]
+   EN: Leave empty for XML &lt;attributes&gt; auto-mapping, or select field for direct mapping
+
+66. [includes/admin/partials/step-2-mapping.php]
+   EN: Let AI handle complex field transformations. Describe what you want in plain language.
+
+67. [includes/admin/partials/step-2-mapping.php]
+   EN: Map CSV columns that contain attribute values (e.g., "Attribute:Color", "Attribute:Size").
+
+68. [includes/admin/partials/step-2-mapping.php]
+   EN: Map CSV columns to WooCommerce variation fields. These are read from variation rows.
+
+69. [includes/admin/partials/import-edit.php, includes/admin/partials/step-2-mapping.php]
+   EN: Map your file fields to WooCommerce product fields and configure processing modes.
+
+70. [includes/admin/class-wc-xml-csv-ai-import-admin.php]
+   EN: Next →
+
+71. [includes/admin/partials/step-2-mapping.php]
+   EN: No additional configuration needed. Products will be imported as simple products.
+
+72. [includes/admin/partials/settings-page.php]
+   EN: No server configuration needed, self-healing, processes full import automatically.
+
+73. [includes/admin/partials/step-2-mapping.php]
+   EN: No shipping classes found. Create them in WooCommerce → Settings → Shipping
+
+74. [includes/admin/partials/import-edit.php]
+   EN: No shipping classes found. Please create them in WooCommerce → Settings → Shipping → Shipping classes
+
+75. [includes/admin/partials/step-2-mapping.php]
+   EN: No shipping classes found. They will be created automatically during import, or create them in WooCommerce → Settings → Shipping → Shipping Classes.
+
+76. [includes/admin/partials/step-2-mapping.php]
+   EN: Note: If you have a direct shipping_class field mapped above, it takes priority over these rules.
+
+77. [includes/admin/partials/settings-page.php]
+   EN: Note: We recommend running every minute. The plugin will only process imports when their scheduled interval has passed.
+
+78. [includes/admin/class-wc-xml-csv-ai-import-admin.php]
+   EN: Object (%d fields)
+
+79. [includes/admin/partials/step-3-progress.php]
+   EN: Once configured, imports will continue automatically even if you close this page.
+
+80. [includes/admin/partials/step-2-mapping.php]
+   EN: Only for XML with &lt;attribute&gt;&lt;name&gt;...&lt;/name&gt;&lt;value&gt;...&lt;/value&gt;&lt;/attribute&gt; structure
+
+81. [includes/admin/partials/step-2-mapping.php]
+   EN: Optional: Calculate shipping class based on dimensions/weight when no direct mapping is set.
+
+82. [includes/admin/class-wc-xml-csv-ai-import-admin.php]
+   EN: Other Fields
+
+83. [includes/admin/class-wc-xml-csv-ai-import-admin.php]
+   EN: PHP Formula processing is a PRO feature. Please upgrade to use this functionality.
+
+84. [includes/admin/partials/step-2-mapping.php]
+   EN: Parent SKU links variations to parent. Type column (values: "variable" or "variation") helps identify row types.
+
+85. [includes/admin/partials/step-2-mapping.php]
+   EN: Path to attributes container in each variation (without { })
+
+86. [includes/admin/partials/step-2-mapping.php]
+   EN: Path to variation/attribute container. Examples:
+
+87. [includes/admin/partials/step-2-mapping.php]
+   EN: Plugin will automatically create attributes: pa_size=L, pa_color=Black
+
+88. [includes/admin/class-wc-xml-csv-ai-import-admin.php]
+   EN: Pricing
+
+89. [includes/admin/partials/import-edit.php]
+   EN: Processes entire import in one request. 100% reliable but requires server cron setup.
+
+90. [includes/class-wc-xml-csv-ai-import-importer.php]
+   EN: Product "%1$s" (SKU: %2$s) marked as out of stock - no longer in feed.
+
+91. [includes/admin/class-wc-xml-csv-ai-import-admin.php]
+   EN: Product %1$d of %2$d
+
+92. [includes/admin/partials/step-2-mapping.php]
+   EN: Product type. Auto-detected if grouped_products or external_url is mapped.
+
+93. [includes/admin/partials/import-edit.php]
+   EN: Products to process per chunk (1-500). Higher = faster, but more memory. Recommended: 50-200 for updates.
+
+94. [includes/admin/partials/step-2-mapping.php]
+   EN: Result: Attribute "Colour" with value "Blue"
+
+95. [includes/admin/partials/step-2-mapping.php]
+   EN: Rules are evaluated from top to bottom. First matching rule wins (or use "Apply All" mode).
+
+96. [includes/admin/partials/step-2-mapping.php]
+   EN: Rules are evaluated from top to bottom. First matching rule wins. The assigned shipping class will be created automatically if it doesn't exist.
+
+97. [includes/admin/partials/step-2-mapping.php]
+   EN: Rules are evaluated top to bottom. First matching rule applies. Avoid overlapping conditions.
+
+98. [includes/admin/partials/step-2-mapping.php]
+   EN: Save and reuse mapping configurations across imports. Available in PRO version.
+
+99. [includes/admin/partials/step-2-mapping.php]
+   EN: Save your field mappings as reusable templates. Perfect for recurring imports from the same source.
+
+100. [includes/admin/partials/import-edit.php]
+   EN: Schedule automatic imports to run at regular intervals. Keep your products always up-to-date without manual intervention.
+
+101. [includes/admin/partials/step-1-upload.php]
+   EN: Select file type manually for URLs without file extension (e.g., API feeds).
+
+102. [includes/admin/partials/step-3-progress.php]
+   EN: Set up a cron job to continue imports in the background, even when the browser is closed.
+
+103. [includes/admin/partials/step-2-mapping.php]
+   EN: Set up automatic imports on a schedule. Keep your products updated from supplier feeds without manual intervention.
+
+104. [includes/admin/class-wc-xml-csv-ai-import-admin.php]
+   EN: Shipping
+
+105. [includes/admin/class-wc-xml-csv-ai-import-admin.php]
+   EN: Shipping formula processing is a PRO feature. Please upgrade to use this functionality.
+
+106. [includes/admin/partials/step-1-upload.php]
+   EN: The XML element name that contains individual product data (e.g., "product", "item", "goods"). Leave as "product" for CSV files.
+
+107. [includes/admin/partials/step-3-progress.php]
+   EN: The import process encountered an error and could not be completed. Please check the logs below for more details.
+
+108. [includes/admin/partials/step-2-mapping.php]
+   EN: These settings apply to ALL variations created from this attribute. Leave as "No change" to use parent product values.
+
+109. [includes/admin/partials/step-2-mapping.php]
+   EN: This feature is available in the Pro version. Upgrade to unlock all advanced features.
+
+110. [includes/admin/partials/step-2-mapping.php]
+   EN: This formula is used only when no direct mapping is set above. Leave empty to skip.
+
+111. [includes/admin/partials/import-edit.php]
+   EN: This import needs to be configured. Please select source fields from the dropdowns below, configure processing modes, and click "Save Changes" to activate this import.
+
+112. [includes/admin/partials/settings-page.php]
+   EN: This is the URL that the cron job will call to trigger scheduled imports.
+
+113. [includes/admin/class-wc-xml-csv-ai-import-admin.php]
+   EN: Track every import in detail. Monitor progress, debug issues, and ensure data quality with comprehensive logging.
+
+114. [includes/admin/partials/step-2-mapping.php]
+   EN: Transform or translate ANY field value during import using PHP formulas, AI processing, or Hybrid mode.
+
+115. [includes/admin/partials/step-2-mapping.php]
+   EN: Uncheck to prevent this field from being updated when re-importing existing products
+
+116. [includes/admin/class-wc-xml-csv-ai-import-admin.php]
+   EN: Unlock all PRO features including scheduled imports, advanced filters, and AI processing.
+
+117. [includes/admin/partials/step-2-mapping.php]
+   EN: Use PHP formulas to transform field values during import. Full flexibility for complex transformations.
+
+118. [includes/admin/partials/settings-page.php]
+   EN: Use an external server cron job to trigger imports via URL. Processes entire import in one request (with loop until complete).
+
+119. [includes/admin/partials/settings-page.php]
+   EN: Uses WooCommerce Action Scheduler for reliable background processing. Automatically processes all products until complete. Works without server cron configuration.
+
+120. [includes/admin/class-wc-xml-csv-ai-import-admin.php]
+   EN: Variable Product Detected
+
+121. [includes/admin/partials/step-2-mapping.php]
+   EN: Variables: $value, $parent_description, $sku, $name, etc.
+
+122. [includes/admin/partials/step-2-mapping.php]
+   EN: Variables: $value, $parent_price, $sku, etc.
+
+123. [includes/admin/partials/import-edit.php]
+   EN: We recommend running cron every minute. The plugin will only process when the scheduled interval has passed.
+
+124. [includes/admin/partials/step-1-upload.php]
+   EN: What to do with products that were imported before but are no longer present in the XML/CSV file.
+
+125. [includes/admin/partials/import-edit.php, includes/admin/partials/step-2-mapping.php]
+   EN: When enabled, existing products with matching SKUs will be updated instead of creating duplicates.
+
+126. [includes/admin/partials/import-edit.php]
+   EN: When enabled, products that were imported before but are no longer in the XML/CSV file will be processed.
+
+127. [includes/admin/partials/import-edit.php]
+   EN: When re-running, products that no longer match filters will be set to Draft status (not deleted).
+
+128. [bootflow-product-importer.php]
+   EN: WooCommerce XML/CSV Smart Import requires WooCommerce to be installed and active.
+
+129. [includes/admin/partials/import-edit.php]
+   EN: Write a PHP formula to automatically assign shipping classes based on product dimensions and weight. The formula should return the shipping class slug (e.g., "S", "M", "L", "Smags").
+
+130. [includes/class-wc-xml-csv-ai-import-license.php]
+   EN: Your PRO license is not activated. Please %1$sactivate your license%2$s to unlock PRO features, or use the free version from WordPress.org.
+
+131. [includes/admin/partials/step-2-mapping.php]
+   EN: e.g., "Size: " . $value . " - " . $parent_description
+
+132. [includes/admin/partials/import-edit.php, includes/admin/partials/step-2-mapping.php]
+   EN: e.g., $value * 1.2
+
+133. [includes/admin/partials/step-2-mapping.php]
+   EN: e.g., $value * 1.21
+
+134. [includes/admin/partials/step-2-mapping.php]
+   EN: e.g., -red, -xl
+
+135. [includes/admin/partials/import-edit.php]
+   EN: e.g., Add 20 to this number: {value}. Return only the result number.
+
+136. [includes/admin/partials/step-2-mapping.php]
+   EN: e.g., Convert price and add 21% VAT
+
+137. [includes/admin/partials/import-edit.php]
+   EN: e.g., Enhance this processed text for better readability
+
+138. [includes/admin/partials/step-2-mapping.php]
+   EN: e.g., Enhance this text for better readability
+
+139. [includes/admin/partials/step-2-mapping.php]
+   EN: e.g., Extract color names from this text
+
+140. [includes/admin/partials/step-2-mapping.php]
+   EN: e.g., Extract image URL from HTML
+
+141. [includes/admin/partials/step-2-mapping.php]
+   EN: e.g., Extract the currency code from this value
+
+142. [includes/admin/partials/step-2-mapping.php]
+   EN: e.g., Generate unique variation description
+
+143. [includes/admin/partials/step-2-mapping.php]
+   EN: e.g., Izmērs, Krāsa, Material
+
+144. [includes/admin/partials/step-2-mapping.php]
+   EN: e.g., Material
+
+145. [includes/admin/partials/step-1-upload.php]
+   EN: e.g., Summer Collection 2024
+
+146. [includes/admin/partials/import-edit.php, includes/admin/partials/step-2-mapping.php]
+   EN: e.g., Translate this product name to English and make it SEO-friendly
+
+147. [includes/admin/partials/step-2-mapping.php]
+   EN: e.g., explode(",", $value)
+
+148. [includes/admin/partials/step-2-mapping.php]
+   EN: e.g., return $product['price']['@attributes']['currency'] ?? 'USD';
+
+149. [includes/admin/partials/step-2-mapping.php]
+   EN: e.g., return $value * 1.21;
+
+150. [includes/admin/partials/import-edit.php]
+   EN: e.g., return $value + 20;
+
+151. [includes/admin/partials/step-2-mapping.php]
+   EN: e.g., size, color, material
+
+152. [includes/admin/partials/step-2-mapping.php]
+   EN: e.g., str_replace("small", "large", $value)
+
+153. [includes/admin/partials/import-edit.php, includes/admin/partials/step-2-mapping.php]
+   EN: e.g., trim(strtolower($value))
+
+154. [includes/admin/partials/step-2-mapping.php]
+   EN: e.g., variations.variation.attributes
+
+155. [includes/admin/partials/step-1-upload.php]
+   EN: https://example.com/products.xml
+
+156. [includes/admin/class-wc-xml-csv-ai-import-admin.php]
+   EN: items
+
+157. [includes/admin/partials/step-2-mapping.php]
+   EN: {attribute1}→{value1}
+
+158. [includes/admin/class-wc-xml-csv-ai-import-admin.php]
+   EN: ← Prev
+
+159. [includes/admin/class-wc-xml-csv-ai-import-admin.php]
+   EN: ⏳ <1 min
+
+160. [includes/admin/class-wc-xml-csv-ai-import-admin.php, includes/admin/partials/import-edit.php]
+   EN: ⏳ due now
+
+161. [includes/admin/class-wc-xml-csv-ai-import-admin.php]
+   EN: ⏳ in %d min
+
+162. [includes/admin/class-wc-xml-csv-ai-import-admin.php]
+   EN: ⏳ in %dh %dm
+
+163. [includes/admin/partials/import-edit.php]
+   EN: ⏳ in less than 1 min
+
+164. [includes/admin/partials/import-edit.php]
+   EN: ⏳ next run in %d min
+
+165. [includes/admin/partials/import-edit.php]
+   EN: ⏳ next run in %dh %dm
+
+166. [includes/admin/partials/import-edit.php]
+   EN: ⚠️ Always use $value as input (not field names like $price or $product_price)
+
+167. [includes/admin/partials/import-edit.php]
+   EN: ⚠️ Changing filters will affect future imports. Existing products won't be modified automatically.
+
+168. [includes/admin/partials/import-edit.php]
+   EN: ⚠️ If unchecked: Products not matching filters will be skipped during import, but existing products will remain Published.
+
+169. [includes/admin/partials/step-2-mapping.php]
+   EN: ✅ Access any XML field: <code>$value . " - " . $brand</code>
+
+170. [includes/admin/partials/step-2-mapping.php]
+   EN: ✅ Complex formulas need return: <code>if ($value > 100) { return $value * 0.9; } return $value;</code>
+
+171. [includes/admin/partials/step-2-mapping.php]
+   EN: ✅ Simple formulas work directly: <code>$value * 1.2</code>
+
+172. [includes/admin/partials/step-2-mapping.php]
+   EN: 🏭 Supplier
+
+173. [includes/admin/partials/step-2-mapping.php]
+   EN: 🏷️ Brand
+
+174. [includes/admin/partials/step-2-mapping.php]
+   EN: 📁 Category
+
+175. [includes/admin/partials/step-2-mapping.php]
+   EN: 📄 XML Field
+
+176. [includes/admin/partials/step-2-mapping.php]
+   EN: 🔢 SKU Pattern
+

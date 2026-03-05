@@ -2155,7 +2155,8 @@ window.populateFieldSelectorsForRowGlobal = function($row) {
                 .replace(/\[\-\]/g, '-')
                 .replace(/\[/g, '')
                 .replace(/\]/g, '');
-            $('#sku-pattern-preview').text('Preview: ' + preview);
+            var _ip = (typeof wcAiImportData !== 'undefined' && wcAiImportData.i18n) ? wcAiImportData.i18n : {};
+            $('#sku-pattern-preview').text((_ip.preview || 'Preview:') + ' ' + preview);
         }
         
         // Initialize
@@ -2491,6 +2492,7 @@ window.populateFieldSelectorsForRowGlobal = function($row) {
     function displayFileStructure(data) {
         var $container = $('#file-structure-browser');
         var html = '';
+        var _i = (typeof wcAiImportData !== 'undefined' && wcAiImportData.i18n) ? wcAiImportData.i18n : {};
         
         // Add product navigation if we have any products
         if (data.current_page && data.total_pages) {
@@ -2498,16 +2500,16 @@ window.populateFieldSelectorsForRowGlobal = function($row) {
             
             // Row 1: Prev/Next buttons
             html += '<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">';
-            html += '<button type="button" class="button button-small" id="prev-product" ' + (data.current_page <= 1 ? 'disabled' : '') + '>← Prev</button>';
-            html += '<span style="font-size: 13px; font-weight: 600; color: #1e1e1e;">Product ' + data.current_page + ' of ' + data.total_pages + '</span>';
-            html += '<button type="button" class="button button-small" id="next-product" ' + (data.current_page >= data.total_pages ? 'disabled' : '') + '>Next →</button>';
+            html += '<button type="button" class="button button-small" id="prev-product" ' + (data.current_page <= 1 ? 'disabled' : '') + '>' + (_i.prev || '← Prev') + '</button>';
+            html += '<span style="font-size: 13px; font-weight: 600; color: #1e1e1e;">' + (_i.product_x_of_y || 'Product %1$d of %2$d').replace('%1$d', data.current_page).replace('%2$d', data.total_pages) + '</span>';
+            html += '<button type="button" class="button button-small" id="next-product" ' + (data.current_page >= data.total_pages ? 'disabled' : '') + '>' + (_i.next || 'Next →') + '</button>';
             html += '</div>';
             
             // Row 2: Go to product input
             html += '<div style="display: flex; align-items: center; justify-content: center; gap: 8px; padding-top: 8px; border-top: 1px solid #e2e4e7;">';
-            html += '<label style="font-size: 12px; color: #666; margin: 0;">Go to product:</label>';
+            html += '<label style="font-size: 12px; color: #666; margin: 0;">' + (_i.go_to_product || 'Go to product:') + '</label>';
             html += '<input type="number" id="goto-product-input" min="1" max="' + data.total_pages + '" value="' + data.current_page + '" style="width: 60px; text-align: center; padding: 4px 8px; border: 1px solid #8c8f94; border-radius: 4px;">';
-            html += '<button type="button" class="button button-primary button-small" id="goto-product-btn" style="padding: 4px 12px;">Go</button>';
+            html += '<button type="button" class="button button-primary button-small" id="goto-product-btn" style="padding: 4px 12px;">' + (_i.go || 'Go') + '</button>';
             html += '</div>';
             
             html += '</div>';
@@ -2573,7 +2575,7 @@ window.populateFieldSelectorsForRowGlobal = function($row) {
                     });
                     // Also add a "all items" draggable option
                     nestedHtml += '<div class="draggable-field nested-draggable" draggable="true" data-field-path="' + basePath + '*" style="margin-left: ' + indent + 'px; margin-top: 4px; padding: 4px 8px; font-size: 10px; color: #0073aa; background: #e8f4fc; border-radius: 3px; cursor: grab; display: flex; align-items: center; gap: 6px; border: 1px dashed #0073aa;">';
-                    nestedHtml += '<span style="font-weight: 600;">⊕ All ' + obj.length + ' items</span>';
+                    nestedHtml += '<span style="font-weight: 600;">⊕ ' + (_i.all_items || 'All %d items').replace('%d', obj.length) + '</span>';
                     nestedHtml += '<code style="font-size: 9px; background: #fff; padding: 1px 4px; border-radius: 2px;">{' + basePath + '*}</code>';
                     nestedHtml += '</div>';
                 } else if (typeof obj === 'object' && obj !== null) {
@@ -2613,10 +2615,10 @@ window.populateFieldSelectorsForRowGlobal = function($row) {
                     isExpandable = true;
                     currentExpandId = 'expand-' + (++expandableId);
                     if (Array.isArray(value)) {
-                        displayValue = '<span class="expandable-toggle" data-target="' + currentExpandId + '" style="color: #0073aa; cursor: pointer; font-style: italic; white-space: nowrap;">▶ ' + value.length + ' items <span style="font-size: 10px;">(click to expand)</span></span>';
+                        displayValue = '<span class="expandable-toggle" data-target="' + currentExpandId + '" style="color: #0073aa; cursor: pointer; font-style: italic; white-space: nowrap;">▶ ' + value.length + ' ' + (_i.items || 'items') + ' <span style="font-size: 10px;">' + (_i.click_to_expand || '(click to expand)') + '</span></span>';
                     } else {
                         var objKeys = Object.keys(value);
-                        displayValue = '<span class="expandable-toggle" data-target="' + currentExpandId + '" style="color: #0073aa; cursor: pointer; font-style: italic; white-space: nowrap;">▶ Object (' + objKeys.length + ' fields) <span style="font-size: 10px;">(click)</span></span>';
+                        displayValue = '<span class="expandable-toggle" data-target="' + currentExpandId + '" style="color: #0073aa; cursor: pointer; font-style: italic; white-space: nowrap;">▶ ' + (_i.object_fields || 'Object (%d fields)').replace('%d', objKeys.length) + ' <span style="font-size: 10px;">' + (_i.click || '(click)') + '</span></span>';
                     }
                 } else if (value === null || value === undefined || value === '') {
                     displayValue = '<span style="color: #999;">—</span>';
@@ -2672,11 +2674,11 @@ window.populateFieldSelectorsForRowGlobal = function($row) {
                 return groupHtml;
             }
             
-            html += renderGroup('Basic Info', basicFields, '');
-            html += renderGroup('Pricing', pricingFields, '');
-            html += renderGroup('Inventory', inventoryFields, '');
-            html += renderGroup('Shipping', shippingFields, '');
-            html += renderGroup('Identifiers', identifierFields, '');
+            html += renderGroup(_i.basic_info || 'Basic Info', basicFields, '');
+            html += renderGroup(_i.pricing || 'Pricing', pricingFields, '');
+            html += renderGroup(_i.inventory || 'Inventory', inventoryFields, '');
+            html += renderGroup(_i.shipping || 'Shipping', shippingFields, '');
+            html += renderGroup(_i.identifiers || 'Identifiers', identifierFields, '');
             
             // Render remaining fields (not in predefined groups)
             var otherFieldsHtml = '';
@@ -2691,7 +2693,7 @@ window.populateFieldSelectorsForRowGlobal = function($row) {
             
             if (otherFieldsHtml) {
                 html += '<div style="margin-bottom: 12px;">';
-                html += '<div style="font-size: 11px; text-transform: uppercase; color: #666; font-weight: 600; margin-bottom: 6px; padding-bottom: 4px; border-bottom: 2px solid #0073aa;">📁 Other Fields</div>';
+                html += '<div style="font-size: 11px; text-transform: uppercase; color: #666; font-weight: 600; margin-bottom: 6px; padding-bottom: 4px; border-bottom: 2px solid #0073aa;">📁 ' + (_i.other_fields || 'Other Fields') + '</div>';
                 html += otherFieldsHtml;
                 html += '</div>';
             }
@@ -2705,7 +2707,7 @@ window.populateFieldSelectorsForRowGlobal = function($row) {
             }
             if (nestedCount > 0) {
                 html += '<div style="margin-top: 10px; padding: 8px; background: #f0f0f0; border-radius: 4px; font-size: 11px; color: #666;">';
-                html += '📂 + ' + nestedCount + ' nested/complex fields (attributes, variations, etc.) available in dropdown';
+                html += '📂 ' + (_i.nested_fields || '+ %d nested/complex fields (attributes, variations, etc.) available in dropdown').replace('%d', nestedCount);
                 html += '</div>';
             }
             
@@ -7122,5 +7124,67 @@ window.populateFieldSelectorsForRowGlobal = function($row) {
             });
         }
     };
+
+    // ===== Language Switcher =====
+    $(document).ready(function() {
+        var $toggle = $('#bootflow-lang-toggle');
+        var $dropdown = $('#bootflow-lang-dropdown');
+        
+        if (!$toggle.length) return;
+        
+        // Toggle dropdown
+        $toggle.on('click', function(e) {
+            e.stopPropagation();
+            var isOpen = $dropdown.is(':visible');
+            $dropdown.toggle(!isOpen);
+            $toggle.toggleClass('open', !isOpen);
+        });
+        
+        // Close on outside click
+        $(document).on('click', function() {
+            $dropdown.hide();
+            $toggle.removeClass('open');
+        });
+        
+        $dropdown.on('click', function(e) {
+            e.stopPropagation();
+        });
+        
+        // Handle language selection
+        $dropdown.on('click', '.bootflow-lang-option', function(e) {
+            e.preventDefault();
+            var locale = $(this).data('locale');
+            var nonce = $('#bootflow-lang-nonce').val();
+            
+            // Visual feedback
+            $dropdown.find('.bootflow-lang-option').removeClass('active');
+            $(this).addClass('active');
+            $dropdown.hide();
+            $toggle.removeClass('open');
+            
+            // Update button text
+            var flag = $(this).find('.bootflow-lang-flag').text();
+            var name = $(this).find('.bootflow-lang-name').text();
+            $toggle.find('.bootflow-lang-flag').text(flag);
+            $toggle.find('.bootflow-lang-name').text(name);
+            
+            // AJAX save
+            var ajaxUrl = (typeof wcAiImport !== 'undefined') ? wcAiImport.ajax_url : 
+                          (typeof wc_xml_csv_ai_import_ajax !== 'undefined') ? wc_xml_csv_ai_import_ajax.ajax_url :
+                          (typeof wcAiImportData !== 'undefined') ? wcAiImportData.ajax_url :
+                          (typeof ajaxurl !== 'undefined') ? ajaxurl : '/wp-admin/admin-ajax.php';
+            
+            $.post(ajaxUrl, {
+                action: 'bootflow_switch_language',
+                locale: locale,
+                nonce: nonce
+            }, function(response) {
+                if (response.success) {
+                    // Reload page to apply new language
+                    window.location.reload();
+                }
+            });
+        });
+    });
 
 })(jQuery);/* Cache bust 1770061919 */
