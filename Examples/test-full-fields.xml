@@ -1,0 +1,652 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Bootflow Product Importer — FULL TEST FILE
+    Covers ALL mapping sections and fields:
+    ═══════════════════════════════════════════════════════════
+    1.  Basic Product Fields (sku, name, type, description, short_description, status)
+    2.  Pricing Engine (custom — test price markup rules)
+    3.  Pricing Fields (regular_price, sale_price, sale_price_dates_from/to, tax_status, tax_class)
+    4.  Inventory Fields (manage_stock, stock_quantity, stock_status, backorders)
+    5.  Physical Properties (weight, length, width, height, shipping_class)
+    6.  Shipping Class Engine (custom — test shipping class rules)
+    7.  Media Fields (images, featured_image)
+    8.  Categories & Tags — TAXONOMY (categories, tags, brand + mapping tables)
+    9.  Product Options (featured, virtual, downloadable, sold_individually, reviews_allowed)
+    10. Download Settings (download_limit, download_expiry)
+    11. Product Identifiers (ean, upc, isbn, mpn, gtin)
+    12. Linked Products (upsell_ids, cross_sell_ids, grouped_products, parent_id)
+    13. Advanced Fields (purchase_note, menu_order, button_text, external_url)
+    14. SEO Fields (meta_title, meta_description, meta_keywords)
+    15. Attributes & Variations (custom UI — color, size, material + variations)
+    ═══════════════════════════════════════════════════════════
+    Contains 8 products testing all edge cases:
+    - Simple product (full data)
+    - Variable product (with attributes/variations)
+    - External/Affiliate product
+    - Grouped product
+    - Virtual + Downloadable product
+    - Product with hierarchical categories
+    - Product with multiple categories (separated)
+    - Product with sale dates, backorders, identifiers
+-->
+<products>
+
+    <!-- ═══════════════════ PRODUCT 1: Simple — ALL fields filled ═══════════════════ -->
+    <product>
+        <!-- BASIC -->
+        <sku>BPI-TEST-001</sku>
+        <name>Premium Wireless Bluetooth Headphones</name>
+        <product_type>simple</product_type>
+        <description><![CDATA[<p>Experience crystal-clear audio with our Premium Wireless Bluetooth Headphones. Features active noise cancellation, 30-hour battery life, and premium comfort padding.</p><ul><li>Bluetooth 5.3</li><li>40mm drivers</li><li>Active Noise Cancellation</li><li>Foldable design</li></ul>]]></description>
+        <short_description>Premium wireless headphones with ANC and 30hr battery life.</short_description>
+        <status>publish</status>
+
+        <!-- PRICING -->
+        <regular_price>149.99</regular_price>
+        <sale_price>119.99</sale_price>
+        <sale_price_dates_from>2026-03-01</sale_price_dates_from>
+        <sale_price_dates_to>2026-04-30</sale_price_dates_to>
+        <tax_status>taxable</tax_status>
+        <tax_class>standard</tax_class>
+
+        <!-- INVENTORY -->
+        <manage_stock>yes</manage_stock>
+        <stock_quantity>250</stock_quantity>
+        <stock_status>instock</stock_status>
+        <backorders>no</backorders>
+
+        <!-- PHYSICAL PROPERTIES -->
+        <weight>0.35</weight>
+        <length>22</length>
+        <width>18</width>
+        <height>8</height>
+        <shipping_class>standard</shipping_class>
+
+        <!-- MEDIA -->
+        <images>https://picsum.photos/seed/headphones1/800/800,https://picsum.photos/seed/headphones2/800/800,https://picsum.photos/seed/headphones3/800/800</images>
+        <featured_image>https://picsum.photos/seed/headphones-main/800/800</featured_image>
+
+        <!-- TAXONOMY — single category mode test -->
+        <category>Electronics</category>
+        <tags>wireless, bluetooth, headphones, audio, ANC</tags>
+        <brand>SoundMax</brand>
+
+        <!-- PRODUCT OPTIONS -->
+        <featured>yes</featured>
+        <virtual>no</virtual>
+        <downloadable>no</downloadable>
+        <sold_individually>no</sold_individually>
+        <reviews_allowed>yes</reviews_allowed>
+
+        <!-- DOWNLOAD SETTINGS (N/A for this one, but test empty) -->
+        <download_limit></download_limit>
+        <download_expiry></download_expiry>
+
+        <!-- PRODUCT IDENTIFIERS -->
+        <ean>4006381333931</ean>
+        <upc>012345678905</upc>
+        <isbn></isbn>
+        <mpn>SM-BT500-BLK</mpn>
+        <gtin>04006381333931</gtin>
+
+        <!-- LINKED PRODUCTS -->
+        <upsell_ids>BPI-TEST-002,BPI-TEST-003</upsell_ids>
+        <cross_sell_ids>BPI-TEST-004</cross_sell_ids>
+        <grouped_products></grouped_products>
+        <parent_id></parent_id>
+
+        <!-- ADVANCED -->
+        <purchase_note>Thank you for your purchase! Register at soundmax.com for extended warranty.</purchase_note>
+        <menu_order>1</menu_order>
+        <button_text></button_text>
+        <external_url></external_url>
+
+        <!-- SEO -->
+        <meta_title>Premium Bluetooth Headphones with ANC — SoundMax</meta_title>
+        <meta_description>Buy SoundMax Premium Wireless Bluetooth Headphones with Active Noise Cancellation. 30-hour battery, foldable design. Free shipping.</meta_description>
+        <meta_keywords>bluetooth headphones, wireless headphones, ANC headphones, noise cancelling</meta_keywords>
+
+        <!-- ATTRIBUTES (for testing attribute mapping) -->
+        <attributes>
+            <color>Black</color>
+            <material>Plastic, Leather</material>
+            <connectivity>Bluetooth 5.3</connectivity>
+        </attributes>
+    </product>
+
+    <!-- ═══════════════════ PRODUCT 2: Variable — with variations ═══════════════════ -->
+    <product>
+        <sku>BPI-TEST-002</sku>
+        <name>Men's Classic Cotton T-Shirt</name>
+        <product_type>variable</product_type>
+        <description><![CDATA[<p>Timeless comfort meets modern style. Our Men's Classic Cotton T-Shirt is made from 100% organic cotton for a soft, breathable feel all day long.</p>]]></description>
+        <short_description>Classic 100% organic cotton t-shirt, available in multiple colors and sizes.</short_description>
+        <status>publish</status>
+
+        <regular_price>29.99</regular_price>
+        <sale_price></sale_price>
+        <sale_price_dates_from></sale_price_dates_from>
+        <sale_price_dates_to></sale_price_dates_to>
+        <tax_status>taxable</tax_status>
+        <tax_class></tax_class>
+
+        <manage_stock>yes</manage_stock>
+        <stock_quantity>500</stock_quantity>
+        <stock_status>instock</stock_status>
+        <backorders>notify</backorders>
+
+        <weight>0.2</weight>
+        <length>30</length>
+        <width>25</width>
+        <height>2</height>
+        <shipping_class>light</shipping_class>
+
+        <images>https://picsum.photos/seed/tshirt1/800/800,https://picsum.photos/seed/tshirt2/800/800</images>
+        <featured_image>https://picsum.photos/seed/tshirt-main/800/800</featured_image>
+
+        <!-- TAXONOMY — hierarchical category test: Clothing > Men > T-Shirts -->
+        <category>Clothing > Men > T-Shirts</category>
+        <tags>cotton, organic, t-shirt, men, casual</tags>
+        <brand>EcoWear</brand>
+
+        <featured>no</featured>
+        <virtual>no</virtual>
+        <downloadable>no</downloadable>
+        <sold_individually>no</sold_individually>
+        <reviews_allowed>yes</reviews_allowed>
+
+        <download_limit></download_limit>
+        <download_expiry></download_expiry>
+
+        <ean>5901234123457</ean>
+        <upc></upc>
+        <isbn></isbn>
+        <mpn>EW-CTS-001</mpn>
+        <gtin>05901234123457</gtin>
+
+        <upsell_ids>BPI-TEST-003</upsell_ids>
+        <cross_sell_ids>BPI-TEST-001,BPI-TEST-005</cross_sell_ids>
+        <grouped_products></grouped_products>
+        <parent_id></parent_id>
+
+        <purchase_note>Machine wash cold. Do not bleach.</purchase_note>
+        <menu_order>2</menu_order>
+        <button_text></button_text>
+        <external_url></external_url>
+
+        <meta_title>Men's Classic Cotton T-Shirt — EcoWear Collection</meta_title>
+        <meta_description>Premium organic cotton t-shirt for men. Comfortable, breathable and sustainable fashion by EcoWear.</meta_description>
+        <meta_keywords>cotton t-shirt, men tshirt, organic cotton, eco fashion</meta_keywords>
+
+        <!-- ATTRIBUTES with variations -->
+        <attributes>
+            <color>Red, Blue, White, Black</color>
+            <size>S, M, L, XL, XXL</size>
+            <material>100% Organic Cotton</material>
+        </attributes>
+
+        <variations>
+            <variation>
+                <sku>BPI-TEST-002-RED-S</sku>
+                <color>Red</color>
+                <size>S</size>
+                <regular_price>29.99</regular_price>
+                <stock_quantity>50</stock_quantity>
+                <weight>0.18</weight>
+            </variation>
+            <variation>
+                <sku>BPI-TEST-002-RED-M</sku>
+                <color>Red</color>
+                <size>M</size>
+                <regular_price>29.99</regular_price>
+                <stock_quantity>75</stock_quantity>
+                <weight>0.2</weight>
+            </variation>
+            <variation>
+                <sku>BPI-TEST-002-BLUE-L</sku>
+                <color>Blue</color>
+                <size>L</size>
+                <regular_price>29.99</regular_price>
+                <sale_price>24.99</sale_price>
+                <stock_quantity>30</stock_quantity>
+                <weight>0.22</weight>
+            </variation>
+            <variation>
+                <sku>BPI-TEST-002-BLK-XL</sku>
+                <color>Black</color>
+                <size>XL</size>
+                <regular_price>31.99</regular_price>
+                <stock_quantity>40</stock_quantity>
+                <weight>0.24</weight>
+            </variation>
+        </variations>
+    </product>
+
+    <!-- ═══════════════════ PRODUCT 3: External/Affiliate ═══════════════════ -->
+    <product>
+        <sku>BPI-TEST-003</sku>
+        <name>Sony WH-1000XM5 Wireless Headphones</name>
+        <product_type>external</product_type>
+        <description><![CDATA[<p>Industry-leading noise cancellation. 30 hours of battery life. Crystal clear calls with 8 microphones and Auto NC Optimizer.</p>]]></description>
+        <short_description>Sony's flagship ANC headphones — available via Amazon.</short_description>
+        <status>publish</status>
+
+        <regular_price>348.00</regular_price>
+        <sale_price>298.00</sale_price>
+        <sale_price_dates_from>2026-03-15</sale_price_dates_from>
+        <sale_price_dates_to>2026-03-31</sale_price_dates_to>
+        <tax_status>none</tax_status>
+        <tax_class></tax_class>
+
+        <manage_stock>no</manage_stock>
+        <stock_quantity></stock_quantity>
+        <stock_status>instock</stock_status>
+        <backorders>no</backorders>
+
+        <weight>0.25</weight>
+        <length>20</length>
+        <width>17</width>
+        <height>7.5</height>
+        <shipping_class></shipping_class>
+
+        <images>https://picsum.photos/seed/sony1/800/800,https://picsum.photos/seed/sony2/800/800</images>
+        <featured_image>https://picsum.photos/seed/sony-main/800/800</featured_image>
+
+        <!-- TAXONOMY — multiple categories separated by | -->
+        <category>Electronics|Audio|Headphones</category>
+        <tags>sony, noise cancelling, premium, wireless</tags>
+        <brand>Sony</brand>
+
+        <featured>yes</featured>
+        <virtual>no</virtual>
+        <downloadable>no</downloadable>
+        <sold_individually>yes</sold_individually>
+        <reviews_allowed>no</reviews_allowed>
+
+        <download_limit></download_limit>
+        <download_expiry></download_expiry>
+
+        <ean>4548736132102</ean>
+        <upc>027242923782</upc>
+        <isbn></isbn>
+        <mpn>WH1000XM5/B</mpn>
+        <gtin>04548736132102</gtin>
+
+        <upsell_ids></upsell_ids>
+        <cross_sell_ids></cross_sell_ids>
+        <grouped_products></grouped_products>
+        <parent_id></parent_id>
+
+        <purchase_note></purchase_note>
+        <menu_order>3</menu_order>
+        <button_text>Buy on Amazon</button_text>
+        <external_url>https://www.amazon.com/dp/B0BX2L8PZL</external_url>
+
+        <meta_title>Sony WH-1000XM5 — Best Wireless ANC Headphones</meta_title>
+        <meta_description>The industry's best noise-cancelling headphones. Buy Sony WH-1000XM5 at the best price.</meta_description>
+        <meta_keywords>sony headphones, WH-1000XM5, noise cancelling, wireless headphones</meta_keywords>
+
+        <attributes>
+            <color>Black</color>
+            <connectivity>Bluetooth 5.2, 3.5mm Jack</connectivity>
+        </attributes>
+    </product>
+
+    <!-- ═══════════════════ PRODUCT 4: Virtual + Downloadable ═══════════════════ -->
+    <product>
+        <sku>BPI-TEST-004</sku>
+        <name>Complete Web Development Course 2026</name>
+        <product_type>simple</product_type>
+        <description><![CDATA[<p>Master HTML, CSS, JavaScript, React, Node.js, and MongoDB in this comprehensive 60-hour video course. Includes lifetime access and certificate of completion.</p>]]></description>
+        <short_description>60-hour full-stack web development course with certificate.</short_description>
+        <status>publish</status>
+
+        <regular_price>199.99</regular_price>
+        <sale_price>49.99</sale_price>
+        <sale_price_dates_from>2026-01-01</sale_price_dates_from>
+        <sale_price_dates_to>2026-12-31</sale_price_dates_to>
+        <tax_status>taxable</tax_status>
+        <tax_class>digital-goods</tax_class>
+
+        <manage_stock>no</manage_stock>
+        <stock_quantity></stock_quantity>
+        <stock_status>instock</stock_status>
+        <backorders>no</backorders>
+
+        <!-- No physical properties needed for virtual/downloadable -->
+        <weight></weight>
+        <length></length>
+        <width></width>
+        <height></height>
+        <shipping_class></shipping_class>
+
+        <images>https://picsum.photos/seed/course1/800/800</images>
+        <featured_image>https://picsum.photos/seed/course-main/800/800</featured_image>
+
+        <category>Digital Products > Online Courses</category>
+        <tags>web development, coding, javascript, react, online course</tags>
+        <brand>DevAcademy</brand>
+
+        <featured>yes</featured>
+        <virtual>yes</virtual>
+        <downloadable>yes</downloadable>
+        <sold_individually>yes</sold_individually>
+        <reviews_allowed>yes</reviews_allowed>
+
+        <!-- DOWNLOAD SETTINGS — filled for downloadable product -->
+        <download_limit>5</download_limit>
+        <download_expiry>365</download_expiry>
+
+        <ean></ean>
+        <upc></upc>
+        <isbn>978-3-16-148410-0</isbn>
+        <mpn></mpn>
+        <gtin></gtin>
+
+        <upsell_ids>BPI-TEST-005</upsell_ids>
+        <cross_sell_ids></cross_sell_ids>
+        <grouped_products></grouped_products>
+        <parent_id></parent_id>
+
+        <purchase_note>Your download link will be available in your account. Access your course at learn.devacademy.com.</purchase_note>
+        <menu_order>4</menu_order>
+        <button_text></button_text>
+        <external_url></external_url>
+
+        <meta_title>Full Stack Web Dev Course 2026 — HTML, CSS, JS, React, Node</meta_title>
+        <meta_description>Learn web development from scratch. 60 hours of video, projects + certificate. Lifetime access.</meta_description>
+        <meta_keywords>web development course, learn javascript, react course, full stack, online learning</meta_keywords>
+
+        <attributes>
+            <format>Video, PDF</format>
+            <language>English, Latvian</language>
+            <level>Beginner to Advanced</level>
+        </attributes>
+    </product>
+
+    <!-- ═══════════════════ PRODUCT 5: Grouped product ═══════════════════ -->
+    <product>
+        <sku>BPI-TEST-005</sku>
+        <name>Home Office Starter Bundle</name>
+        <product_type>grouped</product_type>
+        <description><![CDATA[<p>Everything you need for a productive home office. This bundle includes our premium headphones, a wireless keyboard, and an ergonomic mouse — all at a special bundle price.</p>]]></description>
+        <short_description>Complete home office bundle: headphones + keyboard + mouse.</short_description>
+        <status>publish</status>
+
+        <regular_price></regular_price>
+        <sale_price></sale_price>
+        <sale_price_dates_from></sale_price_dates_from>
+        <sale_price_dates_to></sale_price_dates_to>
+        <tax_status>taxable</tax_status>
+        <tax_class></tax_class>
+
+        <manage_stock>no</manage_stock>
+        <stock_quantity></stock_quantity>
+        <stock_status>instock</stock_status>
+        <backorders>no</backorders>
+
+        <weight>1.5</weight>
+        <length>40</length>
+        <width>30</width>
+        <height>15</height>
+        <shipping_class>heavy</shipping_class>
+
+        <images>https://picsum.photos/seed/bundle1/800/800,https://picsum.photos/seed/bundle2/800/800,https://picsum.photos/seed/bundle3/800/800,https://picsum.photos/seed/bundle4/800/800</images>
+        <featured_image>https://picsum.photos/seed/bundle-main/800/800</featured_image>
+
+        <!-- TAXONOMY — multiple hierarchical categories separated by | -->
+        <category>Electronics > Bundles|Office > Accessories</category>
+        <tags>bundle, home office, desk setup, accessories, productivity</tags>
+        <brand>TechBundle</brand>
+
+        <featured>no</featured>
+        <virtual>no</virtual>
+        <downloadable>no</downloadable>
+        <sold_individually>no</sold_individually>
+        <reviews_allowed>yes</reviews_allowed>
+
+        <download_limit></download_limit>
+        <download_expiry></download_expiry>
+
+        <ean>7501234567890</ean>
+        <upc></upc>
+        <isbn></isbn>
+        <mpn>TB-HOSB-2026</mpn>
+        <gtin>07501234567890</gtin>
+
+        <upsell_ids></upsell_ids>
+        <cross_sell_ids>BPI-TEST-001</cross_sell_ids>
+        <!-- Grouped products — references child product SKUs -->
+        <grouped_products>BPI-TEST-001,BPI-TEST-006,BPI-TEST-007</grouped_products>
+        <parent_id></parent_id>
+
+        <purchase_note>Bundle items will ship together within 2-3 business days.</purchase_note>
+        <menu_order>5</menu_order>
+        <button_text></button_text>
+        <external_url></external_url>
+
+        <meta_title>Home Office Starter Bundle — Headphones, Keyboard, Mouse</meta_title>
+        <meta_description>Get everything for your home office in one bundle. Premium headphones, wireless keyboard and ergonomic mouse included.</meta_description>
+        <meta_keywords>home office bundle, desk accessories, office setup, remote work</meta_keywords>
+
+        <attributes>
+            <includes>Headphones, Keyboard, Mouse</includes>
+            <warranty>2 Years</warranty>
+        </attributes>
+    </product>
+
+    <!-- ═══════════════════ PRODUCT 6: Out of stock + backorders ═══════════════════ -->
+    <product>
+        <sku>BPI-TEST-006</sku>
+        <name>Mechanical RGB Gaming Keyboard</name>
+        <product_type>simple</product_type>
+        <description><![CDATA[<p>Full-size mechanical keyboard with Cherry MX Brown switches, per-key RGB lighting, USB-C connection, and aircraft-grade aluminum frame. N-key rollover and anti-ghosting.</p>]]></description>
+        <short_description>Mechanical gaming keyboard with Cherry MX switches and RGB.</short_description>
+        <status>draft</status>
+
+        <regular_price>159.00</regular_price>
+        <sale_price></sale_price>
+        <sale_price_dates_from></sale_price_dates_from>
+        <sale_price_dates_to></sale_price_dates_to>
+        <tax_status>shipping</tax_status>
+        <tax_class>reduced-rate</tax_class>
+
+        <manage_stock>yes</manage_stock>
+        <stock_quantity>0</stock_quantity>
+        <stock_status>onbackorder</stock_status>
+        <backorders>yes</backorders>
+
+        <weight>1.1</weight>
+        <length>44</length>
+        <width>14</width>
+        <height>4</height>
+        <shipping_class>fragile</shipping_class>
+
+        <images>https://picsum.photos/seed/keyboard1/800/800,https://picsum.photos/seed/keyboard2/800/800</images>
+        <featured_image>https://picsum.photos/seed/keyboard-main/800/800</featured_image>
+
+        <category>Electronics > Computer Peripherals > Keyboards</category>
+        <tags>keyboard, mechanical, gaming, RGB, Cherry MX</tags>
+        <brand>KeyForge</brand>
+
+        <featured>no</featured>
+        <virtual>no</virtual>
+        <downloadable>no</downloadable>
+        <sold_individually>no</sold_individually>
+        <reviews_allowed>yes</reviews_allowed>
+
+        <download_limit></download_limit>
+        <download_expiry></download_expiry>
+
+        <ean>8901234567893</ean>
+        <upc>898123456781</upc>
+        <isbn></isbn>
+        <mpn>KF-MK-RGB-104</mpn>
+        <gtin>08901234567893</gtin>
+
+        <upsell_ids>BPI-TEST-005</upsell_ids>
+        <cross_sell_ids>BPI-TEST-007</cross_sell_ids>
+        <grouped_products></grouped_products>
+        <parent_id></parent_id>
+
+        <purchase_note>This product is on backorder. Expected shipping in 2-3 weeks.</purchase_note>
+        <menu_order>6</menu_order>
+        <button_text></button_text>
+        <external_url></external_url>
+
+        <meta_title>Mechanical RGB Gaming Keyboard — Cherry MX Brown</meta_title>
+        <meta_description>Premium mechanical keyboard with Cherry MX Brown switches, per-key RGB and aluminum frame. Perfect for gaming and typing.</meta_description>
+        <meta_keywords>mechanical keyboard, gaming keyboard, cherry mx, RGB keyboard</meta_keywords>
+
+        <attributes>
+            <switch_type>Cherry MX Brown</switch_type>
+            <layout>Full-size (104 keys)</layout>
+            <backlight>Per-key RGB</backlight>
+            <connection>USB-C</connection>
+        </attributes>
+    </product>
+
+    <!-- ═══════════════════ PRODUCT 7: Category mapping test — different brand ═══════════════════ -->
+    <product>
+        <sku>BPI-TEST-007</sku>
+        <name>Ergonomic Vertical Wireless Mouse</name>
+        <product_type>simple</product_type>
+        <description><![CDATA[<p>Reduce wrist strain with our ergonomic vertical mouse. 57-degree angle, 6 programmable buttons, adjustable DPI (800-4000), and dual connectivity (Bluetooth + 2.4GHz dongle).</p>]]></description>
+        <short_description>Vertical ergonomic mouse with dual connectivity and adjustable DPI.</short_description>
+        <status>publish</status>
+
+        <regular_price>59.99</regular_price>
+        <sale_price>44.99</sale_price>
+        <sale_price_dates_from>2026-02-14</sale_price_dates_from>
+        <sale_price_dates_to>2026-03-14</sale_price_dates_to>
+        <tax_status>taxable</tax_status>
+        <tax_class></tax_class>
+
+        <manage_stock>yes</manage_stock>
+        <stock_quantity>120</stock_quantity>
+        <stock_status>instock</stock_status>
+        <backorders>no</backorders>
+
+        <weight>0.12</weight>
+        <length>12</length>
+        <width>6.5</width>
+        <height>7.5</height>
+        <shipping_class>standard</shipping_class>
+
+        <images>https://picsum.photos/seed/mouse1/800/800,https://picsum.photos/seed/mouse2/800/800,https://picsum.photos/seed/mouse3/800/800</images>
+        <featured_image>https://picsum.photos/seed/mouse-main/800/800</featured_image>
+
+        <!-- Category value for MAPPING TABLE test: "Piederumi" maps to → "Accessories" in WooCommerce -->
+        <category>Piederumi</category>
+        <tags>mouse, ergonomic, wireless, vertical, bluetooth</tags>
+        <brand>ErgoTech</brand>
+
+        <featured>no</featured>
+        <virtual>no</virtual>
+        <downloadable>no</downloadable>
+        <sold_individually>no</sold_individually>
+        <reviews_allowed>yes</reviews_allowed>
+
+        <download_limit></download_limit>
+        <download_expiry></download_expiry>
+
+        <ean>6901234567896</ean>
+        <upc></upc>
+        <isbn></isbn>
+        <mpn>ET-VM-600</mpn>
+        <gtin>06901234567896</gtin>
+
+        <upsell_ids>BPI-TEST-006</upsell_ids>
+        <cross_sell_ids>BPI-TEST-001,BPI-TEST-006</cross_sell_ids>
+        <grouped_products></grouped_products>
+        <parent_id></parent_id>
+
+        <purchase_note>Includes 2.4GHz USB dongle. AAA battery pre-installed.</purchase_note>
+        <menu_order>7</menu_order>
+        <button_text></button_text>
+        <external_url></external_url>
+
+        <meta_title>Ergonomic Vertical Mouse — ErgoTech VM-600</meta_title>
+        <meta_description>Reduce wrist pain with our 57-degree vertical mouse. Bluetooth + 2.4GHz, adjustable DPI, 6 buttons.</meta_description>
+        <meta_keywords>ergonomic mouse, vertical mouse, wireless mouse, bluetooth mouse</meta_keywords>
+
+        <attributes>
+            <color>Silver</color>
+            <dpi>800-4000</dpi>
+            <connection>Bluetooth 5.0, 2.4GHz</connection>
+        </attributes>
+    </product>
+
+    <!-- ═══════════════════ PRODUCT 8: Private + pending + edge cases ═══════════════════ -->
+    <product>
+        <sku>BPI-TEST-008</sku>
+        <name>Handmade Latvian Linen Table Runner</name>
+        <product_type>simple</product_type>
+        <description><![CDATA[<p>Beautiful handwoven linen table runner made in Latvia. Traditional Baltic patterns with modern touches. Each piece is unique — slight variations are a sign of handcrafted quality.</p><p>Dimensions: 150cm × 40cm. Material: 100% natural linen.</p>]]></description>
+        <short_description>Handwoven Latvian linen table runner, 150×40 cm, traditional Baltic patterns.</short_description>
+        <status>private</status>
+
+        <regular_price>89.50</regular_price>
+        <sale_price></sale_price>
+        <sale_price_dates_from></sale_price_dates_from>
+        <sale_price_dates_to></sale_price_dates_to>
+        <tax_status>taxable</tax_status>
+        <tax_class>zero-rate</tax_class>
+
+        <manage_stock>yes</manage_stock>
+        <stock_quantity>5</stock_quantity>
+        <stock_status>instock</stock_status>
+        <backorders>no</backorders>
+
+        <weight>0.3</weight>
+        <length>150</length>
+        <width>40</width>
+        <height>0.5</height>
+        <shipping_class>light</shipping_class>
+
+        <images>https://picsum.photos/seed/linen1/800/800,https://picsum.photos/seed/linen2/800/800</images>
+        <featured_image>https://picsum.photos/seed/linen-main/800/800</featured_image>
+
+        <!-- TAXONOMY — multiple flat categories with comma separator -->
+        <category>Home, Kitchen, Decor, Handmade</category>
+        <tags>linen, handmade, latvian, table runner, home decor, baltic</tags>
+        <brand>Latvian Linen Co</brand>
+
+        <featured>no</featured>
+        <virtual>no</virtual>
+        <downloadable>no</downloadable>
+        <sold_individually>yes</sold_individually>
+        <reviews_allowed>yes</reviews_allowed>
+
+        <download_limit></download_limit>
+        <download_expiry></download_expiry>
+
+        <ean>4751234567890</ean>
+        <upc></upc>
+        <isbn></isbn>
+        <mpn>LLC-TR-150-NAT</mpn>
+        <gtin>04751234567890</gtin>
+
+        <upsell_ids></upsell_ids>
+        <cross_sell_ids></cross_sell_ids>
+        <grouped_products></grouped_products>
+        <parent_id></parent_id>
+
+        <purchase_note>Handmade product — please allow 5-7 days for production. Wash at 30°C.</purchase_note>
+        <menu_order>8</menu_order>
+        <button_text></button_text>
+        <external_url></external_url>
+
+        <meta_title>Handmade Latvian Linen Table Runner — Baltic Design</meta_title>
+        <meta_description>Authentic handwoven linen table runner from Latvia. Traditional Baltic patterns, 150×40 cm, 100% natural linen.</meta_description>
+        <meta_keywords>linen table runner, latvian crafts, handmade linen, baltic design, home decor</meta_keywords>
+
+        <attributes>
+            <color>Natural Beige</color>
+            <material>100% Linen</material>
+            <pattern>Baltic Traditional</pattern>
+            <origin>Latvia</origin>
+        </attributes>
+    </product>
+
+</products>

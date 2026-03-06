@@ -346,6 +346,11 @@ window.populateFieldSelectorsForRowGlobal = function($row) {
         
         // AI Auto-Mapping (PRO tier)
         initializeAiAutoMapping();
+
+        // ═══════════════════════════════════════════════════════════
+        // TAXONOMY MAPPING UI - Category Mode Toggle, Mapping Tables
+        // ═══════════════════════════════════════════════════════════
+        initializeTaxonomyMapping();
     }
     
     /**
@@ -431,6 +436,12 @@ window.populateFieldSelectorsForRowGlobal = function($row) {
                                 console.log('★★★ Now applying mappings after Variable mode is enabled');
                                 applyAiMappings(mappings, confidence);
                                 
+                                // Smart fallback for AI-unmapped fields
+                                smartFallbackForUnmapped(unmapped, mappings);
+                                
+                                // Auto-map attr_* columns to CSV variation attributes
+                                autoMapCsvVariationAttributes(unmapped, mappings);
+                                
                                 // Apply attribute mappings
                                 setTimeout(function() {
                                     applyAttributeMappings(mappings, productStructure.variation_path);
@@ -453,6 +464,9 @@ window.populateFieldSelectorsForRowGlobal = function($row) {
                             
                             // Apply field mappings
                             applyAiMappings(mappings, confidence);
+                            
+                            // Smart fallback for AI-unmapped fields
+                            smartFallbackForUnmapped(unmapped, mappings);
                         }
                         
                         // Split message - base message and variable product part
@@ -1109,92 +1123,149 @@ window.populateFieldSelectorsForRowGlobal = function($row) {
      * Works without AI - pattern matching
      */
     var smartMappingPatterns = {
-        // SKU patterns
-        'sku': ['sku', 'code', 'product_code', 'product_sku', 'article', 'artikuls', 'kods', 'preces_kods', 'item_code', 'item_number', 'ean', 'upc', 'barcode'],
+        // SKU patterns (removed ean/upc/barcode — they have their own fields now)
+        'sku': ['sku', 'code', 'product_code', 'product_sku', 'article', 'artikuls', 'kods', 'preces_kods', 'item_code', 'item_number'],
         // Name patterns  
-        'name': ['name', 'title', 'product_name', 'product_title', 'nosaukums', 'produkta_nosaukums', 'prece', 'item_name', 'description_short', 'bezeichnung'],
+        'name': ['name', 'title', 'product_name', 'product_title', 'nosaukums', 'produkta_nosaukums', 'prece', 'item_name', 'bezeichnung'],
+        // Product Type
+        'type': ['product_type', 'type', 'tips', 'produkta_tips', 'item_type'],
         // Description patterns
         'description': ['description', 'desc', 'apraksts', 'product_description', 'full_description', 'long_description', 'beschreibung', 'details', 'content'],
         // Short description patterns
         'short_description': ['short_description', 'short_desc', 'excerpt', 'summary', 'iss_apraksts', 'intro', 'brief'],
+        // Product Status
+        'status': ['status', 'product_status', 'statuss', 'visibility', 'state', 'publish_status'],
         // Price patterns
         'regular_price': ['price', 'regular_price', 'cena', 'base_price', 'retail_price', 'msrp', 'preis', 'unit_price'],
         'sale_price': ['sale_price', 'special_price', 'akcijas_cena', 'discount_price', 'offer_price', 'promo_price'],
         // Sale price dates
         'sale_price_dates_from': ['sale_price_dates_from', 'sale_from', 'sale_start', 'sale_start_date', 'sale_date_from', 'special_from_date', 'akcijas_sakums', 'discount_start'],
         'sale_price_dates_to': ['sale_price_dates_to', 'sale_to', 'sale_end', 'sale_end_date', 'sale_date_to', 'special_to_date', 'akcijas_beigas', 'discount_end'],
-        // Stock patterns
+        // Tax
+        'tax_status': ['tax_status', 'nodokla_statuss', 'taxable', 'tax_type'],
+        'tax_class': ['tax_class', 'nodokla_klase', 'tax_rate', 'vat_class'],
+        // Inventory
+        'manage_stock': ['manage_stock', 'stock_management', 'parvaldīt_krājumus', 'track_inventory', 'track_stock'],
         'stock_quantity': ['stock', 'qty', 'quantity', 'stock_quantity', 'daudzums', 'skaits', 'noliktava', 'inventory', 'available', 'bestand', 'amount'],
+        'stock_status': ['stock_status', 'availability', 'krajumu_statuss', 'in_stock', 'pieejamība'],
+        'backorders': ['backorders', 'backorder', 'allow_backorders', 'pasūtījumi_rezervēti'],
         // Weight/dimensions
         'weight': ['weight', 'svars', 'gross_weight', 'net_weight', 'gewicht', 'mass'],
         'length': ['length', 'garums', 'länge', 'dimension_length', 'package_length'],
         'width': ['width', 'platums', 'breite', 'dimension_width', 'package_width'],
         'height': ['height', 'augstums', 'höhe', 'dimension_height', 'package_height'],
-        // Category
-        'categories': ['category', 'categories', 'kategorija', 'cat', 'product_category', 'kategorie', 'group'],
-        // Brand
-        'brand': ['brand', 'manufacturer', 'zīmols', 'ražotājs', 'marke', 'make', 'vendor'],
-        // Images
+        'shipping_class': ['shipping_class', 'piegades_klase', 'shipping_method', 'delivery_class', 'freight_class'],
+        // Media
         'images': ['image', 'images', 'attēls', 'photo', 'picture', 'bild', 'gallery', 'image_url', 'img', 'thumbnail'],
         'featured_image': ['featured_image', 'main_image', 'galvenais_attēls', 'primary_image', 'main_photo'],
-        // EAN/UPC
-        'ean': ['ean', 'ean13', 'ean_code', 'gtin', 'eans'],
-        'upc': ['upc', 'upc_code'],
-        // Tags
-        'tags': ['tags', 'birkas', 'keywords', 'tag'],
-        // ID/Slug
-        'id': ['id', 'product_id', 'woo_id', 'woocommerce_id', 'external_id'],
-        'slug': ['slug', 'url_key', 'permalink', 'handle', 'url_slug', 'seo_url'],
-        // Stock management
-        'backorders': ['backorders', 'backorder', 'allow_backorders', 'pasūtījumi_rezervēti'],
+        // Category (removed 'group' — too generic, conflicts with grouped_products)
+        'categories': ['category', 'categories', 'kategorija', 'cat', 'product_category', 'kategorie'],
+        // Tags (removed 'keywords' — conflicts with meta_keywords)
+        'tags': ['tags', 'birkas', 'tag', 'product_tags'],
+        // Brand
+        'brand': ['brand', 'manufacturer', 'zīmols', 'ražotājs', 'marke', 'make', 'vendor'],
+        // Product Options
+        'featured': ['featured', 'is_featured', 'izcelts', 'highlight', 'recommended'],
+        'virtual': ['virtual', 'is_virtual', 'virtuāls', 'digital'],
+        'downloadable': ['downloadable', 'is_downloadable', 'lejupielādējams', 'download'],
         'sold_individually': ['sold_individually', 'sold_individual', 'individual_sale', 'limit_one'],
-        // Related products
+        'reviews_allowed': ['reviews_allowed', 'allow_reviews', 'enable_reviews', 'reviews_enabled'],
+        // Download Settings
+        'download_limit': ['download_limit', 'lejupielādes_limits', 'max_downloads'],
+        'download_expiry': ['download_expiry', 'lejupielādes_derīgums', 'download_expiry_days', 'expiry_days'],
+        // Product Identifiers
+        'ean': ['ean', 'ean13', 'ean_code'],
+        'upc': ['upc', 'upc_code', 'upc_a'],
+        'isbn': ['isbn', 'isbn13', 'isbn_code', 'isbn10'],
+        'mpn': ['mpn', 'manufacturer_part_number', 'part_number', 'mfr_part_no'],
+        'gtin': ['gtin', 'gtin13', 'gtin14', 'gtin_code', 'global_trade_item'],
+        // Linked Products
         'upsell_ids': ['upsell_ids', 'upsells', 'upsell', 'upsell_products', 'related_upsell'],
         'cross_sell_ids': ['cross_sell_ids', 'cross_sells', 'crosssell', 'crosssells', 'cross_sell_products'],
+        'grouped_products': ['grouped_products', 'grouped', 'child_products', 'bundle_products', 'group_items'],
+        'parent_id': ['parent_id', 'parent_sku', 'parent_product', 'vecāka_id'],
+        // Advanced
+        'purchase_note': ['purchase_note', 'pirkuma_piezīme', 'order_note', 'buyer_note', 'customer_note'],
+        'menu_order': ['menu_order', 'sort_order', 'position', 'kārtošanas_secība', 'display_order'],
+        'button_text': ['button_text', 'pogas_teksts', 'add_to_cart_text', 'buy_button_text', 'cta_text'],
+        'external_url': ['external_url', 'ārējais_url', 'affiliate_url', 'product_url', 'affiliate_link', 'buy_url'],
+        // SEO
+        'meta_title': ['meta_title', 'seo_title', 'page_title', 'og_title', 'yoast_title'],
+        'meta_description': ['meta_description', 'seo_description', 'og_description', 'yoast_description', 'meta_desc'],
+        'meta_keywords': ['meta_keywords', 'seo_keywords', 'focus_keyword', 'yoast_keywords'],
+        // ID/Slug (removed generic 'id' — too short, conflicts with parent_id, upsell_ids etc.)
+        'id': ['product_id', 'woo_id', 'woocommerce_id', 'external_id'],
+        'slug': ['slug', 'url_key', 'permalink', 'handle', 'url_slug', 'seo_url'],
         // Reviews
-        'reviews_allowed': ['reviews_allowed', 'allow_reviews', 'enable_reviews', 'reviews_enabled'],
         'average_rating': ['average_rating', 'rating', 'avg_rating', 'star_rating', 'vērtējums'],
         'rating_count': ['rating_count', 'review_count', 'reviews_count', 'num_reviews', 'atsauksmju_skaits']
     };
     
     /**
-     * Perform smart mapping using pattern matching (used internally by AI mapping fallback)
+     * Perform smart mapping using pattern matching
+     * Two-pass approach: exact matches first (high confidence), then contains matches (lower confidence)
+     * This prevents ambiguous contains-matches from stealing fields meant for exact matches
+     * e.g. "parent_id" won't match "id" pattern via contains when "parent_id" pattern exists
      */
     function performSmartMapping(sourceFields) {
         var mappings = {};
+        var matchedSources = {};   // Track which source fields are already matched
+        var matchedTargets = {};   // Track which WC fields are already matched (1:1)
         
+        // ── PASS 1: Exact matches only ──
         $.each(sourceFields, function(i, sourceField) {
             var normalizedSource = normalizeFieldName(sourceField);
-            var matched = false;
             
-            // Check against each WooCommerce field pattern
             $.each(smartMappingPatterns, function(wcField, patterns) {
-                if (matched) return;
+                if (matchedSources[sourceField] || matchedTargets[wcField]) return;
                 
-                $.each(patterns, function(j, pattern) {
-                    if (matched) return;
+                for (var j = 0; j < patterns.length; j++) {
+                    var normalizedPattern = normalizeFieldName(patterns[j]);
                     
-                    var normalizedPattern = normalizeFieldName(pattern);
-                    
-                    // Exact match
                     if (normalizedSource === normalizedPattern) {
                         mappings[sourceField] = wcField;
-                        matched = true;
+                        matchedSources[sourceField] = true;
+                        matchedTargets[wcField] = true;
                         console.log('★★★ Smart match (exact):', sourceField, '→', wcField);
-                        return false;
+                        return false; // break $.each for this wcField
                     }
-                    
-                    // Contains match (for compound names like "product_name" matching "name")
-                    if (normalizedSource.indexOf(normalizedPattern) !== -1 || normalizedPattern.indexOf(normalizedSource) !== -1) {
-                        mappings[sourceField] = wcField;
-                        matched = true;
-                        console.log('★★★ Smart match (contains):', sourceField, '→', wcField);
-                        return false;
-                    }
-                });
+                }
             });
         });
         
+        // ── PASS 2: Contains matches for remaining unmatched fields ──
+        $.each(sourceFields, function(i, sourceField) {
+            if (matchedSources[sourceField]) return; // already matched in pass 1
+            
+            var normalizedSource = normalizeFieldName(sourceField);
+            
+            $.each(smartMappingPatterns, function(wcField, patterns) {
+                if (matchedSources[sourceField] || matchedTargets[wcField]) return;
+                
+                for (var j = 0; j < patterns.length; j++) {
+                    var normalizedPattern = normalizeFieldName(patterns[j]);
+                    
+                    // Only check contains if the pattern is meaningful (3+ chars to avoid false hits)
+                    if (normalizedPattern.length >= 3 && normalizedSource.indexOf(normalizedPattern) !== -1) {
+                        mappings[sourceField] = wcField;
+                        matchedSources[sourceField] = true;
+                        matchedTargets[wcField] = true;
+                        console.log('★★★ Smart match (contains):', sourceField, '→', wcField);
+                        return false;
+                    }
+                    // Reverse contains: source is substring of pattern (e.g. "qty" matches "stock_quantity")
+                    if (normalizedSource.length >= 3 && normalizedPattern.indexOf(normalizedSource) !== -1) {
+                        mappings[sourceField] = wcField;
+                        matchedSources[sourceField] = true;
+                        matchedTargets[wcField] = true;
+                        console.log('★★★ Smart match (reverse-contains):', sourceField, '→', wcField);
+                        return false;
+                    }
+                }
+            });
+        });
+        
+        console.log('★★★ Smart mapping result:', Object.keys(mappings).length, 'fields matched');
         return mappings;
     }
     
@@ -1228,9 +1299,28 @@ window.populateFieldSelectorsForRowGlobal = function($row) {
         
         var appliedCount = 0;
         var skuMapped = false;
+        var stockQuantityMapped = false;
         
         $.each(mappings, function(sourceField, targetWcField) {
             var $row = $('.field-mapping-row[data-field="' + targetWcField + '"]');
+            
+            // Fallback: for taxonomy fields (categories, tags, brand) in custom section
+            if ($row.length === 0) {
+                var $directTextarea = $('.textarea-mapping-wrapper[data-field="' + targetWcField + '"] .field-mapping-textarea');
+                if ($directTextarea.length > 0) {
+                    var templateValue = '{' + sourceField + '}';
+                    $directTextarea.val(templateValue).trigger('change').trigger('input');
+                    $directTextarea.closest('.taxonomy-block').css({
+                        'background': '#e8f5e9',
+                        'transition': 'background 0.3s'
+                    });
+                    setTimeout(function() {
+                        $directTextarea.closest('.taxonomy-block').css('background', '');
+                    }, 2000);
+                    appliedCount++;
+                    return true; // continue
+                }
+            }
             
             if ($row.length > 0) {
                 var mapped = false;
@@ -1243,7 +1333,45 @@ window.populateFieldSelectorsForRowGlobal = function($row) {
                     mapped = true;
                 }
                 
-                // Fallback to dropdown (old UI or special fields)
+                // Handle select-with-map (product_type_select, status_select, tax_status_select, stock_status_select, backorders_select, tax_class_select)
+                // These have radio: "fixed" vs "map" — switch to "map" mode and set source dropdown
+                if (!mapped) {
+                    var $selectMapRadio = $row.find('.select-mode-radio[value="map"]');
+                    if ($selectMapRadio.length > 0) {
+                        var $sourceSelect = $row.find('.select-map-field .field-source-select');
+                        if ($sourceSelect.length > 0) {
+                            var optionExists = $sourceSelect.find('option[value="' + sourceField + '"]').length > 0;
+                            if (optionExists) {
+                                // Switch radio to "map" mode
+                                $selectMapRadio.prop('checked', true).trigger('change');
+                                // Set the source value
+                                $sourceSelect.val(sourceField).trigger('change');
+                                mapped = true;
+                            }
+                        }
+                    }
+                }
+                
+                // Handle boolean fields (manage_stock, featured, virtual, downloadable, sold_individually, reviews_allowed)
+                // These have radio: "yes" / "no" / "map" — switch to "map" mode and set source dropdown
+                if (!mapped) {
+                    var $boolMapRadio = $row.find('.boolean-mode-radio[value="map"]');
+                    if ($boolMapRadio.length > 0) {
+                        var $sourceSelect = $row.find('.boolean-map-field .field-source-select');
+                        if ($sourceSelect.length > 0) {
+                            var optionExists = $sourceSelect.find('option[value="' + sourceField + '"]').length > 0;
+                            if (optionExists) {
+                                // Switch radio to "map" mode
+                                $boolMapRadio.prop('checked', true).trigger('change');
+                                // Set the source value
+                                $sourceSelect.val(sourceField).trigger('change');
+                                mapped = true;
+                            }
+                        }
+                    }
+                }
+                
+                // Fallback to any dropdown (old UI or other special fields)
                 if (!mapped) {
                     var $sourceSelect = $row.find('.field-source-select');
                     if ($sourceSelect.length > 0) {
@@ -1259,6 +1387,10 @@ window.populateFieldSelectorsForRowGlobal = function($row) {
                     // Track if SKU was mapped
                     if (targetWcField === 'sku') {
                         skuMapped = true;
+                    }
+                    // Track if stock quantity was mapped
+                    if (targetWcField === 'stock_quantity') {
+                        stockQuantityMapped = true;
                     }
                     
                     // Highlight
@@ -1281,8 +1413,88 @@ window.populateFieldSelectorsForRowGlobal = function($row) {
             enableSkuAutoGenerate();
         }
         
+        // If Stock Quantity was mapped, auto-enable Manage Stock
+        if (stockQuantityMapped) {
+            autoEnableManageStock();
+        }
+        
         console.log('★★★ Applied', appliedCount, 'smart mappings');
         updateMappedCounts();
+    }
+    
+    /**
+     * Smart fallback for AI-unmapped fields
+     * Runs performSmartMapping on fields that the AI couldn't map, then applies results
+     */
+    function smartFallbackForUnmapped(unmappedFields, aiMappings) {
+        if (!unmappedFields || unmappedFields.length === 0) return;
+        
+        // Filter out attr_* fields (handled separately by autoMapCsvVariationAttributes)
+        var fieldsToTry = unmappedFields.filter(function(f) {
+            return !f.match(/^attr_|^attribute_/i);
+        });
+        
+        if (fieldsToTry.length === 0) return;
+        
+        console.log('★★★ Smart fallback: trying to map', fieldsToTry.length, 'AI-unmapped fields:', fieldsToTry);
+        
+        var smartMappings = performSmartMapping(fieldsToTry);
+        
+        if (Object.keys(smartMappings).length > 0) {
+            console.log('★★★ Smart fallback found', Object.keys(smartMappings).length, 'additional mappings:', smartMappings);
+            applySmartMappings(smartMappings);
+        } else {
+            console.log('★★★ Smart fallback: no additional mappings found');
+        }
+    }
+    
+    /**
+     * Auto-map attr_ and attribute_ CSV columns to Variation Attributes section
+     * Creates attribute rows and fills them with the detected attribute columns
+     */
+    function autoMapCsvVariationAttributes(unmappedFields, aiMappings) {
+        // Collect ALL attr_* columns from source fields (not just unmapped)
+        var sourceFields = window.allKnownFieldsOrder || [];
+        var attrColumns = [];
+        
+        sourceFields.forEach(function(field) {
+            var match = field.match(/^(?:attr_|attribute_)(.+)$/i);
+            if (match) {
+                attrColumns.push({
+                    sourceField: field,
+                    attrName: match[1].replace(/_/g, ' ').replace(/\b\w/g, function(l) { return l.toUpperCase(); }) // "connectivity" → "Connectivity"
+                });
+            }
+        });
+        
+        if (attrColumns.length === 0) return;
+        
+        console.log('★★★ Auto-mapping', attrColumns.length, 'CSV variation attribute columns:', attrColumns);
+        
+        // Clear existing attribute rows and add new ones
+        $('#csv-variation-attributes-list').empty();
+        
+        attrColumns.forEach(function(attr) {
+            addCsvVariationAttributeRow();
+            var $row = $('#csv-variation-attributes-list .attr-row').last();
+            $row.find('input[name$="[name]"]').val(attr.attrName);
+            $row.find('textarea[name$="[source]"]').val('{' + attr.sourceField + '}');
+            
+            // Highlight
+            $row.css({
+                'background': '#e8f5e9',
+                'border-color': '#4caf50',
+                'transition': 'all 0.3s'
+            });
+            setTimeout(function() {
+                $row.css({
+                    'background': '',
+                    'border-color': ''
+                });
+            }, 3000);
+        });
+        
+        console.log('★★★ Auto-mapped', attrColumns.length, 'variation attributes');
     }
     
     /**
@@ -1363,6 +1575,21 @@ window.populateFieldSelectorsForRowGlobal = function($row) {
     function updateMappedCounts() {
         $('.mapping-section').each(function() {
             var $section = $(this);
+            var sectionKey = $section.data('section');
+            
+            // Special handling for taxonomy section
+            if (sectionKey === 'taxonomy') {
+                var total = 3; // categories, tags, brand
+                var mapped = 0;
+                $section.find('.taxonomy-block .field-mapping-textarea').each(function() {
+                    if ($(this).val() && $(this).val().trim() !== '') {
+                        mapped++;
+                    }
+                });
+                $section.find('.mapped-count').text(mapped + '/' + total);
+                return;
+            }
+            
             var total = $section.find('.field-mapping-row').length;
             var mapped = 0;
             
@@ -2468,6 +2695,18 @@ window.populateFieldSelectorsForRowGlobal = function($row) {
                     if (typeof wcAiImportData !== 'undefined' && wcAiImportData.saved_mappings) {
                         console.log('★★★ LOADING SAVED MAPPINGS (after dropdowns populated) ★★★');
                         loadSavedMappings(wcAiImportData.saved_mappings);
+                    } else {
+                        // NEW import (no saved mappings) — run Smart Auto-Mapping
+                        // Dropdowns are already populated by populateSourceFields() above
+                        var sourceFields = window.allKnownFieldsOrder || [];
+                        if (sourceFields.length > 0) {
+                            console.log('★★★ Running Smart Auto-Mapping for', sourceFields.length, 'source fields');
+                            var smartMappings = performSmartMapping(sourceFields);
+                            if (Object.keys(smartMappings).length > 0) {
+                                applySmartMappings(smartMappings);
+                                showAutoMappingWarning();
+                            }
+                        }
                     }
                 } else {
                     showMessage($('#mapping-messages'), response.data.message, 'error');
@@ -7187,4 +7426,125 @@ window.populateFieldSelectorsForRowGlobal = function($row) {
         });
     });
 
-})(jQuery);/* Cache bust 1770061919 */
+    // ═══════════════════════════════════════════════════════════
+    // TAXONOMY MAPPING UI - Category Mode Toggle, Mapping Tables
+    // ═══════════════════════════════════════════════════════════
+    function initializeTaxonomyMapping() {
+        console.log('BPI: initializeTaxonomyMapping() called');
+
+        // Category mode radio toggle - show/hide relevant separator fields
+        $('input[name="field_mapping[categories][cat_mode]"]').on('change', function() {
+            var mode = $(this).val();
+            $('.taxonomy-mode-detail').hide();
+            if (mode === 'multiple') {
+                $('.taxonomy-mode-detail[data-for="multiple"]').show();
+            } else if (mode === 'hierarchical') {
+                $('.taxonomy-mode-detail[data-for="hierarchical"]').show();
+            }
+        });
+
+        // Initialize mode visibility
+        var checkedMode = $('input[name="field_mapping[categories][cat_mode]"]:checked').val();
+        if (checkedMode) {
+            $('input[name="field_mapping[categories][cat_mode]"]').trigger('change');
+        }
+
+        // Category mapping toggle
+        $('#cat-enable-mapping').on('change', function() {
+            $('#cat-mapping-table-wrap').toggle(this.checked);
+        });
+
+        // Tag mapping toggle  
+        $('#tag-enable-mapping').on('change', function() {
+            $('#tag-mapping-table-wrap').toggle(this.checked);
+        });
+
+        // Brand mapping toggle
+        $('#brand-enable-mapping').on('change', function() {
+            $('#brand-mapping-table-wrap').toggle(this.checked);
+        });
+
+        // Build category select options HTML
+        function bpiBuildCategoryOptions(selectedId) {
+            var cats = (typeof bpiWcCategories !== 'undefined') ? bpiWcCategories : [];
+            var html = '<option value="">' + ((typeof wcAiImportI18n !== 'undefined' && wcAiImportI18n.select_category) ? wcAiImportI18n.select_category : '— Select Category —') + '</option>';
+            html += '<option value="__new__">' + ((typeof wcAiImportI18n !== 'undefined' && wcAiImportI18n.create_new) ? wcAiImportI18n.create_new : '+ Create New') + '</option>';
+            for (var i = 0; i < cats.length; i++) {
+                var sel = (selectedId && cats[i].id == selectedId) ? ' selected' : '';
+                html += '<option value="' + cats[i].id + '"' + sel + '>' + cats[i].label + '</option>';
+            }
+            return html;
+        }
+
+        // Build tag select options HTML
+        function bpiBuildTagOptions(selectedId) {
+            var tags = (typeof bpiWcTags !== 'undefined') ? bpiWcTags : [];
+            var html = '<option value="">' + ((typeof wcAiImportI18n !== 'undefined' && wcAiImportI18n.select_tag) ? wcAiImportI18n.select_tag : '— Select Tag —') + '</option>';
+            html += '<option value="__new__">' + ((typeof wcAiImportI18n !== 'undefined' && wcAiImportI18n.create_new) ? wcAiImportI18n.create_new : '+ Create New') + '</option>';
+            for (var i = 0; i < tags.length; i++) {
+                var sel = (selectedId && tags[i].id == selectedId) ? ' selected' : '';
+                html += '<option value="' + tags[i].id + '"' + sel + '>' + tags[i].name + '</option>';
+            }
+            return html;
+        }
+
+        // Build brand select options HTML
+        function bpiBuildBrandOptions(selectedId) {
+            var brands = (typeof bpiWcBrands !== 'undefined') ? bpiWcBrands : [];
+            var html = '<option value="">' + ((typeof wcAiImportI18n !== 'undefined' && wcAiImportI18n.select_brand) ? wcAiImportI18n.select_brand : '— Select Brand —') + '</option>';
+            html += '<option value="__new__">' + ((typeof wcAiImportI18n !== 'undefined' && wcAiImportI18n.create_new) ? wcAiImportI18n.create_new : '+ Create New') + '</option>';
+            for (var i = 0; i < brands.length; i++) {
+                var sel = (selectedId && brands[i].id == selectedId) ? ' selected' : '';
+                html += '<option value="' + brands[i].id + '"' + sel + '>' + brands[i].name + '</option>';
+            }
+            return html;
+        }
+
+        // Add category mapping row
+        $('#btn-add-cat-mapping-row').on('click', function(e) {
+            e.preventDefault();
+            console.log('BPI: Add cat mapping row clicked');
+            var idx = $('#cat-mapping-rows tr').length;
+            var row = '<tr>' +
+                '<td><input type="text" name="field_mapping[categories][cat_mapping][' + idx + '][from]" placeholder="Feed value..." /></td>' +
+                '<td><select name="field_mapping[categories][cat_mapping][' + idx + '][to]">' + bpiBuildCategoryOptions() + '</select></td>' +
+                '<td><button type="button" class="btn-remove-mapping-row" title="Remove">✕</button></td>' +
+                '</tr>';
+            $('#cat-mapping-rows').append(row);
+        });
+
+        // Add tag mapping row
+        $('#btn-add-tag-mapping-row').on('click', function(e) {
+            e.preventDefault();
+            console.log('BPI: Add tag mapping row clicked');
+            var idx = $('#tag-mapping-rows tr').length;
+            var row = '<tr>' +
+                '<td><input type="text" name="field_mapping[tags][tag_mapping][' + idx + '][from]" placeholder="Feed value..." /></td>' +
+                '<td><select name="field_mapping[tags][tag_mapping][' + idx + '][to]">' + bpiBuildTagOptions() + '</select></td>' +
+                '<td><button type="button" class="btn-remove-mapping-row" title="Remove">✕</button></td>' +
+                '</tr>';
+            $('#tag-mapping-rows').append(row);
+        });
+
+        // Add brand mapping row
+        $('#btn-add-brand-mapping-row').on('click', function(e) {
+            e.preventDefault();
+            console.log('BPI: Add brand mapping row clicked');
+            var idx = $('#brand-mapping-rows tr').length;
+            var row = '<tr>' +
+                '<td><input type="text" name="field_mapping[brand][brand_mapping][' + idx + '][from]" placeholder="Feed value..." /></td>' +
+                '<td><select name="field_mapping[brand][brand_mapping][' + idx + '][to]">' + bpiBuildBrandOptions() + '</select></td>' +
+                '<td><button type="button" class="btn-remove-mapping-row" title="Remove">✕</button></td>' +
+                '</tr>';
+            $('#brand-mapping-rows').append(row);
+        });
+
+        // Remove mapping row (delegated since rows are dynamically added)
+        $(document).on('click', '.btn-remove-mapping-row', function() {
+            $(this).closest('tr').remove();
+        });
+
+        console.log('BPI: Taxonomy mapping handlers registered OK');
+    }
+
+})(jQuery);/* Cache bust: ' + Date.now() + ' */

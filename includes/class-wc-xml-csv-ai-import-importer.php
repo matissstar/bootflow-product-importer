@@ -3040,33 +3040,92 @@ class WC_XML_CSV_AI_Import_Importer {
 
     /**
      * Set product categories.
+     * Supports: single/multiple/hierarchical modes, mapping table, leaf-only, auto-create toggle.
      *
      * @since    1.0.0
      * @param    int $product_id Product ID
      * @param    mixed $categories Categories (array or string)
      */
     private function set_product_categories($product_id, $categories) {
+        // Get taxonomy mapping settings from field_mapping config
+        $cat_config = $this->config['field_mapping']['categories'] ?? array();
+        $cat_mode = $cat_config['cat_mode'] ?? 'multiple';
+        $cat_separator = $cat_config['cat_separator'] ?? ',';
+        $cat_hier_sep = $cat_config['cat_hier_sep'] ?? '>';
+        $cat_multi_sep = $cat_config['cat_multi_sep'] ?? '|';
+        $auto_create = !empty($cat_config['cat_auto_create']);
+        $match_existing = !empty($cat_config['cat_match_existing']);
+        $leaf_only = !empty($cat_config['cat_leaf_only']);
+        $also_tags = !empty($cat_config['cat_also_tags']);
+        $enable_mapping = !empty($cat_config['cat_enable_mapping']);
+        $mapping_table = $cat_config['cat_mapping'] ?? array();
+        
+        // Fallback: if no mode set, check global settings
+        if (!isset($cat_config['cat_mode'])) {
+            $settings = get_option('wc_xml_csv_ai_import_settings', array());
+            $auto_create = isset($settings['auto_create_categories']) ? $settings['auto_create_categories'] : true;
+        }
+
+        // Parse categories based on mode
         if (is_string($categories)) {
-            $categories = array_map('trim', explode(',', $categories));
+            switch ($cat_mode) {
+                case 'single':
+                    $categories = array(trim($categories));
+                    break;
+                case 'hierarchical':
+                    // Split by multi-category separator first (e.g., |), then each is a hierarchy path
+                    if (!empty($cat_multi_sep) && strpos($categories, $cat_multi_sep) !== false) {
+                        $categories = array_map('trim', explode($cat_multi_sep, $categories));
+                    } else {
+                        $categories = array(trim($categories));
+                    }
+                    break;
+                case 'multiple':
+                default:
+                    $sep = !empty($cat_separator) ? $cat_separator : ',';
+                    $categories = array_map('trim', explode($sep, $categories));
+                    break;
+            }
         }
 
         $category_ids = array();
-        $all_tags = array(); // Collect all category elements as tags
-        $settings = get_option('wc_xml_csv_ai_import_settings', array());
-        $auto_create = isset($settings['auto_create_categories']) ? $settings['auto_create_categories'] : true;
+        $all_tags = array();
 
         $this->log_debug('SET_PRODUCT_CATEGORIES: Processing categories for product', array(
             'product_id' => $product_id,
             'categories' => $categories,
-            'auto_create' => $auto_create
+            'mode' => $cat_mode,
+            'auto_create' => $auto_create,
+            'leaf_only' => $leaf_only,
+            'enable_mapping' => $enable_mapping,
         ));
 
         foreach ($categories as $category_path) {
             $category_path = trim($category_path);
             if (empty($category_path)) continue;
 
-            // Auto-detect separator: >, -, |, //, ->
-            $separator = $this->detect_category_separator($category_path);
+            // Apply mapping table if enabled
+            if ($enable_mapping && !empty($mapping_table)) {
+                $mapped = $this->apply_taxonomy_mapping($category_path, $mapping_table, 'product_cat');
+                if ($mapped !== false) {
+                    if (is_int($mapped) && $mapped > 0) {
+                        $category_ids[] = $mapped;
+                    }
+                    continue; // Skip normal processing — mapping handled it
+                }
+                // If no mapping match found, fall through to normal processing
+            }
+
+            // Check if hierarchical
+            $separator = false;
+            if ($cat_mode === 'hierarchical' && !empty($cat_hier_sep)) {
+                if (strpos($category_path, $cat_hier_sep) !== false) {
+                    $separator = $cat_hier_sep;
+                }
+            } elseif ($cat_mode !== 'single') {
+                // Auto-detect separator for non-single modes
+                $separator = $this->detect_category_separator($category_path);
+            }
             
             if ($separator) {
                 $this->log_debug('CATEGORY_HIERARCHY: Detected separator', array(
@@ -3074,21 +3133,44 @@ class WC_XML_CSV_AI_Import_Importer {
                     'separator' => $separator
                 ));
                 
-                // Hierarchical category path detected
                 $hierarchy_id = $this->create_category_hierarchy($category_path, $separator, $auto_create);
                 if ($hierarchy_id) {
-                    $category_ids[] = $hierarchy_id;
+                    if ($leaf_only) {
+                        // Only assign the deepest category
+                        $category_ids[] = $hierarchy_id;
+                    } else {
+                        // Assign all categories in hierarchy
+                        $elements = array_map('trim', explode($separator, $category_path));
+                        $parent_id = 0;
+                        foreach ($elements as $element) {
+                            if (empty($element)) continue;
+                            $term = get_term_by('name', $element, 'product_cat');
+                            if (!$term) {
+                                // Try to find by parent
+                                $matching = get_terms(array('taxonomy' => 'product_cat', 'name' => $element, 'parent' => $parent_id, 'hide_empty' => false));
+                                $term = !empty($matching) ? $matching[0] : null;
+                            }
+                            if ($term) {
+                                $category_ids[] = $term->term_id;
+                                $parent_id = $term->term_id;
+                            }
+                        }
+                    }
+                    
                     $this->log_debug('CATEGORY_HIERARCHY: Created hierarchy', array(
                         'path' => $category_path,
-                        'final_category_id' => $hierarchy_id
+                        'final_category_id' => $hierarchy_id,
+                        'leaf_only' => $leaf_only,
                     ));
                 }
                 
-                // Extract each element as a tag
-                $elements = array_map('trim', explode($separator, $category_path));
-                foreach ($elements as $element) {
-                    if (!empty($element) && $element !== '>' && $element !== '-') {
-                        $all_tags[] = $element;
+                // Collect tags from hierarchy elements
+                if ($also_tags) {
+                    $elements = array_map('trim', explode($separator, $category_path));
+                    foreach ($elements as $element) {
+                        if (!empty($element) && $element !== $separator) {
+                            $all_tags[] = $element;
+                        }
                     }
                 }
             } else {
@@ -3096,8 +3178,17 @@ class WC_XML_CSV_AI_Import_Importer {
                     'path' => $category_path
                 ));
                 
-                // Single category (no hierarchy)
-                $category = get_term_by('name', $category_path, 'product_cat');
+                // Simple category
+                $category = null;
+                
+                if ($match_existing) {
+                    // Try to match by name anywhere in hierarchy
+                    $category = get_term_by('name', $category_path, 'product_cat');
+                } else {
+                    // Strict match - only root categories
+                    $matching = get_terms(array('taxonomy' => 'product_cat', 'name' => $category_path, 'parent' => 0, 'hide_empty' => false));
+                    $category = !empty($matching) ? $matching[0] : null;
+                }
                 
                 if (!$category && $auto_create) {
                     $result = wp_insert_term($category_path, 'product_cat');
@@ -3112,13 +3203,15 @@ class WC_XML_CSV_AI_Import_Importer {
                     $category_ids[] = $category->term_id;
                 }
                 
-                // Add as tag
-                $all_tags[] = $category_path;
+                if ($also_tags) {
+                    $all_tags[] = $category_path;
+                }
             }
         }
 
         // Set categories
         if (!empty($category_ids)) {
+            $category_ids = array_unique($category_ids);
             wp_set_object_terms($product_id, $category_ids, 'product_cat');
             $this->log_debug('CATEGORIES_ASSIGNED: Product categories set', array(
                 'product_id' => $product_id,
@@ -3126,10 +3219,10 @@ class WC_XML_CSV_AI_Import_Importer {
             ));
         }
         
-        // Set tags (all category elements)
+        // Set tags from category elements (only if enabled)
         if (!empty($all_tags)) {
-            $all_tags = array_unique($all_tags); // Remove duplicates
-            wp_set_object_terms($product_id, $all_tags, 'product_tag', true); // Append tags
+            $all_tags = array_unique($all_tags);
+            wp_set_object_terms($product_id, $all_tags, 'product_tag', true);
             $this->log_debug('TAGS_ASSIGNED: Product tags set from categories', array(
                 'product_id' => $product_id,
                 'tags' => $all_tags,
@@ -3139,6 +3232,47 @@ class WC_XML_CSV_AI_Import_Importer {
         
         // Auto-set category thumbnails from first product image
         $this->auto_set_category_thumbnails($category_ids, $product_id);
+    }
+    
+    /**
+     * Apply taxonomy mapping table.
+     * Looks up a feed value in the mapping table and returns the WC term ID.
+     *
+     * @param string $feed_value The value from the feed
+     * @param array  $mapping_table Array of [from => ..., to => ...] pairs
+     * @param string $taxonomy The taxonomy (product_cat, product_tag, product_brand)
+     * @return int|false Term ID if mapped, false if no mapping found
+     */
+    private function apply_taxonomy_mapping($feed_value, $mapping_table, $taxonomy) {
+        $feed_value_lower = strtolower(trim($feed_value));
+        
+        foreach ($mapping_table as $mapping) {
+            if (!isset($mapping['from']) || !isset($mapping['to'])) continue;
+            
+            $from_lower = strtolower(trim($mapping['from']));
+            if ($from_lower === $feed_value_lower) {
+                $to = $mapping['to'];
+                
+                if ($to === '__new__' || empty($to)) {
+                    // Create new — let normal processing handle it
+                    return false;
+                }
+                
+                // to is a term ID
+                $term_id = intval($to);
+                if ($term_id > 0) {
+                    // Verify term exists
+                    $term = get_term($term_id, $taxonomy);
+                    if ($term && !is_wp_error($term)) {
+                        return $term_id;
+                    }
+                }
+                
+                return false;
+            }
+        }
+        
+        return false; // No mapping found
     }
     
     /**
@@ -3333,45 +3467,53 @@ class WC_XML_CSV_AI_Import_Importer {
      */
     /**
      * Set product tags.
-     * Supports comma-separated tags and hierarchical separator detection.
+     * Supports separator config, mapping table, auto-create toggle.
      *
      * @since    1.0.0
      * @param    int $product_id Product ID
      * @param    mixed $tags Tags (array or string)
      */
     private function set_product_tags($product_id, $tags) {
+        // Get taxonomy mapping settings
+        $tag_config = $this->config['field_mapping']['tags'] ?? array();
+        $tag_separator = $tag_config['tag_separator'] ?? ',';
+        $enable_mapping = !empty($tag_config['tag_enable_mapping']);
+        $mapping_table = $tag_config['tag_mapping'] ?? array();
+        
         if (is_string($tags)) {
-            // First split by comma (for multiple tag entries)
-            $tag_entries = array_map('trim', explode(',', $tags));
+            $sep = !empty($tag_separator) ? $tag_separator : ',';
+            $tag_entries = array_map('trim', explode($sep, $tags));
             $all_tags = array();
             
             foreach ($tag_entries as $tag_entry) {
                 if (empty($tag_entry)) continue;
                 
+                // Apply mapping table if enabled
+                if ($enable_mapping && !empty($mapping_table)) {
+                    $mapped = $this->apply_taxonomy_mapping($tag_entry, $mapping_table, 'product_tag');
+                    if ($mapped !== false) {
+                        // Mapped to specific tag ID - collect for wp_set_object_terms
+                        $all_tags[] = intval($mapped);
+                        continue;
+                    }
+                }
+                
                 // Check if this entry has hierarchical separators
                 $separator = $this->detect_category_separator($tag_entry);
                 
                 if ($separator) {
-                    // Split hierarchical path into individual tags
                     $elements = array_map('trim', explode($separator, $tag_entry));
                     foreach ($elements as $element) {
                         if (!empty($element) && $element !== '>' && $element !== '-') {
                             $all_tags[] = $element;
                         }
                     }
-                    
-                    $this->log_debug('TAGS_HIERARCHICAL: Split tag entry', array(
-                        'entry' => $tag_entry,
-                        'separator' => $separator,
-                        'tags' => $elements
-                    ));
                 } else {
-                    // Single tag
                     $all_tags[] = $tag_entry;
                 }
             }
             
-            $tags = array_unique($all_tags); // Remove duplicates
+            $tags = array_unique($all_tags);
             
             $this->log_debug('TAGS_PROCESSED: Final tags list', array(
                 'product_id' => $product_id,
@@ -3464,6 +3606,7 @@ class WC_XML_CSV_AI_Import_Importer {
 
     /**
      * Set product brand.
+     * Supports mapping table and auto-create toggle.
      *
      * @since    1.0.0
      * @param    int $product_id Product ID
@@ -3474,6 +3617,21 @@ class WC_XML_CSV_AI_Import_Importer {
         
         if (is_string($brand)) {
             $brand = trim($brand);
+        }
+        
+        // Get brand mapping settings
+        $brand_config = $this->config['field_mapping']['brand'] ?? array();
+        $enable_mapping = !empty($brand_config['brand_enable_mapping']);
+        $mapping_table = $brand_config['brand_mapping'] ?? array();
+        
+        // Apply mapping table if enabled
+        if ($enable_mapping && !empty($mapping_table) && is_string($brand)) {
+            $mapped = $this->apply_taxonomy_mapping($brand, $mapping_table, 'product_brand');
+            if ($mapped !== false) {
+                $result = wp_set_object_terms($product_id, array(intval($mapped)), 'product_brand');
+                $this->log('debug', 'SET_PRODUCT_BRAND mapped result: ' . print_r($result, true));
+                return;
+            }
         }
 
         $this->log('debug', 'SET_PRODUCT_BRAND wp_set_object_terms with brand: ' . print_r($brand, true));

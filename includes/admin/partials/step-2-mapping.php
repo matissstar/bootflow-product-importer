@@ -220,11 +220,8 @@ $woocommerce_fields = array(
     ),
     'taxonomy' => array(
         'title' => __('Categories & Tags', 'bootflow-product-importer'),
-        'fields' => array(
-            'categories' => array('label' => __('Product Categories', 'bootflow-product-importer'), 'required' => false, 'type' => 'text'),
-            'tags' => array('label' => __('Product Tags', 'bootflow-product-importer'), 'required' => false, 'type' => 'text'),
-            'brand' => array('label' => __('Brand', 'bootflow-product-importer'), 'required' => false, 'type' => 'text'),
-        )
+        'fields' => array(),
+        'custom_content' => true, // Flag for custom rendering (taxonomy UI)
     ),
     'product_options' => array(
         'title' => __('Product Options', 'bootflow-product-importer'),
@@ -655,7 +652,7 @@ $ai_providers = array(
                                 <h3 class="section-toggle" data-target="<?php echo esc_attr($section_key); ?>">
                                     <span class="dashicons dashicons-arrow-down"></span>
                                     <?php echo esc_attr($section['title']); ?>
-                                    <span class="mapped-count">0/<?php echo count($section['fields']); ?></span>
+                                    <span class="mapped-count">0/<?php echo ($section_key === 'taxonomy') ? 3 : count($section['fields']); ?></span>
                                 </h3>
                                 
                                 <div class="section-fields" id="section-<?php echo esc_attr($section_key); ?>">
@@ -1968,6 +1965,498 @@ $ai_providers = array(
                                             </div>
                                             
                                         </div><!-- /attributes-variations-container -->
+                                    <?php elseif ($section_key === 'taxonomy'): ?>
+                                        <!-- ═══════════════════════════════════════════════════════════════ -->
+                                        <!-- TAXONOMY MAPPING - Categories, Tags, Brand                      -->
+                                        <!-- WP All Import style UI with modes, separators, mapping table    -->
+                                        <!-- ═══════════════════════════════════════════════════════════════ -->
+                                        <?php
+                                        // Fetch existing WooCommerce categories for mapping dropdown
+                                        $wc_categories = get_terms(array(
+                                            'taxonomy' => 'product_cat',
+                                            'hide_empty' => false,
+                                            'orderby' => 'name',
+                                            'order' => 'ASC',
+                                        ));
+                                        $wc_categories_tree = array();
+                                        if (!is_wp_error($wc_categories) && !empty($wc_categories)) {
+                                            // Build flat list with hierarchy indicator
+                                            $cat_by_parent = array();
+                                            foreach ($wc_categories as $cat) {
+                                                $cat_by_parent[$cat->parent][] = $cat;
+                                            }
+                                            // Recursive function to build indented list
+                                            if (!function_exists('_bpi_build_cat_tree')) {
+                                            function _bpi_build_cat_tree($parent_id, $cat_by_parent, $depth = 0) {
+                                                $result = array();
+                                                if (!isset($cat_by_parent[$parent_id])) return $result;
+                                                foreach ($cat_by_parent[$parent_id] as $cat) {
+                                                    $result[] = array(
+                                                        'id' => $cat->term_id,
+                                                        'name' => $cat->name,
+                                                        'slug' => $cat->slug,
+                                                        'depth' => $depth,
+                                                        'label' => str_repeat('— ', $depth) . $cat->name,
+                                                    );
+                                                    $result = array_merge($result, _bpi_build_cat_tree($cat->term_id, $cat_by_parent, $depth + 1));
+                                                }
+                                                return $result;
+                                            }
+                                            } // end function_exists check
+                                            $wc_categories_tree = _bpi_build_cat_tree(0, $cat_by_parent);
+                                        }
+
+                                        // Fetch existing WooCommerce tags
+                                        $wc_tags = get_terms(array(
+                                            'taxonomy' => 'product_tag',
+                                            'hide_empty' => false,
+                                            'orderby' => 'name',
+                                            'order' => 'ASC',
+                                        ));
+
+                                        // Fetch existing brands
+                                        $wc_brands = array();
+                                        if (taxonomy_exists('product_brand')) {
+                                            $wc_brands = get_terms(array(
+                                                'taxonomy' => 'product_brand',
+                                                'hide_empty' => false,
+                                                'orderby' => 'name',
+                                                'order' => 'ASC',
+                                            ));
+                                            if (is_wp_error($wc_brands)) $wc_brands = array();
+                                        }
+                                        
+                                        // Load saved taxonomy settings for edit mode
+                                        $saved_cat = $saved_mappings['categories'] ?? array();
+                                        $saved_tag = $saved_mappings['tags'] ?? array();
+                                        $saved_brand = $saved_mappings['brand'] ?? array();
+                                        $saved_cat_source = $saved_cat['source'] ?? '';
+                                        $saved_cat_mode = $saved_cat['cat_mode'] ?? 'multiple';
+                                        $saved_cat_separator = $saved_cat['cat_separator'] ?? ',';
+                                        $saved_cat_hier_sep = $saved_cat['cat_hier_sep'] ?? '>';
+                                        $saved_cat_multi_sep = $saved_cat['cat_multi_sep'] ?? '|';
+                                        $saved_cat_auto_create = isset($saved_cat['cat_auto_create']) ? $saved_cat['cat_auto_create'] : '1';
+                                        $saved_cat_match_existing = isset($saved_cat['cat_match_existing']) ? $saved_cat['cat_match_existing'] : '1';
+                                        $saved_cat_leaf_only = !empty($saved_cat['cat_leaf_only']);
+                                        $saved_cat_also_tags = !empty($saved_cat['cat_also_tags']);
+                                        $saved_cat_enable_mapping = !empty($saved_cat['cat_enable_mapping']);
+                                        $saved_cat_mapping = $saved_cat['cat_mapping'] ?? array();
+                                        $saved_tag_source = $saved_tag['source'] ?? '';
+                                        $saved_tag_separator = $saved_tag['tag_separator'] ?? ',';
+                                        $saved_tag_enable_mapping = !empty($saved_tag['tag_enable_mapping']);
+                                        $saved_tag_mapping = $saved_tag['tag_mapping'] ?? array();
+                                        $saved_brand_source = $saved_brand['source'] ?? '';
+                                        $saved_brand_enable_mapping = !empty($saved_brand['brand_enable_mapping']);
+                                        $saved_brand_mapping = $saved_brand['brand_mapping'] ?? array();
+                                        ?>
+                                        
+                                        <div class="taxonomy-mapping-container" style="padding: 20px;">
+
+                                            <!-- ══════════════════════════════════════════ -->
+                                            <!-- PRODUCT CATEGORIES                          -->
+                                            <!-- ══════════════════════════════════════════ -->
+                                            <div class="taxonomy-block" data-taxonomy="categories" style="margin-bottom: 30px; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
+                                                <div style="padding: 15px 20px; background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); border-bottom: 1px solid #a5d6a7; display: flex; align-items: center; gap: 10px;">
+                                                    <span style="font-size: 22px;">📂</span>
+                                                    <strong style="font-size: 15px; color: #2e7d32;"><?php esc_html_e('Product Categories', 'bootflow-product-importer'); ?></strong>
+                                                </div>
+                                                
+                                                <div style="padding: 20px;">
+                                                    <!-- Source Field -->
+                                                    <div style="margin-bottom: 20px;">
+                                                        <label style="font-weight: 600; display: block; margin-bottom: 8px;">
+                                                            <?php esc_html_e('Source Field', 'bootflow-product-importer'); ?>
+                                                        </label>
+                                                        <div class="textarea-mapping-wrapper" data-field="categories">
+                                                            <textarea name="field_mapping[categories][source]" 
+                                                                      class="field-mapping-textarea" 
+                                                                      rows="1"
+                                                                      data-field-name="categories"
+                                                                      placeholder="<?php esc_attr_e('Type { to see fields or drag field here...', 'bootflow-product-importer'); ?>"><?php echo esc_textarea($saved_cat_source); ?></textarea>
+                                                        </div>
+                                                        <p class="description" style="margin-top: 5px;">
+                                                            <?php esc_html_e('Select the XML/CSV field containing category data. You can combine fields: {category} or {parent_cat} > {sub_cat}', 'bootflow-product-importer'); ?>
+                                                        </p>
+                                                    </div>
+                                                    
+                                                    <!-- Category Mode -->
+                                                    <div style="margin-bottom: 20px; padding: 15px; background: #f9f9f9; border-radius: 6px;">
+                                                        <label style="font-weight: 600; display: block; margin-bottom: 12px;">
+                                                            <?php esc_html_e('Category Mode', 'bootflow-product-importer'); ?>
+                                                        </label>
+                                                        
+                                                        <!-- Mode 1: Single -->
+                                                        <label class="taxonomy-mode-option" style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 12px; cursor: pointer;">
+                                                            <input type="radio" name="field_mapping[categories][cat_mode]" value="single" style="margin-top: 3px;" <?php checked($saved_cat_mode, 'single'); ?>>
+                                                            <span>
+                                                                <strong><?php esc_html_e('Single category per product', 'bootflow-product-importer'); ?></strong>
+                                                                <small style="display: block; color: #666; margin-top: 2px;">
+                                                                    <?php esc_html_e('Each product gets one category from source field value', 'bootflow-product-importer'); ?>
+                                                                </small>
+                                                            </span>
+                                                        </label>
+                                                        
+                                                        <!-- Mode 2: Multiple -->
+                                                        <label class="taxonomy-mode-option" style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 8px; cursor: pointer;">
+                                                            <input type="radio" name="field_mapping[categories][cat_mode]" value="multiple" style="margin-top: 3px;" <?php checked($saved_cat_mode, 'multiple'); ?>>
+                                                            <span>
+                                                                <strong><?php esc_html_e('Multiple categories, separated by:', 'bootflow-product-importer'); ?></strong>
+                                                                <small style="display: block; color: #666; margin-top: 2px;">
+                                                                    <?php esc_html_e('Source field contains multiple category names delimited by separator', 'bootflow-product-importer'); ?>
+                                                                </small>
+                                                            </span>
+                                                        </label>
+                                                        <div class="taxonomy-mode-detail" data-for="multiple" style="margin-left: 26px; margin-bottom: 12px; display: <?php echo ($saved_cat_mode === 'multiple') ? 'block' : 'none'; ?>;">
+                                                            <input type="text" name="field_mapping[categories][cat_separator]" value="<?php echo esc_attr($saved_cat_separator); ?>" 
+                                                                   style="width: 80px; text-align: center; font-family: monospace; font-size: 14px; padding: 5px 10px; border: 1px solid #ccc; border-radius: 4px;"
+                                                                   placeholder=",">
+                                                            <span style="color: #888; margin-left: 8px; font-size: 12px;">
+                                                                <?php esc_html_e('e.g., Electronics, Phones, Accessories', 'bootflow-product-importer'); ?>
+                                                            </span>
+                                                        </div>
+                                                        
+                                                        <!-- Mode 3: Hierarchical -->
+                                                        <label class="taxonomy-mode-option" style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 8px; cursor: pointer;">
+                                                            <input type="radio" name="field_mapping[categories][cat_mode]" value="hierarchical" style="margin-top: 3px;" <?php checked($saved_cat_mode, 'hierarchical'); ?>>
+                                                            <span>
+                                                                <strong><?php esc_html_e('Hierarchical categories (Parent > Child)', 'bootflow-product-importer'); ?></strong>
+                                                                <small style="display: block; color: #666; margin-top: 2px;">
+                                                                    <?php esc_html_e('Source field contains nested category path with separator', 'bootflow-product-importer'); ?>
+                                                                </small>
+                                                            </span>
+                                                        </label>
+                                                        <div class="taxonomy-mode-detail" data-for="hierarchical" style="margin-left: 26px; margin-bottom: 12px; display: <?php echo ($saved_cat_mode === 'hierarchical') ? 'block' : 'none'; ?>;">
+                                                            <label style="font-size: 13px; color: #555; margin-right: 8px;"><?php esc_html_e('Hierarchy separator:', 'bootflow-product-importer'); ?></label>
+                                                            <input type="text" name="field_mapping[categories][cat_hier_sep]" value="<?php echo esc_attr($saved_cat_hier_sep); ?>" 
+                                                                   style="width: 80px; text-align: center; font-family: monospace; font-size: 14px; padding: 5px 10px; border: 1px solid #ccc; border-radius: 4px;"
+                                                                   placeholder=">">
+                                                            <span style="color: #888; margin-left: 8px; font-size: 12px;">
+                                                                <?php esc_html_e('e.g., Electronics > Phones > Apple', 'bootflow-product-importer'); ?>
+                                                            </span>
+                                                            <br>
+                                                            <label style="font-size: 13px; color: #555; margin-right: 8px; margin-top: 8px; display: inline-block;"><?php esc_html_e('Multi-category separator:', 'bootflow-product-importer'); ?></label>
+                                                            <input type="text" name="field_mapping[categories][cat_multi_sep]" value="<?php echo esc_attr($saved_cat_multi_sep); ?>" 
+                                                                   style="width: 80px; text-align: center; font-family: monospace; font-size: 14px; padding: 5px 10px; border: 1px solid #ccc; border-radius: 4px;"
+                                                                   placeholder="|">
+                                                            <span style="color: #888; margin-left: 8px; font-size: 12px;">
+                                                                <?php esc_html_e('Separates multiple hierarchical paths, e.g., A > B | C > D', 'bootflow-product-importer'); ?>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <!-- Category Options -->
+                                                    <div style="margin-bottom: 20px; padding: 15px; background: #f5f5f5; border-radius: 6px;">
+                                                        <label style="font-weight: 600; display: block; margin-bottom: 12px;">
+                                                            <?php esc_html_e('Options', 'bootflow-product-importer'); ?>
+                                                        </label>
+                                                        
+                                                        <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px; cursor: pointer;">
+                                                            <input type="checkbox" name="field_mapping[categories][cat_auto_create]" value="1" <?php checked($saved_cat_auto_create); ?>>
+                                                            <span><?php esc_html_e('Auto-create categories if they don\'t exist', 'bootflow-product-importer'); ?></span>
+                                                        </label>
+                                                        
+                                                        <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px; cursor: pointer;">
+                                                            <input type="checkbox" name="field_mapping[categories][cat_match_existing]" value="1" <?php checked($saved_cat_match_existing); ?>>
+                                                            <span><?php esc_html_e('Try to match existing child categories (match by name regardless of hierarchy)', 'bootflow-product-importer'); ?></span>
+                                                        </label>
+                                                        
+                                                        <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px; cursor: pointer;">
+                                                            <input type="checkbox" name="field_mapping[categories][cat_leaf_only]" value="1" <?php checked($saved_cat_leaf_only); ?>>
+                                                            <span><?php esc_html_e('Only assign the deepest (leaf) category, not the entire hierarchy', 'bootflow-product-importer'); ?></span>
+                                                        </label>
+                                                        
+                                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                                            <input type="checkbox" name="field_mapping[categories][cat_also_tags]" value="1" <?php checked($saved_cat_also_tags); ?>>
+                                                            <span><?php esc_html_e('Also add category names as product tags', 'bootflow-product-importer'); ?></span>
+                                                        </label>
+                                                    </div>
+                                                    
+                                                    <!-- Category Mapping Table -->
+                                                    <div style="margin-bottom: 10px;">
+                                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; margin-bottom: 15px;">
+                                                            <input type="checkbox" id="cat-enable-mapping" name="field_mapping[categories][cat_enable_mapping]" value="1" <?php checked($saved_cat_enable_mapping); ?>>
+                                                            <strong><?php esc_html_e('Enable Category Mapping', 'bootflow-product-importer'); ?></strong>
+                                                            <span style="color: #888; font-size: 12px; font-weight: normal;">
+                                                                — <?php esc_html_e('Map feed values to specific WooCommerce categories', 'bootflow-product-importer'); ?>
+                                                            </span>
+                                                        </label>
+                                                        
+                                                        <div id="cat-mapping-table-wrap" style="display: <?php echo $saved_cat_enable_mapping ? 'block' : 'none'; ?>;">
+                                                            <div style="padding: 15px; background: #fff3e0; border-radius: 6px; border: 1px solid #ffcc80; margin-bottom: 15px;">
+                                                                <p style="margin: 0; font-size: 13px; color: #e65100;">
+                                                                    <strong>💡 <?php esc_html_e('How mapping works:', 'bootflow-product-importer'); ?></strong>
+                                                                    <?php esc_html_e('Add rows to map feed category values to your WooCommerce categories. Values not in the mapping table will be imported as-is (or auto-created).', 'bootflow-product-importer'); ?>
+                                                                </p>
+                                                            </div>
+                                                            
+                                                            <table class="taxonomy-mapping-table widefat" style="margin-bottom: 10px;">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th style="width: 45%;"><?php esc_html_e('Feed Value (from source)', 'bootflow-product-importer'); ?></th>
+                                                                        <th style="width: 45%;"><?php esc_html_e('WooCommerce Category', 'bootflow-product-importer'); ?></th>
+                                                                        <th style="width: 10%;"></th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody id="cat-mapping-rows">
+                                                                    <?php if (!empty($saved_cat_mapping)): ?>
+                                                                        <?php foreach ($saved_cat_mapping as $idx => $map_row): ?>
+                                                                        <tr>
+                                                                            <td><input type="text" name="field_mapping[categories][cat_mapping][<?php echo (int)$idx; ?>][from]" value="<?php echo esc_attr($map_row['from'] ?? ''); ?>" /></td>
+                                                                            <td><select name="field_mapping[categories][cat_mapping][<?php echo (int)$idx; ?>][to]">
+                                                                                <option value=""><?php esc_html_e('— Select Category —', 'bootflow-product-importer'); ?></option>
+                                                                                <option value="__new__"><?php esc_html_e('+ Create New', 'bootflow-product-importer'); ?></option>
+                                                                                <?php foreach ($wc_categories_tree as $cat_item): ?>
+                                                                                    <option value="<?php echo esc_attr($cat_item['id']); ?>" <?php selected($map_row['to'] ?? '', $cat_item['id']); ?>><?php echo esc_html($cat_item['label']); ?></option>
+                                                                                <?php endforeach; ?>
+                                                                            </select></td>
+                                                                            <td><button type="button" class="btn-remove-mapping-row" title="Remove">✕</button></td>
+                                                                        </tr>
+                                                                        <?php endforeach; ?>
+                                                                    <?php endif; ?>
+                                                                </tbody>
+                                                            </table>
+                                                            
+                                                            <button type="button" class="button" id="btn-add-cat-mapping-row">
+                                                                <span class="dashicons dashicons-plus" style="vertical-align: middle; margin-top: 2px;"></span>
+                                                                <?php esc_html_e('Add Mapping Row', 'bootflow-product-importer'); ?>
+                                                            </button>
+                                                            
+                                                            <!-- Hidden JSON for WC categories (used by JS) -->
+                                                            <script type="text/javascript">
+                                                                var bpiWcCategories = <?php echo wp_json_encode($wc_categories_tree); ?>;
+                                                            </script>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <!-- Update on Sync for categories -->
+                                                    <?php if ($can_selective_update): ?>
+                                                    <div class="update-on-sync-wrapper" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee;">
+                                                        <label>
+                                                            <input type="checkbox" name="field_mapping[categories][update_on_sync]" value="1" checked>
+                                                            <span><?php esc_html_e('Update categories on re-import?', 'bootflow-product-importer'); ?></span>
+                                                        </label>
+                                                    </div>
+                                                    <?php else: ?>
+                                                    <input type="hidden" name="field_mapping[categories][update_on_sync]" value="1">
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
+
+                                            <!-- ══════════════════════════════════════════ -->
+                                            <!-- PRODUCT TAGS                                 -->
+                                            <!-- ══════════════════════════════════════════ -->
+                                            <div class="taxonomy-block" data-taxonomy="tags" style="margin-bottom: 30px; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
+                                                <div style="padding: 15px 20px; background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); border-bottom: 1px solid #90caf9; display: flex; align-items: center; gap: 10px;">
+                                                    <span style="font-size: 22px;">🏷️</span>
+                                                    <strong style="font-size: 15px; color: #1565c0;"><?php esc_html_e('Product Tags', 'bootflow-product-importer'); ?></strong>
+                                                </div>
+                                                
+                                                <div style="padding: 20px;">
+                                                    <!-- Source Field -->
+                                                    <div style="margin-bottom: 20px;">
+                                                        <label style="font-weight: 600; display: block; margin-bottom: 8px;">
+                                                            <?php esc_html_e('Source Field', 'bootflow-product-importer'); ?>
+                                                        </label>
+                                                        <div class="textarea-mapping-wrapper" data-field="tags">
+                                                            <textarea name="field_mapping[tags][source]" 
+                                                                      class="field-mapping-textarea" 
+                                                                      rows="1"
+                                                                      data-field-name="tags"
+                                                                      placeholder="<?php esc_attr_e('Type { to see fields or drag field here...', 'bootflow-product-importer'); ?>"><?php echo esc_textarea($saved_tag_source); ?></textarea>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <!-- Tag Separator -->
+                                                    <div style="margin-bottom: 20px;">
+                                                        <label style="font-weight: 600; display: inline-block; margin-right: 10px;">
+                                                            <?php esc_html_e('Tag separator:', 'bootflow-product-importer'); ?>
+                                                        </label>
+                                                        <input type="text" name="field_mapping[tags][tag_separator]" value="<?php echo esc_attr($saved_tag_separator); ?>" 
+                                                               style="width: 80px; text-align: center; font-family: monospace; font-size: 14px; padding: 5px 10px; border: 1px solid #ccc; border-radius: 4px;"
+                                                               placeholder=",">
+                                                        <span style="color: #888; margin-left: 8px; font-size: 12px;">
+                                                            <?php esc_html_e('e.g., outdoor, camping, waterproof', 'bootflow-product-importer'); ?>
+                                                        </span>
+                                                    </div>
+                                                    
+                                                    <!-- Tag Options -->
+                                                    <div style="margin-bottom: 15px;">
+                                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                                            <input type="checkbox" name="field_mapping[tags][tag_auto_create]" value="1" checked>
+                                                            <span><?php esc_html_e('Auto-create tags if they don\'t exist', 'bootflow-product-importer'); ?></span>
+                                                        </label>
+                                                    </div>
+                                                    
+                                                    <!-- Tag Mapping Table -->
+                                                    <div style="margin-bottom: 10px;">
+                                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; margin-bottom: 15px;">
+                                                            <input type="checkbox" id="tag-enable-mapping" name="field_mapping[tags][tag_enable_mapping]" value="1" <?php checked($saved_tag_enable_mapping); ?>>
+                                                            <strong><?php esc_html_e('Enable Tag Mapping', 'bootflow-product-importer'); ?></strong>
+                                                            <span style="color: #888; font-size: 12px; font-weight: normal;">
+                                                                — <?php esc_html_e('Map feed values to specific WooCommerce tags', 'bootflow-product-importer'); ?>
+                                                            </span>
+                                                        </label>
+                                                        
+                                                        <div id="tag-mapping-table-wrap" style="display: <?php echo $saved_tag_enable_mapping ? 'block' : 'none'; ?>;">
+                                                            <table class="taxonomy-mapping-table widefat" style="margin-bottom: 10px;">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th style="width: 45%;"><?php esc_html_e('Feed Value (from source)', 'bootflow-product-importer'); ?></th>
+                                                                        <th style="width: 45%;"><?php esc_html_e('WooCommerce Tag', 'bootflow-product-importer'); ?></th>
+                                                                        <th style="width: 10%;"></th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody id="tag-mapping-rows">
+                                                                    <?php if (!empty($saved_tag_mapping)): ?>
+                                                                        <?php foreach ($saved_tag_mapping as $idx => $map_row): ?>
+                                                                        <tr>
+                                                                            <td><input type="text" name="field_mapping[tags][tag_mapping][<?php echo (int)$idx; ?>][from]" value="<?php echo esc_attr($map_row['from'] ?? ''); ?>" /></td>
+                                                                            <td><select name="field_mapping[tags][tag_mapping][<?php echo (int)$idx; ?>][to]">
+                                                                                <option value=""><?php esc_html_e('\u2014 Select Tag \u2014', 'bootflow-product-importer'); ?></option>
+                                                                                <option value="__new__"><?php esc_html_e('+ Create New', 'bootflow-product-importer'); ?></option>
+                                                                                <?php if (!is_wp_error($wc_tags) && !empty($wc_tags)): ?>
+                                                                                    <?php foreach ($wc_tags as $tag_item): ?>
+                                                                                        <option value="<?php echo esc_attr($tag_item->term_id); ?>" <?php selected($map_row['to'] ?? '', $tag_item->term_id); ?>><?php echo esc_html($tag_item->name); ?></option>
+                                                                                    <?php endforeach; ?>
+                                                                                <?php endif; ?>
+                                                                            </select></td>
+                                                                            <td><button type="button" class="btn-remove-mapping-row" title="Remove">\u2715</button></td>
+                                                                        </tr>
+                                                                        <?php endforeach; ?>
+                                                                    <?php endif; ?>
+                                                                </tbody>
+                                                            </table>
+                                                            
+                                                            <button type="button" class="button" id="btn-add-tag-mapping-row">
+                                                                <span class="dashicons dashicons-plus" style="vertical-align: middle; margin-top: 2px;"></span>
+                                                                <?php esc_html_e('Add Mapping Row', 'bootflow-product-importer'); ?>
+                                                            </button>
+                                                            
+                                                            <script type="text/javascript">
+                                                                var bpiWcTags = <?php echo wp_json_encode(
+                                                                    !is_wp_error($wc_tags) && !empty($wc_tags) 
+                                                                        ? array_map(function($t) { return array('id' => $t->term_id, 'name' => $t->name, 'slug' => $t->slug); }, $wc_tags) 
+                                                                        : array()
+                                                                ); ?>;
+                                                            </script>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <!-- Update on Sync for tags -->
+                                                    <?php if ($can_selective_update): ?>
+                                                    <div class="update-on-sync-wrapper" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee;">
+                                                        <label>
+                                                            <input type="checkbox" name="field_mapping[tags][update_on_sync]" value="1" checked>
+                                                            <span><?php esc_html_e('Update tags on re-import?', 'bootflow-product-importer'); ?></span>
+                                                        </label>
+                                                    </div>
+                                                    <?php else: ?>
+                                                    <input type="hidden" name="field_mapping[tags][update_on_sync]" value="1">
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
+
+                                            <!-- ══════════════════════════════════════════ -->
+                                            <!-- BRAND                                        -->
+                                            <!-- ══════════════════════════════════════════ -->
+                                            <div class="taxonomy-block" data-taxonomy="brand" style="border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
+                                                <div style="padding: 15px 20px; background: linear-gradient(135deg, #fce4ec 0%, #f8bbd0 100%); border-bottom: 1px solid #f48fb1; display: flex; align-items: center; gap: 10px;">
+                                                    <span style="font-size: 22px;">🏪</span>
+                                                    <strong style="font-size: 15px; color: #c2185b;"><?php esc_html_e('Brand / Manufacturer', 'bootflow-product-importer'); ?></strong>
+                                                </div>
+                                                
+                                                <div style="padding: 20px;">
+                                                    <!-- Source Field -->
+                                                    <div style="margin-bottom: 20px;">
+                                                        <label style="font-weight: 600; display: block; margin-bottom: 8px;">
+                                                            <?php esc_html_e('Source Field', 'bootflow-product-importer'); ?>
+                                                        </label>
+                                                        <div class="textarea-mapping-wrapper" data-field="brand">
+                                                            <textarea name="field_mapping[brand][source]" 
+                                                                      class="field-mapping-textarea" 
+                                                                      rows="1"
+                                                                      data-field-name="brand"
+                                                                      placeholder="<?php esc_attr_e('Type { to see fields or drag field here...', 'bootflow-product-importer'); ?>"><?php echo esc_textarea($saved_brand_source); ?></textarea>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <!-- Brand Options -->
+                                                    <div style="margin-bottom: 15px;">
+                                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                                            <input type="checkbox" name="field_mapping[brand][brand_auto_create]" value="1" checked>
+                                                            <span><?php esc_html_e('Auto-create brand if it doesn\'t exist', 'bootflow-product-importer'); ?></span>
+                                                        </label>
+                                                    </div>
+                                                    
+                                                    <!-- Brand Mapping Table -->
+                                                    <div style="margin-bottom: 10px;">
+                                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; margin-bottom: 15px;">
+                                                            <input type="checkbox" id="brand-enable-mapping" name="field_mapping[brand][brand_enable_mapping]" value="1" <?php checked($saved_brand_enable_mapping); ?>>
+                                                            <strong><?php esc_html_e('Enable Brand Mapping', 'bootflow-product-importer'); ?></strong>
+                                                            <span style="color: #888; font-size: 12px; font-weight: normal;">
+                                                                — <?php esc_html_e('Map feed values to specific WooCommerce brands', 'bootflow-product-importer'); ?>
+                                                            </span>
+                                                        </label>
+                                                        
+                                                        <div id="brand-mapping-table-wrap" style="display: <?php echo $saved_brand_enable_mapping ? 'block' : 'none'; ?>;">
+                                                            <table class="taxonomy-mapping-table widefat" style="margin-bottom: 10px;">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th style="width: 45%;"><?php esc_html_e('Feed Value (from source)', 'bootflow-product-importer'); ?></th>
+                                                                        <th style="width: 45%;"><?php esc_html_e('WooCommerce Brand', 'bootflow-product-importer'); ?></th>
+                                                                        <th style="width: 10%;"></th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody id="brand-mapping-rows">
+                                                                    <?php if (!empty($saved_brand_mapping)): ?>
+                                                                        <?php foreach ($saved_brand_mapping as $idx => $map_row): ?>
+                                                                        <tr>
+                                                                            <td><input type="text" name="field_mapping[brand][brand_mapping][<?php echo (int)$idx; ?>][from]" value="<?php echo esc_attr($map_row['from'] ?? ''); ?>" /></td>
+                                                                            <td><select name="field_mapping[brand][brand_mapping][<?php echo (int)$idx; ?>][to]">
+                                                                                <option value=""><?php esc_html_e('\u2014 Select Brand \u2014', 'bootflow-product-importer'); ?></option>
+                                                                                <option value="__new__"><?php esc_html_e('+ Create New', 'bootflow-product-importer'); ?></option>
+                                                                                <?php foreach ($wc_brands as $brand_item): ?>
+                                                                                    <option value="<?php echo esc_attr($brand_item->term_id); ?>" <?php selected($map_row['to'] ?? '', $brand_item->term_id); ?>><?php echo esc_html($brand_item->name); ?></option>
+                                                                                <?php endforeach; ?>
+                                                                            </select></td>
+                                                                            <td><button type="button" class="btn-remove-mapping-row" title="Remove">\u2715</button></td>
+                                                                        </tr>
+                                                                        <?php endforeach; ?>
+                                                                    <?php endif; ?>
+                                                                </tbody>
+                                                            </table>
+                                                            
+                                                            <button type="button" class="button" id="btn-add-brand-mapping-row">
+                                                                <span class="dashicons dashicons-plus" style="vertical-align: middle; margin-top: 2px;"></span>
+                                                                <?php esc_html_e('Add Mapping Row', 'bootflow-product-importer'); ?>
+                                                            </button>
+                                                            
+                                                            <script type="text/javascript">
+                                                                var bpiWcBrands = <?php echo wp_json_encode(
+                                                                    !empty($wc_brands) 
+                                                                        ? array_map(function($b) { return array('id' => $b->term_id, 'name' => $b->name, 'slug' => $b->slug); }, $wc_brands)
+                                                                        : array()
+                                                                ); ?>;
+                                                            </script>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <!-- Update on Sync for brand -->
+                                                    <?php if ($can_selective_update): ?>
+                                                    <div class="update-on-sync-wrapper" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee;">
+                                                        <label>
+                                                            <input type="checkbox" name="field_mapping[brand][update_on_sync]" value="1" checked>
+                                                            <span><?php esc_html_e('Update brand on re-import?', 'bootflow-product-importer'); ?></span>
+                                                        </label>
+                                                    </div>
+                                                    <?php else: ?>
+                                                    <input type="hidden" name="field_mapping[brand][update_on_sync]" value="1">
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
+
+                                        </div><!-- /taxonomy-mapping-container -->
+
                                     <?php else: ?>
                                     <?php $is_first_field_in_section = true; ?>
                                     <?php foreach ($section['fields'] as $field_key => $field): ?>

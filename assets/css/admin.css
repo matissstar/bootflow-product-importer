@@ -7,6 +7,7 @@
     margin: 20px 0;
     border-radius: 8px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    overflow-x: hidden;
 }
 
 .wc-ai-import-layout {
@@ -14,11 +15,12 @@
     gap: 20px;
     margin-top: 20px;
     align-items: flex-start;
+    overflow: hidden;
 }
 
 .wc-ai-import-sidebar {
     flex: 0 0 420px;
-    min-width: 350px;
+    min-width: 0;
     position: sticky;
     top: 32px;
     max-height: none;
@@ -47,7 +49,7 @@
 
 .wc-ai-import-main {
     flex: 1;
-    min-width: 400px;
+    min-width: 0;
 }
 
 .wc-ai-import-card {
@@ -1952,4 +1954,93 @@
     content: '✓';
     margin-left: auto;
     color: #2271b1;
+}
+
+/* ═══════════════════════════════════════════════════ */
+/* TAXONOMY MAPPING UI                                  */
+/* ═══════════════════════════════════════════════════ */
+
+.taxonomy-mapping-container {
+    padding: 20px;
+}
+
+.taxonomy-block {
+    transition: box-shadow 0.2s;
+}
+
+.taxonomy-block:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+/* Mapping table */
+.taxonomy-mapping-table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.taxonomy-mapping-table th {
+    background: #f5f5f5;
+    padding: 10px 12px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 13px;
+    border-bottom: 2px solid #ddd;
+}
+
+.taxonomy-mapping-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid #eee;
+    vertical-align: middle;
+}
+
+.taxonomy-mapping-table tr:hover td {
+    background: #fafafa;
+}
+
+.taxonomy-mapping-table input[type="text"] {
+    width: 100%;
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 13px;
+}
+
+.taxonomy-mapping-table select {
+    width: 100%;
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 13px;
+    max-width: 100%;
+}
+
+.taxonomy-mapping-table .btn-remove-mapping-row {
+    background: none;
+    border: none;
+    color: #cc1818;
+    cursor: pointer;
+    padding: 4px 8px;
+    font-size: 16px;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.taxonomy-mapping-table .btn-remove-mapping-row:hover {
+    background: #fce4ec;
+}
+
+/* Mode options styling */
+.taxonomy-mode-option {
+    padding: 8px 12px;
+    border-radius: 6px;
+    transition: background 0.2s;
+}
+
+.taxonomy-mode-option:hover {
+    background: #f0f0f0;
+}
+
+.taxonomy-mode-option input[type="radio"]:checked ~ span strong {
+    color: #2271b1;
+}
 }
