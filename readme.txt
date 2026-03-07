@@ -1,5 +1,5 @@
 === Bootflow – Product XML & CSV Importer ===
-Contributors: bootflow
+Contributors: bootflowio
 Tags: woocommerce, import, xml, csv, products
 Requires at least: 5.8
 Tested up to: 6.9

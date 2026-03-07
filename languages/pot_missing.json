@@ -1,6 +1,0 @@
-[
-    "$parent_description . \" | \" . $value",
-    "e.g., \"Size: \" . $value . \" - \" . $parent_description",
-    "e.g., explode(\",\", $value)",
-    "e.g., str_replace(\"small\", \"large\", $value)"
-]

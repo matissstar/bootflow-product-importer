@@ -8,8 +8,8 @@
  * WP.org compliance: Only deletes this plugin's data with proper prefixes
  *
  * @since      1.0.0
- * @package    WC_XML_CSV_AI_Import
- * @subpackage WC_XML_CSV_AI_Import/includes
+ * @package    Bfpi
+ * @subpackage Bfpi/includes
  */
 
 // WP.org compliance: security check for uninstall
@@ -29,13 +29,13 @@ if (!defined('ABSPATH')) {
 global $wpdb;
 
 // Check if user wants to keep data
-$keep_data = get_option('wc_xml_csv_ai_import_keep_data_on_uninstall', false);
+$keep_data = get_option('bfpi_keep_data_on_uninstall', false);
 
 if (!$keep_data) {
     // WP.org compliance: Delete custom database tables with proper escaping
     // These tables are created by this plugin only
-    $table_imports = $wpdb->prefix . 'wc_itp_imports';
-    $table_logs = $wpdb->prefix . 'wc_itp_import_logs';
+    $table_imports = $wpdb->prefix . 'bfpi_imports';
+    $table_logs = $wpdb->prefix . 'bfpi_import_logs';
     
     // phpcs:ignore WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQLPlaceholders.UnsupportedIdentifierPlaceholder -- Uninstall cleanup, %i requires WP 6.2+
     $wpdb->query($wpdb->prepare("DROP TABLE IF EXISTS %i", $table_imports));
@@ -44,15 +44,15 @@ if (!$keep_data) {
     
     // Delete plugin options - only this plugin's options with specific prefix
     $options_to_delete = array(
-        'wc_xml_csv_ai_import_version',
-        'wc_xml_csv_ai_import_ai_settings',
-        'wc_xml_csv_ai_import_performance_settings',
-        'wc_xml_csv_ai_import_import_settings',
-        'wc_xml_csv_ai_import_file_settings',
-        'wc_xml_csv_ai_import_logging_settings',
-        'wc_xml_csv_ai_import_security_settings',
-        'wc_xml_csv_ai_import_keep_data_on_uninstall',
-        'wc_xml_csv_ai_import_license'
+        'bfpi_version',
+        'bfpi_ai_settings',
+        'bfpi_performance_settings',
+        'bfpi_import_settings',
+        'bfpi_file_settings',
+        'bfpi_logging_settings',
+        'bfpi_security_settings',
+        'bfpi_keep_data_on_uninstall',
+        'bfpi_license'
     );
     
     foreach ($options_to_delete as $option) {
@@ -64,14 +64,14 @@ if (!$keep_data) {
     $wpdb->query(
         $wpdb->prepare(
             "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s",
-            '_transient_wc_xml_csv_ai_import_%'
+            '_transient_bfpi_%'
         )
     );
     // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Uninstall cleanup with specific prefix
     $wpdb->query(
         $wpdb->prepare(
             "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s",
-            '_transient_timeout_wc_xml_csv_ai_import_%'
+            '_transient_timeout_bfpi_%'
         )
     );
     
@@ -82,14 +82,14 @@ if (!$keep_data) {
     // WP.org compliance: verify path is within uploads before deletion
     if (file_exists($plugin_upload_dir) && strpos(realpath($plugin_upload_dir), realpath($upload_dir['basedir'])) === 0) {
         // Recursively delete directory and contents
-        wc_xml_csv_ai_import_delete_directory($plugin_upload_dir);
+        bfpi_delete_directory($plugin_upload_dir);
     }
     
     // Clear any scheduled events
     $scheduled_hooks = array(
-        'wc_xml_csv_ai_import_process_batch',
-        'wc_xml_csv_ai_import_cleanup_files',
-        'wc_xml_csv_ai_import_cleanup_logs'
+        'bfpi_process_batch',
+        'bfpi_cleanup_files',
+        'bfpi_cleanup_logs'
     );
     
     foreach ($scheduled_hooks as $hook) {
@@ -104,7 +104,7 @@ if (!$keep_data) {
     $wpdb->query(
         $wpdb->prepare(
             "DELETE FROM {$wpdb->usermeta} WHERE meta_key LIKE %s",
-            'wc_xml_csv_ai_import_%'
+            'bfpi_%'
         )
     );
     
@@ -121,7 +121,7 @@ if (!$keep_data) {
  * @param string $dir Directory path
  * @return bool Success
  */
-function wc_xml_csv_ai_import_delete_directory($dir) {
+function bfpi_delete_directory($dir) {
     if (!file_exists($dir)) {
         return true;
     }
@@ -140,7 +140,7 @@ function wc_xml_csv_ai_import_delete_directory($dir) {
             continue;
         }
         
-        if (!wc_xml_csv_ai_import_delete_directory($dir . DIRECTORY_SEPARATOR . $item)) {
+        if (!bfpi_delete_directory($dir . DIRECTORY_SEPARATOR . $item)) {
             return false;
         }
     }

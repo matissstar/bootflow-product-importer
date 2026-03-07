@@ -406,7 +406,7 @@ window.populateFieldSelectorsForRowGlobal = function($row) {
                 url: wcAiImportData.ajax_url,
                 type: 'POST',
                 data: {
-                    action: 'wc_xml_csv_ai_auto_mapping',
+                    action: 'bfpi_auto_mapping',
                     nonce: wcAiImportData.nonce,
                     source_fields: sourceFields,
                     provider: provider,
@@ -2468,7 +2468,7 @@ window.populateFieldSelectorsForRowGlobal = function($row) {
             return;
         }
 
-        $button.prop('disabled', true).text(wc_xml_csv_ai_import_ajax.strings.test_ai);
+        $button.prop('disabled', true).text(bfpi_ajax.strings.test_ai);
 
         // Simple URL validation
         try {
@@ -2509,14 +2509,14 @@ window.populateFieldSelectorsForRowGlobal = function($row) {
 
         // Submit form
         var formData = new FormData(this);
-        formData.append('action', 'wc_xml_csv_ai_import_upload_file');
-        formData.append('nonce', wc_xml_csv_ai_import_ajax.nonce);
+        formData.append('action', 'bfpi_upload_file');
+        formData.append('nonce', bfpi_ajax.nonce);
 
         var $button = $('#proceed-mapping');
-        $button.prop('disabled', true).html('<span class="spinner is-active"></span> ' + wc_xml_csv_ai_import_ajax.strings.uploading);
+        $button.prop('disabled', true).html('<span class="spinner is-active"></span> ' + bfpi_ajax.strings.uploading);
 
         $.ajax({
-            url: wc_xml_csv_ai_import_ajax.ajax_url,
+            url: bfpi_ajax.ajax_url,
             type: 'POST',
             data: formData,
             processData: false,
@@ -2576,7 +2576,7 @@ window.populateFieldSelectorsForRowGlobal = function($row) {
         $container.html('<div class="structure-loader" style="text-align: center; padding: 40px;"><div class="spinner is-active" style="float: none; margin: 0 auto;"></div><p style="margin-top: 10px; font-size: 14px; color: #666;">Loading product structure...</p></div>');
         
         var data = {
-            action: 'wc_xml_csv_ai_import_parse_structure',
+            action: 'bfpi_parse_structure',
             file_path: wcAiImportData.file_path,
             file_type: wcAiImportData.file_type,
             product_wrapper: wcAiImportData.product_wrapper,
@@ -3900,7 +3900,7 @@ window.populateFieldSelectorsForRowGlobal = function($row) {
             }
         }
 
-        $button.prop('disabled', true).text(wc_xml_csv_ai_import_ajax.strings.test_ai || 'Testing...');
+        $button.prop('disabled', true).text(bfpi_ajax.strings.test_ai || 'Testing...');
 
         // Build sample data for context
         var sampleData = {};
@@ -3915,15 +3915,15 @@ window.populateFieldSelectorsForRowGlobal = function($row) {
         }
 
         $.ajax({
-            url: wc_xml_csv_ai_import_ajax.ajax_url,
+            url: bfpi_ajax.ajax_url,
             type: 'POST',
             data: {
-                action: 'wc_xml_csv_ai_import_test_ai',
+                action: 'bfpi_test_ai',
                 provider: provider,
                 test_prompt: prompt,
                 test_value: testValue,
                 sample_data: sampleData,
-                nonce: wc_xml_csv_ai_import_ajax.nonce
+                nonce: bfpi_ajax.nonce
             },
             success: function(response) {
                 if (response.success) {
@@ -3998,14 +3998,14 @@ window.populateFieldSelectorsForRowGlobal = function($row) {
         $button.prop('disabled', true).text('Testing...');
 
         $.ajax({
-            url: wc_xml_csv_ai_import_ajax.ajax_url,
+            url: bfpi_ajax.ajax_url,
             type: 'POST',
             data: {
-                action: 'wc_xml_csv_ai_import_test_php',
+                action: 'bfpi_test_php',
                 formula: formula,
                 test_value: testValue,
                 sample_data: (window.currentSampleData && window.currentSampleData.length > 0) ? window.currentSampleData[0] : {},
-                nonce: wc_xml_csv_ai_import_ajax.nonce
+                nonce: bfpi_ajax.nonce
             },
             success: function(response) {
                 if (response.success) {
@@ -4059,16 +4059,16 @@ window.populateFieldSelectorsForRowGlobal = function($row) {
         $button.prop('disabled', true).text('Testing...');
 
         $.ajax({
-            url: wc_xml_csv_ai_import_ajax.ajax_url,
+            url: bfpi_ajax.ajax_url,
             type: 'POST',
             data: {
-                action: 'wc_xml_csv_ai_import_test_shipping',
+                action: 'bfpi_test_shipping',
                 formula: formula,
                 weight: weight,
                 length: length,
                 width: width,
                 height: height,
-                nonce: wc_xml_csv_ai_import_ajax.nonce
+                nonce: bfpi_ajax.nonce
             },
             success: function(response) {
                 if (response.success) {
@@ -4117,7 +4117,7 @@ window.populateFieldSelectorsForRowGlobal = function($row) {
             }
         }
 
-        if (!confirm(wc_xml_csv_ai_import_ajax.strings.confirm_import)) {
+        if (!confirm(bfpi_ajax.strings.confirm_import)) {
             return;
         }
 
@@ -4137,12 +4137,12 @@ window.populateFieldSelectorsForRowGlobal = function($row) {
         
         // Save mappings first
         $.ajax({
-            url: wc_xml_csv_ai_import_ajax.ajax_url,
+            url: bfpi_ajax.ajax_url,
             type: 'POST',
             data: {
-                action: 'wc_xml_csv_ai_import_save_mapping',
+                action: 'bfpi_save_mapping',
                 import_id: importId,
-                nonce: wc_xml_csv_ai_import_ajax.nonce,
+                nonce: bfpi_ajax.nonce,
                 mapping_data: JSON.stringify(mappingData)
             },
             success: function(saveResponse) {
@@ -4153,7 +4153,7 @@ window.populateFieldSelectorsForRowGlobal = function($row) {
                 }
                 
                 // Mappings saved successfully, now start import
-                $startButton.html('<span class="spinner is-active"></span> ' + wc_xml_csv_ai_import_ajax.strings.importing);
+                $startButton.html('<span class="spinner is-active"></span> ' + bfpi_ajax.strings.importing);
                 startImportAfterSave(mappingData);
             },
             error: function() {
@@ -4168,8 +4168,8 @@ window.populateFieldSelectorsForRowGlobal = function($row) {
      */
     function startImportAfterSave(mappingData) {
         var formData = new FormData();
-        formData.append('action', 'wc_xml_csv_ai_import_start_import');
-        formData.append('nonce', wc_xml_csv_ai_import_ajax.nonce);
+        formData.append('action', 'bfpi_start_import');
+        formData.append('nonce', bfpi_ajax.nonce);
         
         // Send field_mapping as JSON string to preserve nested objects (like attributes_variations)
         if (mappingData.field_mapping && Object.keys(mappingData.field_mapping).length > 0) {
@@ -4232,10 +4232,10 @@ window.populateFieldSelectorsForRowGlobal = function($row) {
         }
 
         var $button = $('#start-import');
-        $button.prop('disabled', true).html('<span class="spinner is-active"></span> ' + wc_xml_csv_ai_import_ajax.strings.importing);
+        $button.prop('disabled', true).html('<span class="spinner is-active"></span> ' + bfpi_ajax.strings.importing);
 
         $.ajax({
-            url: wc_xml_csv_ai_import_ajax.ajax_url,
+            url: bfpi_ajax.ajax_url,
             type: 'POST',
             data: formData,
             processData: false,
@@ -4244,7 +4244,7 @@ window.populateFieldSelectorsForRowGlobal = function($row) {
                 if (response.success) {
                     showMessage($('#mapping-messages'), response.data.message, 'success');
                     setTimeout(function() {
-                        window.location.href = 'admin.php?page=wc-xml-csv-import&step=3&import_id=' + response.data.import_id;
+                        window.location.href = 'admin.php?page=bfpi-import&step=3&import_id=' + response.data.import_id;
                     }, 1000);
                 } else {
                     showMessage($('#mapping-messages'), response.data.message, 'error');
@@ -4287,13 +4287,13 @@ window.populateFieldSelectorsForRowGlobal = function($row) {
 
         // Send AJAX request to save
         $.ajax({
-            url: wc_xml_csv_ai_import_ajax.ajax_url,
+            url: bfpi_ajax.ajax_url,
             type: 'POST',
             data: {
-                action: 'wc_xml_csv_ai_import_save_mapping',
+                action: 'bfpi_save_mapping',
                 import_id: importId,
                 mapping_data: JSON.stringify(mappingData),
-                nonce: wc_xml_csv_ai_import_ajax.nonce
+                nonce: bfpi_ajax.nonce
             },
             success: function(response) {
                 console.log('AJAX response:', response);
@@ -4696,13 +4696,13 @@ window.populateFieldSelectorsForRowGlobal = function($row) {
     function monitorImportProgress(importId) {
         var progressInterval = setInterval(function() {
             $.ajax({
-                url: wc_xml_csv_ai_import_ajax.ajax_url,
+                url: bfpi_ajax.ajax_url,
                 type: 'POST',
                 timeout: 600000, // 10 minutes timeout for long-running imports
                 data: {
-                    action: 'wc_xml_csv_ai_import_get_progress',
+                    action: 'bfpi_get_progress',
                     import_id: importId,
-                    nonce: wc_xml_csv_ai_import_ajax.nonce
+                    nonce: bfpi_ajax.nonce
                 },
                 success: function(response) {
                     if (response.success) {
@@ -4742,15 +4742,15 @@ window.populateFieldSelectorsForRowGlobal = function($row) {
             : 50;
         
         $.ajax({
-            url: wc_xml_csv_ai_import_ajax.ajax_url,
+            url: bfpi_ajax.ajax_url,
             type: 'POST',
             timeout: 300000, // 5 minutes per batch
             data: {
-                action: 'wc_xml_csv_ai_import_process_batch',
+                action: 'bfpi_process_batch',
                 import_id: importId,
                 offset: offset,
                 limit: batchSize,
-                nonce: wc_xml_csv_ai_import_ajax.nonce
+                nonce: bfpi_ajax.nonce
             },
             success: function(response) {
                 console.log('Batch processed:', response);
@@ -5024,7 +5024,7 @@ window.populateFieldSelectorsForRowGlobal = function($row) {
             url: wcAiImportData.ajax_url,
             type: 'POST',
             data: {
-                action: 'wc_xml_csv_ai_import_update_url',
+                action: 'bfpi_update_url',
                 nonce: wcAiImportData.nonce,
                 import_id: importId,
                 file_url: newUrl
@@ -5125,17 +5125,17 @@ window.populateFieldSelectorsForRowGlobal = function($row) {
     function loadRecipesList() {
         console.log('loadRecipesList() called');
         
-        if (typeof wc_xml_csv_ai_import_ajax === 'undefined') {
-            console.error('wc_xml_csv_ai_import_ajax is not defined');
+        if (typeof bfpi_ajax === 'undefined') {
+            console.error('bfpi_ajax is not defined');
             return;
         }
         
         $.ajax({
-            url: wc_xml_csv_ai_import_ajax.ajax_url,
+            url: bfpi_ajax.ajax_url,
             type: 'POST',
             data: {
-                action: 'wc_xml_csv_ai_import_get_recipes',
-                nonce: wc_xml_csv_ai_import_ajax.nonce
+                action: 'bfpi_get_recipes',
+                nonce: bfpi_ajax.nonce
             },
             success: function(response) {
                 console.log('Recipes response:', response);
@@ -5188,11 +5188,11 @@ window.populateFieldSelectorsForRowGlobal = function($row) {
         var recipeIdToSend = currentLoadedRecipeId || selectedRecipeId || '';
         
         $.ajax({
-            url: wc_xml_csv_ai_import_ajax.ajax_url,
+            url: bfpi_ajax.ajax_url,
             type: 'POST',
             data: {
-                action: 'wc_xml_csv_ai_import_save_recipe',
-                nonce: wc_xml_csv_ai_import_ajax.nonce,
+                action: 'bfpi_save_recipe',
+                nonce: bfpi_ajax.nonce,
                 recipe_name: recipeName,
                 recipe_id: recipeIdToSend,
                 mapping_data: mappingData
@@ -5247,11 +5247,11 @@ window.populateFieldSelectorsForRowGlobal = function($row) {
         $btn.prop('disabled', true).html('<span class="spinner is-active" style="margin: 0;"></span>');
         
         $.ajax({
-            url: wc_xml_csv_ai_import_ajax.ajax_url,
+            url: bfpi_ajax.ajax_url,
             type: 'POST',
             data: {
-                action: 'wc_xml_csv_ai_import_load_recipe',
-                nonce: wc_xml_csv_ai_import_ajax.nonce,
+                action: 'bfpi_load_recipe',
+                nonce: bfpi_ajax.nonce,
                 recipe_id: recipeId
             },
             success: function(response) {
@@ -5301,11 +5301,11 @@ window.populateFieldSelectorsForRowGlobal = function($row) {
         $btn.prop('disabled', true);
         
         $.ajax({
-            url: wc_xml_csv_ai_import_ajax.ajax_url,
+            url: bfpi_ajax.ajax_url,
             type: 'POST',
             data: {
-                action: 'wc_xml_csv_ai_import_delete_recipe',
-                nonce: wc_xml_csv_ai_import_ajax.nonce,
+                action: 'bfpi_delete_recipe',
+                nonce: bfpi_ajax.nonce,
                 recipe_id: recipeId
             },
             success: function(response) {
@@ -5359,11 +5359,11 @@ window.populateFieldSelectorsForRowGlobal = function($row) {
         $btn.prop('disabled', true).html('<span class="spinner is-active" style="margin: 0 5px 0 0;"></span> Detecting...');
         
         $.ajax({
-            url: wc_xml_csv_ai_import_ajax.ajax_url,
+            url: bfpi_ajax.ajax_url,
             type: 'POST',
             data: {
-                action: 'wc_xml_csv_ai_import_auto_detect_mapping',
-                nonce: wc_xml_csv_ai_import_ajax.nonce,
+                action: 'bfpi_auto_detect_mapping',
+                nonce: bfpi_ajax.nonce,
                 source_fields: sourceFields
             },
             success: function(response) {
@@ -5715,7 +5715,7 @@ window.populateFieldSelectorsForRowGlobal = function($row) {
                 url: ajaxurl,
                 type: 'POST',
                 data: {
-                    action: 'wc_xml_csv_ai_import_get_products_count',
+                    action: 'bfpi_get_products_count',
                     import_id: importId,
                     nonce: nonceToUse
                 },
@@ -5753,7 +5753,7 @@ window.populateFieldSelectorsForRowGlobal = function($row) {
                     url: ajaxurl,
                     type: 'POST',
                     data: {
-                        action: 'wc_xml_csv_ai_import_delete_products_batch',
+                        action: 'bfpi_delete_products_batch',
                         import_id: importId,
                         nonce: nonceToUse, // Use same nonce as get_products_count
                         batch_size: 25
@@ -7409,7 +7409,7 @@ window.populateFieldSelectorsForRowGlobal = function($row) {
             
             // AJAX save
             var ajaxUrl = (typeof wcAiImport !== 'undefined') ? wcAiImport.ajax_url : 
-                          (typeof wc_xml_csv_ai_import_ajax !== 'undefined') ? wc_xml_csv_ai_import_ajax.ajax_url :
+                          (typeof bfpi_ajax !== 'undefined') ? bfpi_ajax.ajax_url :
                           (typeof wcAiImportData !== 'undefined') ? wcAiImportData.ajax_url :
                           (typeof ajaxurl !== 'undefined') ? ajaxurl : '/wp-admin/admin-ajax.php';
             

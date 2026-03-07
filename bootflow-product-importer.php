@@ -1,12 +1,12 @@
 <?php
 /**
  * Plugin Name: Bootflow – Product XML & CSV Importer
- * Plugin URI:  https://bootflow.io/product-importer/
+ * Plugin URI:  https://bootflow.io/
  * Description: Import and update WooCommerce products from XML and CSV feeds with manual field mapping, product variations support, and a reliable import workflow.
  * Version:     0.9.1
  * Author:      Bootflow
  * Author URI:  https://bootflow.io
- * Text Domain: bootflow-product-importer
+ * Text Domain: bootflow-product-xml-csv-importer
  * Domain Path: /languages
  * Requires at least: 5.8
  * Tested up to: 6.9
@@ -22,135 +22,109 @@ if (!defined('WPINC')) {
 
 // Check if WooCommerce is active
 if (!in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_option('active_plugins')))) {
-    add_action('admin_notices', 'wc_xml_csv_ai_import_woocommerce_missing_notice');
+    add_action('admin_notices', 'bfpi_woocommerce_missing_notice');
     return;
 }
 
-function wc_xml_csv_ai_import_woocommerce_missing_notice() {
+function bfpi_woocommerce_missing_notice() {
     ?>
     <div class="notice notice-error">
-        <p><?php esc_html_e('WooCommerce XML/CSV Smart Import requires WooCommerce to be installed and active.', 'bootflow-product-importer'); ?></p>
+        <p><?php esc_html_e('WooCommerce XML/CSV Smart Import requires WooCommerce to be installed and active.', 'bootflow-product-xml-csv-importer'); ?></p>
     </div>
     <?php
 }
 
-/**
- * Suppress debug output on plugin pages
- */
-function wc_xml_csv_ai_import_suppress_debug_output() {
-    // WP.org compliance: sanitize input
-    $page = isset($_GET['page']) ? sanitize_key(wp_unslash($_GET['page'])) : '';
-    if (is_admin() && strpos($page, 'bootflow-product-importer') !== false) {
-        if (!WC_XML_CSV_AI_IMPORT_DEBUG) {
-            ini_set('display_errors', 0);
-            ini_set('log_errors', 1);
-            
-            // Clean any existing output
-            if (ob_get_level() && !headers_sent()) {
-                ob_clean();
-            }
-        }
-    }
-}
-add_action('admin_init', 'wc_xml_csv_ai_import_suppress_debug_output', 1);
+// Debug output is controlled by WordPress WP_DEBUG constant.
 
 /**
  * Currently plugin version.
  */
-define('WC_XML_CSV_AI_IMPORT_VERSION', '0.9.1');
-define('WC_XML_CSV_AI_IMPORT_PLUGIN_DIR', plugin_dir_path(__FILE__));
-define('WC_XML_CSV_AI_IMPORT_PLUGIN_URL', plugin_dir_url(__FILE__));
-define('WC_XML_CSV_AI_IMPORT_PLUGIN_BASENAME', plugin_basename(__FILE__));
-define('WC_XML_CSV_AI_IMPORT_TEXT_DOMAIN', 'bootflow-product-importer'); // WP.org compliance: text domain must match plugin slug
+define('BFPI_VERSION', '0.9.1');
+define('BFPI_PLUGIN_DIR', plugin_dir_path(__FILE__));
+define('BFPI_PLUGIN_URL', plugin_dir_url(__FILE__));
+define('BFPI_PLUGIN_BASENAME', plugin_basename(__FILE__));
+define('BFPI_TEXT_DOMAIN', 'bootflow-product-xml-csv-importer'); // WP.org compliance: text domain must match plugin slug
 
-/**
- * Pro/Free edition flag
- * This constant is set by the build script:
- * - true = Pro version (with license validation)
- * - false = Free version (WordPress.org compliant)
- */
-if (!defined('WC_XML_CSV_AI_IMPORT_IS_PRO')) {
-    define('WC_XML_CSV_AI_IMPORT_IS_PRO', false); // BUILD_SCRIPT_WILL_CHANGE_THIS
-}
+// All features are available in this WordPress.org version.
 
 // Ensure clean output for production
-if (!defined('WC_XML_CSV_AI_IMPORT_DEBUG')) {
-    define('WC_XML_CSV_AI_IMPORT_DEBUG', false);
+if (!defined('BFPI_DEBUG')) {
+    define('BFPI_DEBUG', false);
 }
 
 // Load security class early
-require_once plugin_dir_path(__FILE__) . 'includes/class-wc-xml-csv-ai-import-security.php';
-WC_XML_CSV_AI_Import_Security::init(); // Initialize security measures
+require_once plugin_dir_path(__FILE__) . 'includes/class-bfpi-security.php';
+Bfpi_Security::init(); // Initialize security measures
 
-// Load features class (Pro/Free feature detection)
-require_once plugin_dir_path(__FILE__) . 'includes/class-wc-xml-csv-ai-import-features.php';
+// Load features class
+require_once plugin_dir_path(__FILE__) . 'includes/class-bfpi-features.php';
 
-// Load license/tier management (Pro only, but class exists in both for compatibility)
-require_once plugin_dir_path(__FILE__) . 'includes/class-wc-xml-csv-ai-import-license.php';
+// Load license management
+require_once plugin_dir_path(__FILE__) . 'includes/class-bfpi-license.php';
 
 // Load logger class (respects WP_DEBUG setting)
-require_once plugin_dir_path(__FILE__) . 'includes/class-wc-xml-csv-ai-import-logger.php';
+require_once plugin_dir_path(__FILE__) . 'includes/class-bfpi-logger.php';
 
 /**
  * The code that runs during plugin activation.
  */
-function activate_wc_xml_csv_ai_import() {
-    require_once plugin_dir_path(__FILE__) . 'includes/class-wc-xml-csv-ai-import-activator.php';
-    WC_XML_CSV_AI_Import_Activator::activate();
+function activate_bfpi_import() {
+    require_once plugin_dir_path(__FILE__) . 'includes/class-bfpi-activator.php';
+    Bfpi_Activator::activate();
 }
 
 /**
  * The code that runs during plugin deactivation.
  */
-function deactivate_wc_xml_csv_ai_import() {
-    require_once plugin_dir_path(__FILE__) . 'includes/class-wc-xml-csv-ai-import-deactivator.php';
-    WC_XML_CSV_AI_Import_Deactivator::deactivate();
+function deactivate_bfpi_import() {
+    require_once plugin_dir_path(__FILE__) . 'includes/class-bfpi-deactivator.php';
+    Bfpi_Deactivator::deactivate();
 }
 
-register_activation_hook(__FILE__, 'activate_wc_xml_csv_ai_import');
-register_deactivation_hook(__FILE__, 'deactivate_wc_xml_csv_ai_import');
+register_activation_hook(__FILE__, 'activate_bfpi_import');
+register_deactivation_hook(__FILE__, 'deactivate_bfpi_import');
 
 /**
  * The core plugin class that is used to define internationalization,
  * admin-specific hooks, and public-facing site hooks.
  */
-require plugin_dir_path(__FILE__) . 'includes/class-wc-xml-csv-ai-import.php';
+require plugin_dir_path(__FILE__) . 'includes/class-bfpi.php';
 
 /**
  * Begins execution of the plugin.
  */
-function run_wc_xml_csv_ai_import() {
-    $plugin = new WC_XML_CSV_AI_Import();
+function run_bfpi_import() {
+    $plugin = new Bfpi();
     $plugin->run();
 }
 
-run_wc_xml_csv_ai_import();
+run_bfpi_import();
 
 /**
  * Check and update database schema on every load (for existing installations)
  */
-add_action('plugins_loaded', 'wc_xml_csv_ai_import_check_db_version');
+add_action('plugins_loaded', 'bfpi_check_db_version');
 
-function wc_xml_csv_ai_import_check_db_version() {
-    $current_db_version = get_option('wc_xml_csv_ai_import_db_version', '1.0.0');
+function bfpi_check_db_version() {
+    $current_db_version = get_option('bfpi_db_version', '1.0.0');
     $required_db_version = '1.2.0';
     
     if (version_compare($current_db_version, $required_db_version, '<')) {
         // Run migration
-        require_once plugin_dir_path(__FILE__) . 'includes/class-wc-xml-csv-ai-import-activator.php';
-        WC_XML_CSV_AI_Import_Activator::activate();
+        require_once plugin_dir_path(__FILE__) . 'includes/class-bfpi-activator.php';
+        Bfpi_Activator::activate();
     }
 }
 
 /**
  * Add plugin action links
  */
-add_filter('plugin_action_links_' . WC_XML_CSV_AI_IMPORT_PLUGIN_BASENAME, 'wc_xml_csv_ai_import_action_links');
+add_filter('plugin_action_links_' . BFPI_PLUGIN_BASENAME, 'bfpi_action_links');
 
-function wc_xml_csv_ai_import_action_links($links) {
+function bfpi_action_links($links) {
     // WP.org compliance: proper escaping for URLs and text
-    $settings_link = '<a href="' . esc_url(admin_url('admin.php?page=wc-xml-csv-import')) . '">' . esc_html__('Import', 'bootflow-product-importer') . '</a>';
-    $settings_link .= ' | <a href="' . esc_url(admin_url('admin.php?page=wc-xml-csv-import-settings')) . '">' . esc_html__('Settings', 'bootflow-product-importer') . '</a>';
+    $settings_link = '<a href="' . esc_url(admin_url('admin.php?page=bfpi-import')) . '">' . esc_html__('Import', 'bootflow-product-xml-csv-importer') . '</a>';
+    $settings_link .= ' | <a href="' . esc_url(admin_url('admin.php?page=bfpi-import-settings')) . '">' . esc_html__('Settings', 'bootflow-product-xml-csv-importer') . '</a>';
     array_unshift($links, $settings_link);
     return $links;
 }
