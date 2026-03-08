@@ -56,6 +56,13 @@ class Bfpi_License {
     public static function render_upgrade_notice( $feature = '' ) {
         // No-op.
     }
+
+    /**
+     * License notice (no-op)
+     */
+    public static function maybe_show_license_notice() {
+        // No-op – all features free.
+    }
 }
 
 /**

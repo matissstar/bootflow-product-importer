@@ -209,8 +209,7 @@ class Bfpi {
         $this->loader->add_action('wp_ajax_bfpi_activate_license', $plugin_admin, 'handle_activate_license');
         $this->loader->add_action('wp_ajax_bfpi_deactivate_license', $plugin_admin, 'handle_deactivate_license');
         
-        // License notice
-        $this->loader->add_action('admin_notices', 'Bfpi_License', 'maybe_show_license_notice');
+        // License notice – removed (all features free, no license needed).
         
         // Import management
         $this->loader->add_action('wp_ajax_bfpi_update_url', $plugin_admin, 'handle_update_import_url');
