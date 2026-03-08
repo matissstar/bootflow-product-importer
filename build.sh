@@ -1,7 +1,14 @@
 #!/bin/bash
 #
-# Build script for BootFlow WooCommerce XML/CSV Importer
+# Build script for Bootflow – Product XML & CSV Importer
 # Creates FREE and PRO distribution ZIP files
+#
+# The working directory is the PRO codebase. FREE version is generated at 
+# build time by:
+#   1. Copying all files
+#   2. Overlaying free-overrides/ (features, config, processor)
+#   3. Running free-strip.php (stubs PRO methods, removes PRO UI)
+#   4. Excluding PRO-only files (AI providers, scheduler)
 #
 # Usage: ./build.sh
 #
@@ -9,7 +16,7 @@
 set -e
 
 # Configuration
-VERSION="0.9.2-build-$(date +%Y%m%d-%H%M)"
+VERSION="0.9.2"
 PLUGIN_SLUG="bootflow-product-importer"
 PRO_SLUG="${PLUGIN_SLUG}-pro"
 
@@ -18,6 +25,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SRC_DIR="$SCRIPT_DIR"
 DIST_DIR="$SCRIPT_DIR/dist"
 BUILD_DIR="$SCRIPT_DIR/build-temp"
+FREE_OVERRIDES="$SCRIPT_DIR/build-config/free-overrides"
+FREE_STRIP="$SCRIPT_DIR/build-config/free-strip.php"
 
 # Colors for output
 RED='\033[0;31m'
@@ -26,7 +35,7 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 echo -e "${GREEN}========================================${NC}"
-echo -e "${GREEN}Building Product XML/CSV Importer${NC}"
+echo -e "${GREEN}Building Bootflow Product Importer${NC}"
 echo -e "${GREEN}Version: ${VERSION}${NC}"
 echo -e "${GREEN}========================================${NC}"
 echo ""
@@ -38,348 +47,180 @@ rm -rf "$DIST_DIR"
 mkdir -p "$BUILD_DIR"
 mkdir -p "$DIST_DIR"
 
-# ========================================
-# BUILD FREE VERSION
-# ========================================
+# ════════════════════════════════════════════════════════════════════════════
+# BUILD FREE VERSION (WordPress.org)
+# ════════════════════════════════════════════════════════════════════════════
 echo ""
 echo -e "${GREEN}[1/4] Building FREE version...${NC}"
 
 FREE_BUILD_DIR="$BUILD_DIR/$PLUGIN_SLUG"
 mkdir -p "$FREE_BUILD_DIR"
 
-# Copy all files except those in exclude list
-rsync -av \
+# Step 1: Copy all source files (excluding dev/build files and PRO-only files)
+echo -e "${YELLOW}  Step 1: Copying source files...${NC}"
+rsync -a \
     --exclude-from="$SCRIPT_DIR/build-config/free-exclude.txt" \
     --exclude=".git" \
     --exclude=".git/" \
     --exclude="dist/" \
-    --exclude="dist" \
     --exclude="build-temp/" \
-    --exclude="build-temp" \
     --exclude="build-config/" \
-    --exclude="build-config" \
     --exclude="build.sh" \
-    --exclude="sample-data/" \
-    --exclude="sample-data" \
+    --exclude="build.sh.bak" \
     --exclude="PRO-features-list.html" \
     --exclude="PRO-features-list.odt" \
+    --exclude="*.code-workspace" \
+    --exclude="bootflow-product-page.html" \
     "$SRC_DIR/" "$FREE_BUILD_DIR/"
 
-# Modify main plugin file for FREE version
-echo -e "${YELLOW}  Modifying plugin for FREE edition...${NC}"
-
-# Change IS_PRO constant to false
-sed -i "s/define('WC_XML_CSV_AI_IMPORT_IS_PRO', true);/define('WC_XML_CSV_AI_IMPORT_IS_PRO', false);/g" \
-    "$FREE_BUILD_DIR/bootflow-product-importer.php"
-
-# Update plugin header for FREE - no change needed since source already has correct Bootflow branding
-# Just ensure the name stays as-is (Bootflow – WooCommerce XML & CSV Importer)
-
-# NOTE: No need to remove AI/Scheduler require statements anymore - 
-# code now uses file_exists() and class_exists() checks for compatibility
-
-# Remove eval() and create_function usage (WordPress.org requirement)
-echo -e "${YELLOW}  Removing eval() and PRO features for WordPress.org compliance...${NC}"
-
-# In admin.js, comment out or remove any eval usage
-if [ -f "$FREE_BUILD_DIR/assets/js/admin.js" ]; then
-    # Remove PHP processing mode references
-    sed -i 's/processing_mode.*php/processing_mode: "direct"/g' "$FREE_BUILD_DIR/assets/js/admin.js"
+# Step 2: Overlay free-overrides (replaces PRO files with FREE stubs)
+echo -e "${YELLOW}  Step 2: Applying FREE overrides...${NC}"
+if [ -d "$FREE_OVERRIDES" ]; then
+    for override_file in $(find "$FREE_OVERRIDES" -name '*.php' -o -name '*.txt' | sort); do
+        rel_path="${override_file#$FREE_OVERRIDES/}"
+        # Only copy files that were created from scratch (not copies for strip)
+        case "$rel_path" in
+            includes/class-bfpi-features.php|includes/class-bfpi-processor.php|includes/config/features.php|readme.txt)
+                cp "$override_file" "$FREE_BUILD_DIR/$rel_path"
+                echo "    Applied: $rel_path"
+                ;;
+        esac
+    done
+    echo -e "${GREEN}    Override files applied${NC}"
+else
+    echo -e "${RED}    WARNING: free-overrides directory not found!${NC}"
 fi
 
-# Remove eval() from PHP files - replace with safe stubs
-# In processor.php - replace safe_eval function to return original value
-if [ -f "$FREE_BUILD_DIR/includes/class-wc-xml-csv-ai-import-processor.php" ]; then
-    # Comment out the eval line and return original value
-    sed -i 's/\$result = eval.*return.*eval_code.*;/\$result = \$value_param; \/\/ eval disabled in FREE version/g' "$FREE_BUILD_DIR/includes/class-wc-xml-csv-ai-import-processor.php"
-    # NOTE: AI_Providers instantiation now uses class_exists() check in source code - no sed needed
+# Step 3: Run free-strip.php (stubs PRO methods, removes PRO UI from large files)
+echo -e "${YELLOW}  Step 3: Stripping PRO code...${NC}"
+if [ -f "$FREE_STRIP" ]; then
+    php "$FREE_STRIP" "$FREE_BUILD_DIR"
+else
+    echo -e "${RED}    WARNING: free-strip.php not found!${NC}"
 fi
 
-# In importer.php - replace eval with direct value return
-if [ -f "$FREE_BUILD_DIR/includes/class-wc-xml-csv-ai-import-importer.php" ]; then
-    sed -i 's/\$result = @eval(\$wrapped_formula);/\$result = \$base_price; \/\/ eval disabled in FREE version/g' "$FREE_BUILD_DIR/includes/class-wc-xml-csv-ai-import-importer.php"
+# Step 4: Update main plugin file for FREE edition
+echo -e "${YELLOW}  Step 4: Setting FREE edition flags...${NC}"
+MAIN_FILE="$FREE_BUILD_DIR/bootflow-product-importer.php"
+if [ -f "$MAIN_FILE" ]; then
+    sed -i "s/define('BFPI_VERSION', '[^']*');/define('BFPI_VERSION', '${VERSION}');/g" "$MAIN_FILE"
+    sed -i "s/Version: .*/Version: ${VERSION}/g" "$MAIN_FILE"
 fi
-
-# In admin.php - replace eval calls with safe returns
-if [ -f "$FREE_BUILD_DIR/includes/admin/class-wc-xml-csv-ai-import-admin.php" ]; then
-    sed -i 's/\$result = eval(\$wrapped_formula);/\$result = \$test_value; \/\/ eval disabled in FREE version/g' "$FREE_BUILD_DIR/includes/admin/class-wc-xml-csv-ai-import-admin.php"
-    # NOTE: AI_Providers now uses class_exists() check in source code - no sed needed
-fi
-
-# Remove AI Providers tab, Scheduler, Security, and Logging references from settings-page.php
-if [ -f "$FREE_BUILD_DIR/includes/admin/partials/settings-page.php" ]; then
-    # Remove AI Providers tab link
-    sed -i '/<a href="#ai-providers".*AI Providers/d' "$FREE_BUILD_DIR/includes/admin/partials/settings-page.php"
-    # NOTE: Scheduler::is_action_scheduler_available now uses class_exists() check in source code - no sed needed
-    # Remove Security tab from navigation (PHP Formula is PRO-only feature)
-    sed -i '/<a href="#security".*Security/d' "$FREE_BUILD_DIR/includes/admin/partials/settings-page.php"
-    # Remove Logging tab from navigation (Logging is PRO-only feature)
-    sed -i '/<a href="#logging".*Logging/d' "$FREE_BUILD_DIR/includes/admin/partials/settings-page.php"
-    # Remove Scheduling tab from navigation (Scheduling is PRO-only feature)
-    sed -i '/<a href="#scheduling".*Scheduling/d' "$FREE_BUILD_DIR/includes/admin/partials/settings-page.php"
-    # Remove entire Scheduling tab content (from Scheduling Tab to before Files Tab)
-    sed -i '/<!-- Scheduling Tab -->/,/<!-- Files Tab -->/{ /<!-- Files Tab -->/!d; }' "$FREE_BUILD_DIR/includes/admin/partials/settings-page.php"
-    # Remove entire Logging tab content (from Logging Tab to before Security Tab)
-    sed -i '/<!-- Logging Tab -->/,/<!-- Security Tab -->/{ /<!-- Security Tab -->/!d; }' "$FREE_BUILD_DIR/includes/admin/partials/settings-page.php"
-    # Remove entire Security tab content (from Security Tab to submit_button)
-    sed -i '/<!-- Security Tab -->/,/<?php submit_button/{ /<?php submit_button/!d; }' "$FREE_BUILD_DIR/includes/admin/partials/settings-page.php"
-fi
-
-# Remove AI/Hybrid/PHP_formula options from import-edit.php
-if [ -f "$FREE_BUILD_DIR/includes/admin/partials/import-edit.php" ]; then
-    # Remove hybrid and ai_processing options from dropdown
-    sed -i '/<option value="hybrid"/d' "$FREE_BUILD_DIR/includes/admin/partials/import-edit.php"
-    sed -i '/<option value="ai_processing"/d' "$FREE_BUILD_DIR/includes/admin/partials/import-edit.php"
-    sed -i '/<option value="php_formula"/d' "$FREE_BUILD_DIR/includes/admin/partials/import-edit.php"
-fi
-
-# Modify License file for FREE - create stub with basic methods
-if [ -f "$FREE_BUILD_DIR/includes/class-wc-xml-csv-ai-import-license.php" ]; then
-    # Replace License class with a FREE stub that returns 'free' tier
-    cat > "$FREE_BUILD_DIR/includes/class-wc-xml-csv-ai-import-license.php" << 'EOFLIC'
-<?php
-/**
- * License stub for FREE version
- * Returns 'free' tier and upgrade URL, no API calls
- */
-if (!defined('WPINC')) {
-    die;
-}
-
-class WC_XML_CSV_AI_Import_License {
-    public static function get_tier() {
-        return 'free';
-    }
-    
-    public static function is_valid() {
-        return false;
-    }
-    
-    public static function is_pro_plugin() {
-        return false;
-    }
-    
-    public static function get_license_key() {
-        return '';
-    }
-    
-    public static function get_license_data() {
-        return array();
-    }
-    
-    public static function get_license_status() {
-        return '';
-    }
-    
-    public static function can($feature) {
-        return false;
-    }
-    
-    public static function is_at_least($minimum_tier) {
-        return $minimum_tier === 'free';
-    }
-    
-    public static function get_limit($feature, $default = 0) {
-        return $default;
-    }
-    
-    public static function get_upgrade_url() {
-        return 'https://bootflow.io/woocommerce-xml-csv-importer/';
-    }
-    
-    public static function get_tier_name($tier = null) {
-        return 'Free';
-    }
-    
-    public static function clear_cache() {}
-    
-    public static function get_all_features() {
-        return array();
-    }
-    
-    public static function render_upgrade_notice($feature_name = '') {
-        return '<div class="notice notice-info"><p>' . esc_html__('Upgrade to PRO for this feature.', 'bootflow-product-importer') . ' <a href="https://bootflow.io/pricing" target="_blank">bootflow.io/pricing</a></p></div>';
-    }
-    
-    public static function activate_license($license_key) {
-        return array('success' => false, 'message' => __('License activation is only available in the Pro version.', 'bootflow-product-importer'));
-    }
-    
-    public static function deactivate_license() {
-        return array('success' => false, 'message' => __('License deactivation is only available in the Pro version.', 'bootflow-product-importer'));
-    }
-    
-    public static function maybe_show_license_notice() {}
-}
-
-function wc_xml_csv_ai_get_tier() {
-    return 'free';
-}
-EOFLIC
-fi
-
-# Rename main plugin file to match slug
-# No rename needed - file already named correctly
 
 # Create FREE ZIP
 echo -e "${YELLOW}  Creating ZIP archive...${NC}"
 cd "$BUILD_DIR"
 zip -rq "$DIST_DIR/$PLUGIN_SLUG.zip" "$PLUGIN_SLUG"
 
-echo -e "${GREEN}  ✓ FREE version created: $PLUGIN_SLUG.zip${NC}"
+FREE_SIZE=$(du -h "$DIST_DIR/$PLUGIN_SLUG.zip" | cut -f1)
+echo -e "${GREEN}  ✓ FREE version: $PLUGIN_SLUG.zip ($FREE_SIZE)${NC}"
 
-# ========================================
-# BUILD PRO VERSION
-# ========================================
+# ════════════════════════════════════════════════════════════════════════════
+# BUILD PRO VERSION (bootflow.io)
+# ════════════════════════════════════════════════════════════════════════════
 echo ""
 echo -e "${GREEN}[2/4] Building PRO version...${NC}"
 
 PRO_BUILD_DIR="$BUILD_DIR/$PRO_SLUG"
 mkdir -p "$PRO_BUILD_DIR"
 
-# Copy all files except those in exclude list
-rsync -av \
+rsync -a \
     --exclude-from="$SCRIPT_DIR/build-config/pro-exclude.txt" \
     --exclude=".git" \
     --exclude=".git/" \
     --exclude="dist/" \
-    --exclude="dist" \
     --exclude="build-temp/" \
-    --exclude="build-temp" \
     --exclude="build-config/" \
-    --exclude="build-config" \
     --exclude="build.sh" \
+    --exclude="build.sh.bak" \
     --exclude="PRO-features-list.html" \
     --exclude="PRO-features-list.odt" \
+    --exclude="*.code-workspace" \
+    --exclude="bootflow-product-page.html" \
     "$SRC_DIR/" "$PRO_BUILD_DIR/"
 
-# Modify main plugin file for PRO version
-echo -e "${YELLOW}  Modifying plugin for PRO edition...${NC}"
+PRO_MAIN="$PRO_BUILD_DIR/bootflow-product-importer.php"
+if [ -f "$PRO_MAIN" ]; then
+    sed -i "s/define('BFPI_VERSION', '[^']*');/define('BFPI_VERSION', '${VERSION}');/g" "$PRO_MAIN"
+    sed -i "s/Plugin Name: .*/Plugin Name: Bootflow – Product XML \& CSV Importer Pro/g" "$PRO_MAIN"
+    sed -i "s/Version: .*/Version: ${VERSION}/g" "$PRO_MAIN"
+    mv "$PRO_MAIN" "$PRO_BUILD_DIR/$PRO_SLUG.php"
+fi
 
-# Ensure IS_PRO is true (should already be, but just in case)
-sed -i "s/define('WC_XML_CSV_AI_IMPORT_IS_PRO', false);/define('WC_XML_CSV_AI_IMPORT_IS_PRO', true);/g" \
-    "$PRO_BUILD_DIR/bootflow-product-importer.php"
-
-# Update plugin header for PRO
-sed -i "s/Plugin Name: Bootflow – Product XML & CSV Importer/Plugin Name: Bootflow – WooCommerce XML \& CSV Importer (Pro)/g" \
-    "$PRO_BUILD_DIR/bootflow-product-importer.php"
-
-# Update description for PRO
-sed -i "s/Description: Import and update WooCommerce products from XML and CSV feeds with manual field mapping, product variations support, and a reliable import workflow./Description: Advanced automation, scheduled imports, selective updates, and AI-assisted workflows for WooCommerce XML and CSV product feeds./g" \
-    "$PRO_BUILD_DIR/bootflow-product-importer.php"
-
-# Update version number in PRO
-sed -i "s/Version: [0-9.]*$/Version: ${VERSION}/g" \
-    "$PRO_BUILD_DIR/bootflow-product-importer.php"
-
-# Rename main plugin file to match slug
-# Rename for PRO version
-mv "$PRO_BUILD_DIR/bootflow-product-importer.php" "$PRO_BUILD_DIR/$PRO_SLUG.php"
-
-# Create PRO ZIP
-echo -e "${YELLOW}  Creating ZIP archive...${NC}"
 cd "$BUILD_DIR"
 zip -rq "$DIST_DIR/$PRO_SLUG.zip" "$PRO_SLUG"
 
-echo -e "${GREEN}  ✓ PRO version created: $PRO_SLUG.zip${NC}"
+PRO_SIZE=$(du -h "$DIST_DIR/$PRO_SLUG.zip" | cut -f1)
+echo -e "${GREEN}  ✓ PRO version: $PRO_SLUG.zip ($PRO_SIZE)${NC}"
 
-# ========================================
+# ════════════════════════════════════════════════════════════════════════════
 # VERIFICATION
-# ========================================
+# ════════════════════════════════════════════════════════════════════════════
 echo ""
 echo -e "${GREEN}[3/4] Verifying builds...${NC}"
 
-# Check FREE build
-FREE_SIZE=$(du -h "$DIST_DIR/$PLUGIN_SLUG.zip" | cut -f1)
-echo -e "  FREE: $FREE_SIZE"
+ERRORS=0
 
-# Check PRO build  
-PRO_SIZE=$(du -h "$DIST_DIR/$PRO_SLUG.zip" | cut -f1)
-echo -e "  PRO:  $PRO_SIZE"
+echo -e "${YELLOW}  Checking FREE version...${NC}"
+cd "$BUILD_DIR/$PLUGIN_SLUG"
 
-# Verify FREE doesn't have Pro files
-echo -e "${YELLOW}  Checking FREE version doesn't contain Pro files...${NC}"
+# eval() check
+EVAL_COUNT=$(grep -rn '\beval\s*(' --include='*.php' . 2>/dev/null | grep -v 'preg_\|wp_kses\|sanitize' | wc -l)
+if [ "$EVAL_COUNT" -gt 0 ]; then
+    echo -e "${RED}  ✗ eval() found in FREE version!${NC}"
+    grep -rn '\beval\s*(' --include='*.php' . | grep -v 'preg_\|wp_kses\|sanitize'
+    ERRORS=$((ERRORS + 1))
+else
+    echo -e "${GREEN}  ✓ No eval()${NC}"
+fi
+
+# AI providers check
+[ -f "includes/class-bfpi-ai-providers.php" ] && { echo -e "${RED}  ✗ AI providers file present!${NC}"; ERRORS=$((ERRORS + 1)); } || echo -e "${GREEN}  ✓ No AI providers file${NC}"
+
+# Scheduler check
+[ -f "includes/class-bfpi-scheduler.php" ] && { echo -e "${RED}  ✗ Scheduler file present!${NC}"; ERRORS=$((ERRORS + 1)); } || echo -e "${GREEN}  ✓ No scheduler file${NC}"
+
+# .git check
 cd "$BUILD_DIR"
-if unzip -l "$DIST_DIR/$PLUGIN_SLUG.zip" | grep -q "ai-providers"; then
-    echo -e "${RED}  ✗ ERROR: FREE version contains ai-providers.php!${NC}"
-    exit 1
+unzip -l "$DIST_DIR/$PLUGIN_SLUG.zip" 2>/dev/null | grep -q "\.git/" && { echo -e "${RED}  ✗ .git in ZIP!${NC}"; ERRORS=$((ERRORS + 1)); } || echo -e "${GREEN}  ✓ No .git${NC}"
+
+# build-config check
+unzip -l "$DIST_DIR/$PLUGIN_SLUG.zip" 2>/dev/null | grep -q "build-config" && { echo -e "${RED}  ✗ build-config in ZIP!${NC}"; ERRORS=$((ERRORS + 1)); } || echo -e "${GREEN}  ✓ No build-config${NC}"
+
+# PHP syntax check
+echo -e "${YELLOW}  PHP syntax check...${NC}"
+cd "$BUILD_DIR/$PLUGIN_SLUG"
+SYNTAX_ERRORS=$(find . -name '*.php' -exec php -l {} \; 2>&1 | grep -c 'Parse error' || true)
+if [ "$SYNTAX_ERRORS" -gt 0 ]; then
+    echo -e "${RED}  ✗ $SYNTAX_ERRORS syntax errors!${NC}"
+    find . -name '*.php' -exec php -l {} \; 2>&1 | grep 'Parse error'
+    ERRORS=$((ERRORS + 1))
 else
-    echo -e "${GREEN}  ✓ No AI providers in FREE version${NC}"
+    echo -e "${GREEN}  ✓ All PHP syntax OK${NC}"
 fi
 
-if unzip -l "$DIST_DIR/$PLUGIN_SLUG.zip" | grep -q "scheduler"; then
-    echo -e "${RED}  ✗ ERROR: FREE version contains scheduler.php!${NC}"
-    exit 1
-else
-    echo -e "${GREEN}  ✓ No scheduler in FREE version${NC}"
-fi
+echo -e "${YELLOW}  Checking PRO version...${NC}"
+cd "$BUILD_DIR"
+unzip -l "$DIST_DIR/$PRO_SLUG.zip" 2>/dev/null | grep -q "\.git/" && { echo -e "${RED}  ✗ .git in PRO ZIP!${NC}"; ERRORS=$((ERRORS + 1)); } || echo -e "${GREEN}  ✓ No .git in PRO${NC}"
+unzip -l "$DIST_DIR/$PRO_SLUG.zip" 2>/dev/null | grep -q "build-config" && { echo -e "${RED}  ✗ build-config in PRO ZIP!${NC}"; ERRORS=$((ERRORS + 1)); } || echo -e "${GREEN}  ✓ No build-config in PRO${NC}"
 
-# Check for .git directory (should not be in any distribution)
-if unzip -l "$DIST_DIR/$PLUGIN_SLUG.zip" | grep -q "\.git"; then
-    echo -e "${RED}  ✗ ERROR: FREE version contains .git directory!${NC}"
-    exit 1
-else
-    echo -e "${GREEN}  ✓ No .git directory in FREE version${NC}"
-fi
-
-if unzip -l "$DIST_DIR/$PRO_SLUG.zip" | grep -q "\.git"; then
-    echo -e "${RED}  ✗ ERROR: PRO version contains .git directory!${NC}"
-    exit 1
-else
-    echo -e "${GREEN}  ✓ No .git directory in PRO version${NC}"
-fi
-
-# Check for sample-data (should not be in FREE version)
-if unzip -l "$DIST_DIR/$PLUGIN_SLUG.zip" | grep -q "sample-data"; then
-    echo -e "${RED}  ✗ ERROR: FREE version contains sample-data directory!${NC}"
-    exit 1
-else
-    echo -e "${GREEN}  ✓ No sample-data in FREE version${NC}"
-fi
-
-# Check for build-config (should not be in any distribution)
-if unzip -l "$DIST_DIR/$PLUGIN_SLUG.zip" | grep -q "build-config"; then
-    echo -e "${RED}  ✗ ERROR: FREE version contains build-config directory!${NC}"
-    exit 1
-else
-    echo -e "${GREEN}  ✓ No build-config in FREE version${NC}"
-fi
-
-if unzip -l "$DIST_DIR/$PRO_SLUG.zip" | grep -q "build-config"; then
-    echo -e "${RED}  ✗ ERROR: PRO version contains build-config directory!${NC}"
-    exit 1
-else
-    echo -e "${GREEN}  ✓ No build-config in PRO version${NC}"
-fi
-
-# ========================================
-# CLEANUP
-# ========================================
+# ════════════════════════════════════════════════════════════════════════════
+# CLEANUP & DONE
+# ════════════════════════════════════════════════════════════════════════════
 echo ""
 echo -e "${GREEN}[4/4] Cleaning up...${NC}"
 rm -rf "$BUILD_DIR"
 
-# ========================================
-# DONE
-# ========================================
 echo ""
+if [ "$ERRORS" -gt 0 ]; then
+    echo -e "${RED}Build completed with $ERRORS error(s)!${NC}"
+    exit 1
+fi
+
 echo -e "${GREEN}========================================${NC}"
 echo -e "${GREEN}Build Complete!${NC}"
 echo -e "${GREEN}========================================${NC}"
 echo ""
-echo -e "Output files in ${YELLOW}dist/${NC}:"
-echo -e "  📦 ${PLUGIN_SLUG}.zip (FREE - WordPress.org)"
-echo -e "  📦 ${PRO_SLUG}.zip (PRO - bootflow.io)"
-echo ""
-echo -e "FREE version: ${GREEN}WordPress.org compliant${NC}"
-echo -e "  - No AI processing"
-echo -e "  - No scheduled imports"
-echo -e "  - No eval() or external API calls"
-echo ""
-echo -e "PRO version: ${GREEN}Full features${NC}"
-echo -e "  - AI auto-mapping"
-echo -e "  - Scheduled imports"
-echo -e "  - Variable products"
-echo -e "  - Import filters"
-echo -e "  - All processing modes"
+echo -e "  📦 dist/${PLUGIN_SLUG}.zip ($FREE_SIZE) — FREE (WordPress.org)"
+echo -e "  📦 dist/${PRO_SLUG}.zip ($PRO_SIZE) — PRO (bootflow.io)"
 echo ""

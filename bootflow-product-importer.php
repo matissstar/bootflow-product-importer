@@ -39,7 +39,7 @@ function bfpi_woocommerce_missing_notice() {
 /**
  * Currently plugin version.
  */
-define('BFPI_VERSION', '0.9.1');
+define('BFPI_VERSION', '0.9.2');
 define('BFPI_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('BFPI_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('BFPI_PLUGIN_BASENAME', plugin_basename(__FILE__));

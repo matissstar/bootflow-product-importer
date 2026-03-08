@@ -13,3 +13,4 @@ Thumbs.db
 # Misc
 *.png
 node_modules/
+build.sh.bak
