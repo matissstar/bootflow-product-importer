@@ -39,7 +39,6 @@ class Bfpi_Features {
         'file_upload'           => 'free',
         'basic_fields'          => 'free',
         'categories_tags'       => 'free',
-        'advanced_formulas'     => 'free',
     );
 
     /**

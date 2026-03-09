@@ -475,5 +475,5 @@ jQuery(document).ready(function($) {
 });
 <?php
 $bfpi_step1_js = ob_get_clean();
-wp_add_inline_script('bootflow-product-importer-admin', $bfpi_step1_js, 'after');
+wp_add_inline_script('bfpi-import-admin', $bfpi_step1_js, 'after');
 ?>

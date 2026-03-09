@@ -2180,7 +2180,7 @@ $ai_providers = array(
                                                             
                                                             <?php
                                                             wp_add_inline_script(
-                                                                'bootflow-product-importer-admin',
+                                                                'bfpi-import-admin',
                                                                 'var bpiWcCategories = ' . wp_json_encode($wc_categories_tree) . ';',
                                                                 'before'
                                                             );
@@ -2294,7 +2294,7 @@ $ai_providers = array(
                                                             
                                                             <?php
                                                             wp_add_inline_script(
-                                                                'bootflow-product-importer-admin',
+                                                                'bfpi-import-admin',
                                                                 'var bpiWcTags = ' . wp_json_encode(
                                                                     !is_wp_error($wc_tags) && !empty($wc_tags) 
                                                                         ? array_map(function($t) { return array('id' => $t->term_id, 'name' => $t->name, 'slug' => $t->slug); }, $wc_tags) 
@@ -2397,7 +2397,7 @@ $ai_providers = array(
                                                             
                                                             <?php
                                                             wp_add_inline_script(
-                                                                'bootflow-product-importer-admin',
+                                                                'bfpi-import-admin',
                                                                 'var bpiWcBrands = ' . wp_json_encode(
                                                                     !empty($wc_brands) 
                                                                         ? array_map(function($b) { return array('id' => $b->term_id, 'name' => $b->name, 'slug' => $b->slug); }, $wc_brands)
@@ -3786,5 +3786,5 @@ jQuery(document).ready(function($) {
 });
 <?php
 $bfpi_step2_js = ob_get_clean();
-wp_add_inline_script('bootflow-product-importer-admin', $bfpi_step2_js, 'after');
+wp_add_inline_script('bfpi-import-admin', $bfpi_step2_js, 'after');
 ?>

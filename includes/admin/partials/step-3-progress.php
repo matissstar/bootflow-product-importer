@@ -167,7 +167,7 @@ $percentage = $import->total_products > 0 ? round(($import->processed_products /
 }
 <?php
 $bfpi_progress_css = ob_get_clean();
-wp_add_inline_style('bootflow-product-importer-admin', $bfpi_progress_css);
+wp_add_inline_style('bfpi-import-admin', $bfpi_progress_css);
 ?>
 
 <div class="wc-ai-import-step wc-ai-import-step-3" data-import-id="<?php echo esc_attr($import_id); ?>" data-batch-size="<?php echo esc_attr($import->batch_size ?? 50); ?>">
@@ -941,5 +941,5 @@ jQuery(document).ready(function($) {
 });
 <?php
 $bfpi_progress_js = ob_get_clean();
-wp_add_inline_script('bootflow-product-importer-admin', $bfpi_progress_js, 'after');
+wp_add_inline_script('bfpi-import-admin', $bfpi_progress_js, 'after');
 ?>

@@ -250,7 +250,7 @@ if (!empty($import['file_path']) && file_exists($import['file_path'])) {
             'nonce'           => wp_create_nonce('bfpi_nonce'),
         );
         wp_add_inline_script(
-            'bootflow-product-importer-admin',
+            'bfpi-import-admin',
             'var wcAiImportData = ' . wp_json_encode($bfpi_edit_data) . ';',
             'before'
         );
@@ -1048,7 +1048,7 @@ if (!empty($import['file_path']) && file_exists($import['file_path'])) {
 }
 <?php
 $bfpi_edit_css = ob_get_clean();
-wp_add_inline_style('bootflow-product-importer-admin', $bfpi_edit_css);
+wp_add_inline_style('bfpi-import-admin', $bfpi_edit_css);
 ?>
 
 <?php ob_start(); ?>
@@ -1446,6 +1446,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 <?php
 $bfpi_edit_js = ob_get_clean();
-wp_add_inline_script('bootflow-product-importer-admin', $bfpi_edit_js, 'after');
+wp_add_inline_script('bfpi-import-admin', $bfpi_edit_js, 'after');
 ?>
 ```

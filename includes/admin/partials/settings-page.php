@@ -900,7 +900,7 @@ jQuery(document).ready(function($) {
 });
 <?php
 $bfpi_settings_js = ob_get_clean();
-wp_add_inline_script('bootflow-product-importer-admin', $bfpi_settings_js, 'after');
+wp_add_inline_script('bfpi-import-admin', $bfpi_settings_js, 'after');
 ?>
 
 <?php ob_start(); ?>
@@ -923,5 +923,5 @@ wp_add_inline_script('bootflow-product-importer-admin', $bfpi_settings_js, 'afte
 }
 <?php
 $bfpi_settings_css = ob_get_clean();
-wp_add_inline_style('bootflow-product-importer-admin', $bfpi_settings_css);
+wp_add_inline_style('bfpi-import-admin', $bfpi_settings_css);
 ?>

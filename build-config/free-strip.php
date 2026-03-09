@@ -108,47 +108,141 @@ if (file_exists($importer_file)) {
 $step1_file = "$build_dir/includes/admin/partials/step-1-upload.php";
 if (file_exists($step1_file)) {
     $code = file_get_contents($step1_file);
+    $removed = 0;
 
-    // Remove URL upload radio + input section
-    // Match from "url" radio label through the URL input field
-    $code = preg_replace(
-        '/<label[^>]*>[\s\S]*?<input[^>]*value=["\']url["\'][^>]*>[\s\S]*?<\/label>/',
-        '',
-        $code,
-        1
-    );
-    // Remove the URL input container div
-    $code = preg_replace(
-        '/<div[^>]*id=["\']url-upload-section["\'][^>]*>[\s\S]*?<\/div>\s*(?:<\/div>)?/i',
-        '',
-        $code,
-        1
-    );
+    // ── 3a. Remove URL radio button label (exact match) ──
+    $url_label = <<<'BLOCK'
+                    <label class="upload-method-option">
+                        <input type="radio" name="upload_method" value="url" />
+                        <span class="method-icon">🔗</span>
+                        <span class="method-title">
+                            <?php esc_html_e('From URL', 'bootflow-product-xml-csv-importer'); ?>
+                        </span>
+                        <span class="method-desc"><?php esc_html_e('Import from external URL or FTP server', 'bootflow-product-xml-csv-importer'); ?></span>
+                    </label>
+BLOCK;
+    if (strpos($code, $url_label) !== false) {
+        $code = str_replace($url_label, '', $code);
+        $removed++;
+        echo "    Removed: URL upload radio button\n";
+    }
 
-    // Remove schedule_type dropdown if present
-    $code = preg_replace(
-        '/<!--\s*schedule[_\s]?type\s*-->[\s\S]*?<!--\s*\/schedule[_\s]?type\s*-->/i',
-        '',
-        $code
-    );
-    // Alternative: remove <tr> or <div> containing schedule_type select
-    $code = preg_replace(
-        '/<(?:tr|div)[^>]*>[\s\S]*?name=["\']schedule_type["\'][\s\S]*?<\/(?:tr|div)>/i',
-        '',
-        $code,
-        1
-    );
+    // ── 3b. Remove entire URL input section div ──
+    $url_section_start = '            <!-- URL Input -->';
+    $url_section_end   = '            </div>' . "\n\n" . '            <!-- File Type Selection -->';
+    $pos_start = strpos($code, $url_section_start);
+    $pos_end   = strpos($code, $url_section_end);
+    if ($pos_start !== false && $pos_end !== false) {
+        $code = substr($code, 0, $pos_start) . '            <!-- File Type Selection -->' . substr($code, $pos_end + strlen($url_section_end));
+        $removed++;
+        echo "    Removed: URL input section\n";
+    }
 
-    // Remove update_existing checkbox
-    $code = preg_replace(
-        '/<(?:tr|div|label)[^>]*>[\s\S]*?name=["\']update_existing["\'][\s\S]*?<\/(?:tr|div|label)>/i',
-        '',
-        $code,
-        1
-    );
+    // ── 3c. Remove Schedule Configuration section ──
+    $sched_block = "            <!-- Schedule Configuration -->\n" .
+        "            <div class=\"form-group\">\n" .
+        "                <label for=\"schedule_type\"><strong><" . "?php esc_html_e('Schedule Type', 'bootflow-product-xml-csv-importer'); ?" . "></strong></label>\n" .
+        "                <select id=\"schedule_type\" name=\"schedule_type\" class=\"regular-text\">\n" .
+        "                    <option value=\"disabled\"><" . "?php esc_html_e('Manual Import Only', 'bootflow-product-xml-csv-importer'); ?" . "></option>\n" .
+        "                    <option value=\"15min\"><" . "?php esc_html_e('Every 15 Minutes', 'bootflow-product-xml-csv-importer'); ?" . "></option>\n" .
+        "                    <option value=\"hourly\"><" . "?php esc_html_e('Every Hour', 'bootflow-product-xml-csv-importer'); ?" . "></option>\n" .
+        "                    <option value=\"6hours\"><" . "?php esc_html_e('Every 6 Hours', 'bootflow-product-xml-csv-importer'); ?" . "></option>\n" .
+        "                    <option value=\"daily\"><" . "?php esc_html_e('Daily Import', 'bootflow-product-xml-csv-importer'); ?" . "></option>\n" .
+        "                    <option value=\"weekly\"><" . "?php esc_html_e('Weekly Import', 'bootflow-product-xml-csv-importer'); ?" . "></option>\n" .
+        "                    <option value=\"monthly\"><" . "?php esc_html_e('Monthly Import', 'bootflow-product-xml-csv-importer'); ?" . "></option>\n" .
+        "                </select>\n" .
+        "                <p class=\"description\"><" . "?php esc_html_e('Choose how often this import should run automatically. Manual imports can be run at any time.', 'bootflow-product-xml-csv-importer'); ?" . "></p>\n" .
+        "            </div>\n";
+    if (strpos($code, $sched_block) !== false) {
+        $code = str_replace($sched_block, '', $code);
+        $removed++;
+        echo "    Removed: Schedule Configuration section\n";
+    } else {
+        echo "    WARNING: Schedule Configuration section not found\n";
+    }
+
+    // ── 3c2. Also remove the Upload Method Selection div (only file radio remains) ──
+    $method_block = "            <!-- Upload Method Selection -->\n" .
+        "            <div class=\"form-group\">\n" .
+        "                <label><strong><" . "?php esc_html_e('Upload Method', 'bootflow-product-xml-csv-importer'); ?" . "></strong></label>\n" .
+        "                <div class=\"upload-method-selection\">\n" .
+        "                    <label class=\"upload-method-option\">\n" .
+        "                        <input type=\"radio\" name=\"upload_method\" value=\"file\" checked />\n" .
+        "                        <span class=\"method-icon\">\xF0\x9F\x93\x81</span>\n" .
+        "                        <span class=\"method-title\"><" . "?php esc_html_e('Upload File', 'bootflow-product-xml-csv-importer'); ?" . "></span>\n" .
+        "                        <span class=\"method-desc\"><" . "?php esc_html_e('Upload XML/CSV file from your computer', 'bootflow-product-xml-csv-importer'); ?" . "></span>\n" .
+        "                    </label>\n" .
+        "                    \n" .
+        "                </div>\n" .
+        "            </div>\n";
+    if (strpos($code, $method_block) !== false) {
+        $code = str_replace($method_block, '', $code);
+        $removed++;
+        echo "    Removed: Upload Method Selection (radio)\n";
+    }
+
+    // ── 3d. Remove update_existing checkbox div ──
+    $update_block = <<<'BLOCK'
+                        <div class="advanced-item">
+                            <label>
+                                <input type="checkbox" name="update_existing" value="1" />
+                                <?php esc_html_e('Update Existing Products', 'bootflow-product-xml-csv-importer'); ?>
+                            </label>
+                            <p class="description"><?php esc_html_e('Update products that already exist (matched by SKU).', 'bootflow-product-xml-csv-importer'); ?></p>
+                        </div>
+BLOCK;
+    if (strpos($code, $update_block) !== false) {
+        $code = str_replace($update_block, '', $code);
+        $removed++;
+        echo "    Removed: update_existing checkbox\n";
+    }
+
+    // ── 3e. Remove JS upload method toggle (URL-related) ──
+    $js_toggle = <<<'BLOCK'
+    // Upload method selection
+    $('input[name="upload_method"]').on('change', function() {
+        const method = $(this).val();
+        if (method === 'file') {
+            $('#file-upload-section').show();
+            $('#url-upload-section').hide();
+        } else {
+            $('#file-upload-section').hide();
+            $('#url-upload-section').show();
+        }
+    });
+BLOCK;
+    if (strpos($code, $js_toggle) !== false) {
+        $code = str_replace($js_toggle, '', $code);
+        $removed++;
+        echo "    Removed: JS upload method toggle\n";
+    }
+
+    // ── 3f. Remove JS Test URL handler ──
+    $js_test_url_start = "    // Test URL\n    \$('#test-url').on('click', function() {";
+    $js_test_url_end   = "    });\n    \n    // Toggle advanced options";
+    $pos_start = strpos($code, $js_test_url_start);
+    $pos_end   = strpos($code, $js_test_url_end);
+    if ($pos_start !== false && $pos_end !== false) {
+        $code = substr($code, 0, $pos_start) . "    // Toggle advanced options" . substr($code, $pos_end + strlen($js_test_url_end));
+        $removed++;
+        echo "    Removed: JS Test URL handler\n";
+    }
+
+    // ── 3g. Remove JS URL validation check ──
+    $js_url_check = <<<'BLOCK'
+        if (uploadMethod === 'url' && !$('#file_url').val().trim()) {
+            showMessage('Please enter a file URL.', 'error');
+            return;
+        }
+BLOCK;
+    if (strpos($code, $js_url_check) !== false) {
+        $code = str_replace($js_url_check, '', $code);
+        $removed++;
+        echo "    Removed: JS URL validation\n";
+    }
 
     file_put_contents($step1_file, $code);
-    echo "  ✓ step-1-upload.php — PRO UI removed\n";
+    echo "  ✓ step-1-upload.php — $removed PRO elements removed\n";
 } else {
     echo "  ✗ step-1-upload.php not found\n";
 }
