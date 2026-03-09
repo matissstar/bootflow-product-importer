@@ -2803,7 +2803,7 @@ class Bfpi_Importer {
         }
 
         // Shipping class - direct mapping or formula
-        if (isset($product_data['shipping_class']) && !empty($product_data['shipping_class'])) {
+        if (isset($product_data['shipping_class']) && !empty($product_data['shipping_class']) && $this->should_update_field('shipping_class', $product_data['shipping_class'], false)) {
             $shipping_class_slug = sanitize_title($product_data['shipping_class']);
             $shipping_class_term = get_term_by('slug', $shipping_class_slug, 'product_shipping_class');
             
@@ -2823,12 +2823,13 @@ class Bfpi_Importer {
             if ($shipping_class_term && !is_wp_error($shipping_class_term)) {
                 $product->set_shipping_class_id($shipping_class_term->term_id);
             }
-        } elseif ($this->should_update_field('shipping_class', null, false)) {
-            // Try Shipping Class Engine first (rules-based)
+        } else {
+            // Shipping Class Engine always runs when enabled (not gated by update_on_sync)
+            // The engine uses weight/price rules that should always be re-evaluated on re-import
             $engine_assigned = $this->apply_shipping_class_engine($product, $product_data);
             
-            if (!$engine_assigned) {
-                // Fallback: old formula-based auto-assignment
+            if (!$engine_assigned && $this->should_update_field('shipping_class', null, false)) {
+                // Fallback: old formula-based auto-assignment (respects update_on_sync)
                 $this->auto_assign_shipping_class($product, $product_data);
             }
         }
