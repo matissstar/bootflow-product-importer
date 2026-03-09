@@ -653,7 +653,8 @@ jQuery(document).ready(function($) {
             type: 'POST',
             data: {
                 action: 'bfpi_ping_cron',
-                import_id: importId
+                import_id: importId,
+                nonce: bfpi_ajax.nonce
             },
             timeout: 5000, // 5 second timeout
             success: function(response) {
