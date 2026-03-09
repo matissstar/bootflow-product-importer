@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # Build script for Bootflow – Product XML & CSV Importer
-# Creates FREE and PRO distribution ZIP files
+# Creates FREE and PRO distribution builds
 #
 # The working directory is the PRO codebase. FREE version is generated at 
 # build time by:
@@ -9,6 +9,15 @@
 #   2. Overlaying free-overrides/ (features, config, processor)
 #   3. Running free-strip.php (stubs PRO methods, removes PRO UI)
 #   4. Excluding PRO-only files (AI providers, scheduler)
+#
+# Output structure (persistent, inspectable):
+#   dist/
+#     free/
+#       bootflow-product-importer/       ← actual FREE plugin files
+#       bootflow-product-importer.zip    ← ZIP for WordPress.org
+#     pro/
+#       bootflow-product-importer-pro/   ← actual PRO plugin files
+#       bootflow-product-importer-pro.zip ← ZIP for bootflow.io
 #
 # Usage: ./build.sh
 #
@@ -24,7 +33,8 @@ PRO_SLUG="${PLUGIN_SLUG}-pro"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SRC_DIR="$SCRIPT_DIR"
 DIST_DIR="$SCRIPT_DIR/dist"
-BUILD_DIR="$SCRIPT_DIR/build-temp"
+FREE_DIR="$DIST_DIR/free"
+PRO_DIR="$DIST_DIR/pro"
 FREE_OVERRIDES="$SCRIPT_DIR/build-config/free-overrides"
 FREE_STRIP="$SCRIPT_DIR/build-config/free-strip.php"
 
@@ -42,10 +52,8 @@ echo ""
 
 # Clean up previous builds
 echo -e "${YELLOW}Cleaning previous builds...${NC}"
-rm -rf "$BUILD_DIR"
 rm -rf "$DIST_DIR"
-mkdir -p "$BUILD_DIR"
-mkdir -p "$DIST_DIR"
+mkdir -p "$FREE_DIR" "$PRO_DIR"
 
 # ════════════════════════════════════════════════════════════════════════════
 # BUILD FREE VERSION (WordPress.org)
@@ -53,7 +61,7 @@ mkdir -p "$DIST_DIR"
 echo ""
 echo -e "${GREEN}[1/4] Building FREE version...${NC}"
 
-FREE_BUILD_DIR="$BUILD_DIR/$PLUGIN_SLUG"
+FREE_BUILD_DIR="$FREE_DIR/$PLUGIN_SLUG"
 mkdir -p "$FREE_BUILD_DIR"
 
 # Step 1: Copy all source files (excluding dev/build files and PRO-only files)
@@ -109,11 +117,12 @@ fi
 
 # Create FREE ZIP
 echo -e "${YELLOW}  Creating ZIP archive...${NC}"
-cd "$BUILD_DIR"
-zip -rq "$DIST_DIR/$PLUGIN_SLUG.zip" "$PLUGIN_SLUG"
+cd "$FREE_DIR"
+zip -rq "$FREE_DIR/$PLUGIN_SLUG.zip" "$PLUGIN_SLUG"
 
-FREE_SIZE=$(du -h "$DIST_DIR/$PLUGIN_SLUG.zip" | cut -f1)
+FREE_SIZE=$(du -h "$FREE_DIR/$PLUGIN_SLUG.zip" | cut -f1)
 echo -e "${GREEN}  ✓ FREE version: $PLUGIN_SLUG.zip ($FREE_SIZE)${NC}"
+echo -e "${GREEN}    Directory: dist/free/$PLUGIN_SLUG/${NC}"
 
 # ════════════════════════════════════════════════════════════════════════════
 # BUILD PRO VERSION (bootflow.io)
@@ -121,7 +130,7 @@ echo -e "${GREEN}  ✓ FREE version: $PLUGIN_SLUG.zip ($FREE_SIZE)${NC}"
 echo ""
 echo -e "${GREEN}[2/4] Building PRO version...${NC}"
 
-PRO_BUILD_DIR="$BUILD_DIR/$PRO_SLUG"
+PRO_BUILD_DIR="$PRO_DIR/$PRO_SLUG"
 mkdir -p "$PRO_BUILD_DIR"
 
 rsync -a \
@@ -147,11 +156,12 @@ if [ -f "$PRO_MAIN" ]; then
     mv "$PRO_MAIN" "$PRO_BUILD_DIR/$PRO_SLUG.php"
 fi
 
-cd "$BUILD_DIR"
-zip -rq "$DIST_DIR/$PRO_SLUG.zip" "$PRO_SLUG"
+cd "$PRO_DIR"
+zip -rq "$PRO_DIR/$PRO_SLUG.zip" "$PRO_SLUG"
 
-PRO_SIZE=$(du -h "$DIST_DIR/$PRO_SLUG.zip" | cut -f1)
+PRO_SIZE=$(du -h "$PRO_DIR/$PRO_SLUG.zip" | cut -f1)
 echo -e "${GREEN}  ✓ PRO version: $PRO_SLUG.zip ($PRO_SIZE)${NC}"
+echo -e "${GREEN}    Directory: dist/pro/$PRO_SLUG/${NC}"
 
 # ════════════════════════════════════════════════════════════════════════════
 # VERIFICATION
@@ -162,7 +172,7 @@ echo -e "${GREEN}[3/4] Verifying builds...${NC}"
 ERRORS=0
 
 echo -e "${YELLOW}  Checking FREE version...${NC}"
-cd "$BUILD_DIR/$PLUGIN_SLUG"
+cd "$FREE_DIR/$PLUGIN_SLUG"
 
 # eval() check
 EVAL_COUNT=$(grep -rn '\beval\s*(' --include='*.php' . 2>/dev/null | grep -v 'preg_\|wp_kses\|sanitize' | wc -l)
@@ -181,15 +191,14 @@ fi
 [ -f "includes/class-bfpi-scheduler.php" ] && { echo -e "${RED}  ✗ Scheduler file present!${NC}"; ERRORS=$((ERRORS + 1)); } || echo -e "${GREEN}  ✓ No scheduler file${NC}"
 
 # .git check
-cd "$BUILD_DIR"
-unzip -l "$DIST_DIR/$PLUGIN_SLUG.zip" 2>/dev/null | grep -q "\.git/" && { echo -e "${RED}  ✗ .git in ZIP!${NC}"; ERRORS=$((ERRORS + 1)); } || echo -e "${GREEN}  ✓ No .git${NC}"
+[ -d "$FREE_DIR/$PLUGIN_SLUG/.git" ] && { echo -e "${RED}  ✗ .git in FREE!${NC}"; ERRORS=$((ERRORS + 1)); } || echo -e "${GREEN}  ✓ No .git${NC}"
 
 # build-config check
-unzip -l "$DIST_DIR/$PLUGIN_SLUG.zip" 2>/dev/null | grep -q "build-config" && { echo -e "${RED}  ✗ build-config in ZIP!${NC}"; ERRORS=$((ERRORS + 1)); } || echo -e "${GREEN}  ✓ No build-config${NC}"
+[ -d "$FREE_DIR/$PLUGIN_SLUG/build-config" ] && { echo -e "${RED}  ✗ build-config in FREE!${NC}"; ERRORS=$((ERRORS + 1)); } || echo -e "${GREEN}  ✓ No build-config${NC}"
 
 # PHP syntax check
 echo -e "${YELLOW}  PHP syntax check...${NC}"
-cd "$BUILD_DIR/$PLUGIN_SLUG"
+cd "$FREE_DIR/$PLUGIN_SLUG"
 SYNTAX_ERRORS=$(find . -name '*.php' -exec php -l {} \; 2>&1 | grep -c 'Parse error' || true)
 if [ "$SYNTAX_ERRORS" -gt 0 ]; then
     echo -e "${RED}  ✗ $SYNTAX_ERRORS syntax errors!${NC}"
@@ -200,16 +209,14 @@ else
 fi
 
 echo -e "${YELLOW}  Checking PRO version...${NC}"
-cd "$BUILD_DIR"
-unzip -l "$DIST_DIR/$PRO_SLUG.zip" 2>/dev/null | grep -q "\.git/" && { echo -e "${RED}  ✗ .git in PRO ZIP!${NC}"; ERRORS=$((ERRORS + 1)); } || echo -e "${GREEN}  ✓ No .git in PRO${NC}"
-unzip -l "$DIST_DIR/$PRO_SLUG.zip" 2>/dev/null | grep -q "build-config" && { echo -e "${RED}  ✗ build-config in PRO ZIP!${NC}"; ERRORS=$((ERRORS + 1)); } || echo -e "${GREEN}  ✓ No build-config in PRO${NC}"
+[ -d "$PRO_DIR/$PRO_SLUG/.git" ] && { echo -e "${RED}  ✗ .git in PRO!${NC}"; ERRORS=$((ERRORS + 1)); } || echo -e "${GREEN}  ✓ No .git in PRO${NC}"
+[ -d "$PRO_DIR/$PRO_SLUG/build-config" ] && { echo -e "${RED}  ✗ build-config in PRO!${NC}"; ERRORS=$((ERRORS + 1)); } || echo -e "${GREEN}  ✓ No build-config in PRO${NC}"
 
 # ════════════════════════════════════════════════════════════════════════════
-# CLEANUP & DONE
+# DONE
 # ════════════════════════════════════════════════════════════════════════════
 echo ""
-echo -e "${GREEN}[4/4] Cleaning up...${NC}"
-rm -rf "$BUILD_DIR"
+echo -e "${GREEN}[4/4] Done — directories kept for inspection${NC}"
 
 echo ""
 if [ "$ERRORS" -gt 0 ]; then
@@ -221,6 +228,8 @@ echo -e "${GREEN}========================================${NC}"
 echo -e "${GREEN}Build Complete!${NC}"
 echo -e "${GREEN}========================================${NC}"
 echo ""
-echo -e "  📦 dist/${PLUGIN_SLUG}.zip ($FREE_SIZE) — FREE (WordPress.org)"
-echo -e "  📦 dist/${PRO_SLUG}.zip ($PRO_SIZE) — PRO (bootflow.io)"
+echo -e "  � dist/free/${PLUGIN_SLUG}/     — FREE files (inspect directly)"
+echo -e "  📦 dist/free/${PLUGIN_SLUG}.zip  — FREE ZIP (WordPress.org)"
+echo -e "  📁 dist/pro/${PRO_SLUG}/    — PRO files (inspect directly)"
+echo -e "  📦 dist/pro/${PRO_SLUG}.zip — PRO ZIP (bootflow.io)"
 echo ""

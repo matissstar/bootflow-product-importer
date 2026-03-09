@@ -1599,8 +1599,10 @@ class Bfpi_Admin {
                 }
                 
                 // Use wp_handle_upload for secure file handling
+                // test_type => false: skip WP MIME check — extension already validated above
                 $upload_overrides = array(
                     'test_form' => false,
+                    'test_type' => false,
                     'unique_filename_callback' => function( $dir, $name, $ext ) {
                         return time() . '_' . sanitize_file_name( $name );
                     },
