@@ -285,21 +285,35 @@ if (file_exists($step2_file)) {
     // Then remove the AI auto-mapping conditional block (handles nested if/endif)
     $code = strip_template_conditional($code, 'can_ai_mapping');
 
-    // Replace processing mode selects - keep only 'direct' option
-    // Match <select> with processing_mode and replace all options
-    $code = preg_replace_callback(
-        '/(<select[^>]*(?:name=["\'][^"\']*processing_mode[^"\']*["\']|class=["\'][^"\']*processing-mode-select[^"\']*["\'])[^>]*>)([\s\S]*?)(<\/select>)/i',
-        function($matches) {
-            return $matches[1] . "\n" .
-                "                                                    <option value=\"direct\" selected>" . "Direct Mapping</option>\n" .
-                "                                                " . $matches[3];
-        },
+    // Remove processing mode selects entirely — FREE only has Direct Mapping
+    // Remove the <div class="processing-mode"> wrapper (contains the select)
+    while (true) {
+        $code_new = strip_nested_div_by_class($code, 'processing-mode');
+        if ($code_new === $code) break;
+        $code = $code_new;
+    }
+
+    // Remove standalone processing_mode selects (not wrapped in div.processing-mode)
+    // Also matches var_price_processing, var_description_processing, etc.
+    $code = preg_replace(
+        '/<select[^>]*(?:name=["\'][^"\']*processing(?:_mode)?["\']|class=["\'][^"\']*processing-(?:mode-)?select[^"\']*["\'])[^>]*>[\s\S]*?<\/select>/i',
+        '',
         $code
     );
 
-    // Remove PHP formula, AI processing, and hybrid config panels
+    // Remove processing config panels (all variants)
+    $config_divs = array('processing-config', 'var-price-processing-config', 'var-description-processing-config');
+    foreach ($config_divs as $cd) {
+        while (true) {
+            $code_new = strip_nested_div_by_class($code, $cd);
+            if ($code_new === $code) break;
+            $code = $code_new;
+        }
+    }
+
+    // Remove PHP formula, AI processing, and hybrid config panels (any remaining)
     // Uses proper nested div matching instead of regex to handle inner divs
-    $panel_classes = array('php-formula-config', 'hybrid-config');
+    $panel_classes = array('php-formula-config', 'hybrid-config', 'ai-processing-config', 'ai-config', 'ai-prompt-config');
     foreach ($panel_classes as $panel_class) {
         while (true) {
             $code_new = strip_nested_div_by_class($code, $panel_class);
@@ -347,16 +361,30 @@ if (file_exists($edit_file)) {
         1
     );
 
-    // Replace processing mode selects — keep only 'direct'
-    $code = preg_replace_callback(
-        '/(<select[^>]*name=["\'][^"\']*processing_mode[^"\']*["\'][^>]*>)([\s\S]*?)(<\/select>)/i',
-        function($matches) {
-            return $matches[1] . "\n" .
-                "                                        <option value=\"direct\" selected>Direct Mapping</option>\n" .
-                "                                    " . $matches[3];
-        },
+    // Remove processing mode selects and config panels entirely — FREE only has Direct Mapping
+    while (true) {
+        $code_new = strip_nested_div_by_class($code, 'processing-mode');
+        if ($code_new === $code) break;
+        $code = $code_new;
+    }
+    $code = preg_replace(
+        '/<select[^>]*name=["\'][^"\']*processing_mode[^"\']*["\'][^>]*>[\s\S]*?<\/select>/i',
+        '',
         $code
     );
+    while (true) {
+        $code_new = strip_nested_div_by_class($code, 'processing-config');
+        if ($code_new === $code) break;
+        $code = $code_new;
+    }
+    $panel_classes = array('php-formula-config', 'hybrid-config', 'ai-processing-config', 'ai-config');
+    foreach ($panel_classes as $pc) {
+        while (true) {
+            $code_new = strip_nested_div_by_class($code, $pc);
+            if ($code_new === $code) break;
+            $code = $code_new;
+        }
+    }
 
     file_put_contents($edit_file, $code);
     echo "  ✓ import-edit.php — PRO UI removed\n";
