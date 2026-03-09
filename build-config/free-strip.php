@@ -36,14 +36,14 @@ if (file_exists($admin_file)) {
 
     // Methods to stub with wp_send_json_error (AJAX handlers)
     $ajax_stubs = array(
-        'handle_test_url'        => 'URL import testing is available in the Pro version.',
-        'handle_ai_auto_mapping' => 'AI auto-mapping is available in the Pro version.',
-        'handle_test_ai'         => 'AI testing is available in the Pro version.',
-        'handle_test_php'        => 'PHP formula testing is available in the Pro version.',
-        'handle_test_shipping'   => 'Shipping formula testing is available in the Pro version.',
-        'ajax_save_recipe'       => 'Mapping templates are available in the Pro version.',
-        'ajax_load_recipe'       => 'Mapping templates are available in the Pro version.',
-        'ajax_delete_recipe'     => 'Mapping templates are available in the Pro version.',
+        'handle_test_url'        => 'This feature is not available in this edition.',
+        'handle_ai_auto_mapping' => 'This feature is not available in this edition.',
+        'handle_test_ai'         => 'This feature is not available in this edition.',
+        'handle_test_php'        => 'This feature is not available in this edition.',
+        'handle_test_shipping'   => 'This feature is not available in this edition.',
+        'ajax_save_recipe'       => 'This feature is not available in this edition.',
+        'ajax_load_recipe'       => 'This feature is not available in this edition.',
+        'ajax_delete_recipe'     => 'This feature is not available in this edition.',
     );
 
     foreach ($ajax_stubs as $method => $message) {
@@ -52,30 +52,46 @@ if (file_exists($admin_file)) {
         );
     }
 
-    // Methods that exit/die instead of wp_send_json
+    // Methods that exit/die instead of wp_send_json — use neutral messages (no Pro mention)
     $exit_stubs = array(
-        'handle_cron_import'        => "        wp_die(esc_html__('Scheduled imports are available in the Pro version.', 'bootflow-product-xml-csv-importer'), 'Pro Feature', array('response' => 403));\n",
-        'handle_single_import_cron' => "        wp_die(esc_html__('Scheduled imports are available in the Pro version.', 'bootflow-product-xml-csv-importer'), 'Pro Feature', array('response' => 403));\n",
+        'handle_cron_import'        => "        return; // Scheduled imports not available in this edition.\n",
+        'handle_single_import_cron' => "        return; // Scheduled imports not available in this edition.\n",
     );
 
     foreach ($exit_stubs as $method => $body) {
         $code = stub_method($code, $method, $body);
     }
 
-    // download_import_file — private, returns array
-    $code = stub_method($code, 'download_import_file',
-        "        return array('success' => false, 'message' => __('URL import is available in the Pro version.', 'bootflow-product-xml-csv-importer'));\n"
+    // Stub license handlers — no license system in FREE version
+    $code = stub_method($code, 'handle_activate_license',
+        "        wp_send_json_error(array('message' => __('License activation is not required.', 'bootflow-product-xml-csv-importer')));\n"
+    );
+    $code = stub_method($code, 'handle_deactivate_license',
+        "        wp_send_json_error(array('message' => __('No license to deactivate.', 'bootflow-product-xml-csv-importer')));\n"
     );
 
-    // display_logs_page — replace with simple message
+    // download_import_file — private, returns array
+    $code = stub_method($code, 'download_import_file',
+        "        return array('success' => false, 'message' => __('URL import is not available in this edition.', 'bootflow-product-xml-csv-importer'));\n"
+    );
+
+    // display_logs_page — replace with simple message (no Pro mention)
     $code = stub_method($code, 'display_logs_page',
         "        if (!current_user_can('manage_woocommerce')) { return; }\n" .
         "        echo '<div class=\"wrap bfpi-import\"><h1>' . esc_html__('Import Logs', 'bootflow-product-xml-csv-importer') . '</h1>';\n" .
-        "        echo '<p>' . esc_html__('Detailed import logging is available in the Pro version. Basic import status is shown on the Import History page.', 'bootflow-product-xml-csv-importer') . '</p></div>';\n"
+        "        echo '<p>' . esc_html__('Basic import status is shown on the Import History page.', 'bootflow-product-xml-csv-importer') . '</p></div>';\n"
     );
 
     // Remove URL branch from handle_file_upload using brace counting
     $code = strip_elseif_branch($code, 'url');
+
+    // Remove all debug error_log lines that reference $_POST, print_r, or array_keys
+    // These are flagged by WP.org reviewers as "processing the whole input"
+    $code = preg_replace(
+        '/^\s*if\s*\(\s*defined\s*\(\s*[\'"]WP_DEBUG[\'"]\s*\)\s*&&\s*WP_DEBUG\s*\)\s*\{\s*error_log\s*\(.*(?:print_r|array_keys|\$_POST|\$_GET|\$_REQUEST|\$_SERVER).*\);\s*\}\s*$/m',
+        '',
+        $code
+    );
 
     file_put_contents($admin_file, $code);
     echo "  ✓ class-bfpi-admin.php — PRO methods stubbed\n";
@@ -92,12 +108,18 @@ if (file_exists($importer_file)) {
 
     // Stub execute_shipping_class_formula — remove eval()
     $code = stub_method($code, 'execute_shipping_class_formula',
-        "        // Pro feature: shipping class formula execution\n" .
         "        return '';\n"
     );
 
+    // Remove debug error_log lines that use print_r or array_keys (WP.org compliance)
+    $code = preg_replace(
+        '/^\s*if\s*\(\s*defined\s*\(\s*[\'"]WP_DEBUG[\'"]\s*\)\s*&&\s*WP_DEBUG\s*\)\s*\{\s*error_log\s*\(.*(?:print_r|array_keys).*\);\s*\}\s*$/m',
+        '',
+        $code
+    );
+
     file_put_contents($importer_file, $code);
-    echo "  ✓ class-bfpi-importer.php — eval removed\n";
+    echo "  ✓ class-bfpi-importer.php — eval removed, debug cleaned\n";
 } else {
     echo "  ✗ class-bfpi-importer.php not found\n";
 }
@@ -386,6 +408,13 @@ if (file_exists($edit_file)) {
         }
     }
 
+    // Remove debug error_log lines that reference $_POST
+    $code = preg_replace(
+        '/^\s*if\s*\(\s*defined\s*\(\s*[\'"]WP_DEBUG[\'"]\s*\)\s*&&\s*WP_DEBUG\s*\)\s*\{\s*error_log\s*\(.*(?:print_r|array_keys|\$_POST|\$_GET|\$_REQUEST|\$_SERVER).*\);\s*\}\s*$/m',
+        '',
+        $code
+    );
+
     file_put_contents($edit_file, $code);
     echo "  ✓ import-edit.php — PRO UI removed\n";
 } else {
@@ -428,27 +457,120 @@ if (file_exists($settings_file)) {
 }
 
 // ────────────────────────────────────────────────────────────────────────────
-// 7. step-3-progress.php  — remove detailed log sections
+// 6b. settings-page.php  — remove license activation UI and JS
+// ────────────────────────────────────────────────────────────────────────────
+if (file_exists($settings_file)) {
+    $code = file_get_contents($settings_file);
+
+    // Remove license activation JS block: from "// License Activation" to end of deactivation handler
+    $code = preg_replace(
+        '/\s*\/\/\s*License\s+Activation[\s\S]*?\/\/\s*License\s+Deactivation[\s\S]*?\}\s*\)\s*;\s*\}\s*\)\s*;/i',
+        '',
+        $code,
+        1
+    );
+
+    // Remove HTML license key input field and activate/deactivate buttons
+    // Match: <input...id="license_key"...> and related elements
+    $code = preg_replace(
+        '/<[^>]*(?:id|for)=["\']license_key["\'][^>]*>(?:<\/[^>]+>)?/i',
+        '',
+        $code
+    );
+    // Remove activate button
+    $code = preg_replace(
+        '/<button[^>]*id=["\']btn-activate-license["\'][^>]*>[\s\S]*?<\/button>/i',
+        '',
+        $code
+    );
+    // Remove deactivate button  
+    $code = preg_replace(
+        '/<button[^>]*id=["\']btn-deactivate-license["\'][^>]*>[\s\S]*?<\/button>/i',
+        '',
+        $code
+    );
+    // Remove license-activation-result div
+    $code = preg_replace(
+        '/<div[^>]*id=["\']license-activation-result["\'][^>]*>[\s\S]*?<\/div>/i',
+        '',
+        $code
+    );
+    // Remove any "License Key" label/heading
+    $code = preg_replace(
+        '/<(?:label|h\d)[^>]*>[^<]*License\s+Key[^<]*<\/(?:label|h\d)>/i',
+        '',
+        $code
+    );
+    // Remove the license key table row if present
+    $code = preg_replace(
+        '/<tr[^>]*>[\s\S]*?license_key[\s\S]*?<\/tr>/i',
+        '',
+        $code,
+        1
+    );
+
+    file_put_contents($settings_file, $code);
+    echo "  ✓ settings-page.php — license UI removed\n";
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// 7. step-3-progress.php  — remove detailed log sections (feature-gated)
 // ────────────────────────────────────────────────────────────────────────────
 $step3_file = "$build_dir/includes/admin/partials/step-3-progress.php";
 if (file_exists($step3_file)) {
     $code = file_get_contents($step3_file);
 
-    // Remove detailed_logs PHP conditional blocks
-    // Pattern: if (... detailed_logs ...) { ... }
-    $code = preg_replace(
-        '/if\s*\(\s*[^)]*detailed_logs[^)]*\)\s*\{[\s\S]*?\}\s*/i',
-        '',
-        $code
-    );
-    // Also remove any php-if (detailed_logs) endif alternative-syntax blocks
+    // Remove all detailed_logs template conditionals (php if...endif blocks)
+    // Use strpos-based search (regex fails due to nested parentheses in is_available())
     $open_tag = '<' . '?php';
     $close_tag = '?' . '>';
-    $code = preg_replace(
-        '/' . preg_quote($open_tag, '/') . '\s+if\s*\([^)]*detailed_logs[^)]*\)\s*:\s*' . preg_quote($close_tag, '/') . '[\s\S]*?' . preg_quote($open_tag, '/') . '\s+endif;\s*' . preg_quote($close_tag, '/') . '/i',
-        '',
-        $code
-    );
+    $max_iterations = 10;
+    $removed = 0;
+    for ($i = 0; $i < $max_iterations; $i++) {
+        // Find "detailed_logs" occurrence
+        $dl_pos = strpos($code, 'detailed_logs');
+        if ($dl_pos === false) break;
+        
+        // Search backwards from detailed_logs to find the opening "<?php if ("
+        $search_back = substr($code, max(0, $dl_pos - 200), min(200, $dl_pos));
+        $if_marker = $open_tag . ' if (';
+        $if_pos_rel = strrpos($search_back, $if_marker);
+        if ($if_pos_rel === false) break;
+        $start = max(0, $dl_pos - 200) + $if_pos_rel;
+        
+        // Verify this is a template if with colon syntax
+        $line_end = strpos($code, "\n", $dl_pos);
+        $line_fragment = substr($code, $dl_pos, $line_end - $dl_pos);
+        if (strpos($line_fragment, '):') === false) break;
+        
+        $search_from = $line_end;
+
+        // Find matching endif (handle nested if/endif)
+        $depth = 1;
+        $pos = $search_from;
+        $len = strlen($code);
+        while ($pos < $len && $depth > 0) {
+            $next = strpos($code, $open_tag, $pos);
+            if ($next === false) break;
+            $snippet = substr($code, $next, 200);
+            if (preg_match('/^' . preg_quote($open_tag, '/') . '\s+if\s*\(/i', $snippet)) {
+                $depth++;
+                $pos = $next + 5;
+            } elseif (preg_match('/^' . preg_quote($open_tag, '/') . '\s+endif;\s*(?:\/\/[^\n]*)?\s*' . preg_quote($close_tag, '/') . '/i', $snippet, $em)) {
+                $depth--;
+                if ($depth === 0) {
+                    $end = $next + strlen($em[0]);
+                    if (isset($code[$end]) && $code[$end] === "\n") $end++;
+                    $code = substr($code, 0, $start) . substr($code, $end);
+                    $removed++;
+                    break;
+                }
+                $pos = $next + 5;
+            } else {
+                $pos = $next + 5;
+            }
+        }
+    }
 
     // Remove log polling JavaScript sections
     $code = preg_replace(
@@ -459,7 +581,7 @@ if (file_exists($step3_file)) {
     );
 
     file_put_contents($step3_file, $code);
-    echo "  ✓ step-3-progress.php — detailed logs removed\n";
+    echo "  ✓ step-3-progress.php — $removed detailed_logs blocks removed\n";
 } else {
     echo "  ✗ step-3-progress.php not found\n";
 }
@@ -507,6 +629,19 @@ if (file_exists($main_file)) {
         'handle_test_ai',
     );
     foreach ($ai_hooks as $hook) {
+        $code = preg_replace(
+            '/^\s*\$this->loader->add_action\([^)]*' . preg_quote($hook, '/') . '[^)]*\);\s*$/m',
+            '',
+            $code
+        );
+    }
+
+    // Remove license-related hook registrations
+    $license_hooks = array(
+        'handle_activate_license',
+        'handle_deactivate_license',
+    );
+    foreach ($license_hooks as $hook) {
         $code = preg_replace(
             '/^\s*\$this->loader->add_action\([^)]*' . preg_quote($hook, '/') . '[^)]*\);\s*$/m',
             '',
@@ -747,7 +882,7 @@ function strip_elseif_branch($code, $value) {
     $before = substr($code, 0, $brace_pos + 1); // includes the {
     $after = substr($code, $pos - 1); // includes the }
     
-    $stub_body = "\n                throw new Exception(__('URL import is available in the Pro version.', 'bootflow-product-xml-csv-importer'));\n            ";
+    $stub_body = "\n                throw new Exception(__('URL import is not available in this edition.', 'bootflow-product-xml-csv-importer'));\n            ";
     
     echo "    Stripped elseif branch: $value\n";
     return $before . $stub_body . $after;

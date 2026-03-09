@@ -2,8 +2,7 @@
 /**
  * Field Processor — FREE Version
  *
- * Handles direct field processing only. PHP formula, AI, and hybrid modes
- * are available in the Pro version.
+ * Handles direct field processing only.
  *
  * @since      1.0.0
  * @package    Bfpi
@@ -46,7 +45,6 @@ class Bfpi_Processor {
                 case 'php_formula':
                 case 'ai_processing':
                 case 'hybrid':
-                    // These modes are available in the Pro version.
                     return $this->process_direct($value);
 
                 default:

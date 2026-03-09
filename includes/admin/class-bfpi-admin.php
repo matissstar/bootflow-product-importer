@@ -793,9 +793,7 @@ class Bfpi_Admin {
         
         // Debug: Log request method
         if (defined('WP_DEBUG') && WP_DEBUG) { error_log('=== EDIT PAGE LOAD ==='); }
-        if (defined('WP_DEBUG') && WP_DEBUG) { error_log('POST data exists: ' . (empty($_POST) ? 'NO' : 'YES')); }
-        if (defined('WP_DEBUG') && WP_DEBUG) { error_log('update_import in POST: ' . (isset($_POST['update_import']) ? 'YES' : 'NO')); }
-        if (defined('WP_DEBUG') && WP_DEBUG) { error_log('run_import_now in POST: ' . (isset($_POST['run_import_now']) ? 'YES' : 'NO')); }
+
         
         // Handle "Run Import Now" button - saves mapping AND starts import
         if (isset($_POST['run_import_now'])) {
@@ -828,7 +826,7 @@ class Bfpi_Admin {
             $custom_fields = isset($_POST['custom_fields']) ? wp_unslash( $_POST['custom_fields'] ) : array();
             
             if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Raw field_mapping count: ' . count($field_mapping)); }
-            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Raw field_mapping sample: ' . print_r(array_slice($field_mapping, 0, 2, true), true)); }
+
             
             // Merge mappings - save ALL fields that have processing_mode or source
             $all_mappings = array();
@@ -851,7 +849,7 @@ class Bfpi_Admin {
                 }
             }
             if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Merged mappings count: ' . count($all_mappings)); }
-            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Merged mappings sample: ' . print_r(array_slice($all_mappings, 0, 2, true), true)); }
+
             
             // CRITICAL: If no mappings, don't overwrite existing ones!
             if (empty($all_mappings) && !empty($import['field_mappings'])) {
@@ -1959,7 +1957,7 @@ class Bfpi_Admin {
                 if (is_array($field_mapping)) {
                     $field_mapping = map_deep($field_mapping, 'sanitize_text_field');
                 }
-                if (defined('WP_DEBUG') && WP_DEBUG) { error_log('field_mapping from JSON: ' . print_r($field_mapping, true)); }
+
             }
             
             if (isset($_POST['custom_fields_json'])) {
@@ -1967,7 +1965,7 @@ class Bfpi_Admin {
                 if (is_array($custom_fields)) {
                     $custom_fields = map_deep($custom_fields, 'sanitize_text_field');
                 }
-                if (defined('WP_DEBUG') && WP_DEBUG) { error_log('custom_fields from JSON: ' . print_r($custom_fields, true)); }
+
             }
             
             if (isset($_POST['import_filters_json'])) {
@@ -1975,11 +1973,11 @@ class Bfpi_Admin {
                 if (is_array($import_filters)) {
                     $import_filters = map_deep($import_filters, 'sanitize_text_field');
                 }
-                if (defined('WP_DEBUG') && WP_DEBUG) { error_log('import_filters from JSON: ' . print_r($import_filters, true)); }
+
             }
             
             if (defined('WP_DEBUG') && WP_DEBUG) { error_log('After decode - field_mapping count: ' . count($field_mapping)); }
-            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Attributes check: ' . print_r($field_mapping['attributes_variations'] ?? 'NOT SET', true)); }
+
             
             // Check if this is updating existing import
             $import_id = isset($_POST['import_id']) ? intval(wp_unslash($_POST['import_id'])) : 0;

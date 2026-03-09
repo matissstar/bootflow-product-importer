@@ -12,13 +12,6 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-// Debug: Check if form submitted
-if (defined('WP_DEBUG') && WP_DEBUG) { error_log('=== IMPORT-EDIT.PHP LOADED ==='); }
-if (defined('WP_DEBUG') && WP_DEBUG) { error_log('POST empty: ' . (empty($_POST) ? 'YES' : 'NO')); }
-if (!empty($_POST)) {
-    if (defined('WP_DEBUG') && WP_DEBUG) { error_log('update_import present: ' . (isset($_POST['update_import']) ? 'YES' : 'NO')); }
-}
-
 // Ensure file_path is set for AJAX - use latest XML if missing
 if (empty($import['file_url']) || !file_exists($import['file_url'])) {
     $upload_dir = wp_upload_dir();
