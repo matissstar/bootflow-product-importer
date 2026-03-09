@@ -298,12 +298,17 @@ if (file_exists($step2_file)) {
     );
 
     // Remove PHP formula, AI processing, and hybrid config panels
-    // Remove config-panel divs (php formula textarea, AI prompt, hybrid config)
-    $code = preg_replace(
-        '/<div[^>]*class=["\'][^"\']*(?:php-formula-config|ai-config|hybrid-config)[^"\']*config-panel[^"\']*["\'][^>]*>[\s\S]*?<\/div>/i',
-        '',
-        $code
-    );
+    // Uses proper nested div matching instead of regex to handle inner divs
+    $panel_classes = array('php-formula-config', 'hybrid-config');
+    foreach ($panel_classes as $panel_class) {
+        while (true) {
+            $code_new = strip_nested_div_by_class($code, $panel_class);
+            if ($code_new === $code) {
+                break; // no more matches
+            }
+            $code = $code_new;
+        }
+    }
 
     // Remove $can_ai_processing and $can_hybrid_processing variables at top
     $code = preg_replace(
@@ -779,4 +784,55 @@ function strip_template_conditional($code, $var_name) {
 
     echo "  ! Could not find closing endif for '\$$var_name'\n";
     return $code;
+}
+
+/**
+ * Remove a <div> (with all nested content) by CSS class name.
+ *
+ * Unlike regex with [\s\S]*?<\/div>, this correctly handles nested <div> tags
+ * by counting open/close depth.
+ *
+ * @param string $code       File contents
+ * @param string $class_name CSS class to match (partial match within class attr)
+ * @return string            Modified code (first match removed), or unchanged if not found
+ */
+function strip_nested_div_by_class($code, $class_name) {
+    // Find opening <div with this class
+    $pattern = '/<div[^>]*class=["\'][^"\']*' . preg_quote($class_name, '/') . '[^"\']*["\'][^>]*>/i';
+    if (!preg_match($pattern, $code, $m, PREG_OFFSET_CAPTURE)) {
+        return $code; // not found
+    }
+
+    $start = $m[0][1];
+    $pos = $start + strlen($m[0][0]);
+    $len = strlen($code);
+    $depth = 1;
+
+    while ($pos < $len && $depth > 0) {
+        // Find next <div or </div>
+        $next_open = strpos($code, '<div', $pos);
+        $next_close = strpos($code, '</div>', $pos);
+
+        if ($next_close === false) {
+            break; // no closing tag found — malformed HTML
+        }
+
+        if ($next_open !== false && $next_open < $next_close) {
+            // Check if it's actually an opening div (not e.g. <divider>)
+            $char_after = $code[$next_open + 4] ?? '';
+            if ($char_after === ' ' || $char_after === '>' || $char_after === "\t" || $char_after === "\n" || $char_after === "\r") {
+                $depth++;
+            }
+            $pos = $next_open + 4;
+        } else {
+            $depth--;
+            if ($depth === 0) {
+                $end = $next_close + 6; // strlen('</div>')
+                return substr($code, 0, $start) . substr($code, $end);
+            }
+            $pos = $next_close + 6;
+        }
+    }
+
+    return $code; // couldn't find matching close
 }
