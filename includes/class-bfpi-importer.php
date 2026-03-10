@@ -1360,11 +1360,11 @@ class Bfpi_Importer {
         $field_mappings = $this->config['field_mapping'];
 
         // Debug field mappings and source data
-        if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import - Field mappings: ' . print_r($field_mappings, true)); }
-        if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import - Product data keys: ' . print_r(array_keys($product_data), true)); }
+        if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import - Field mappings: ' . print_r($field_mappings, true)); }
+        if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import - Product data keys: ' . print_r(array_keys($product_data), true)); }
 
         if (empty($field_mappings) || !is_array($field_mappings)) {
-            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import - Field mappings are empty or not an array! Creating default mappings...'); }
+            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import - Field mappings are empty or not an array! Creating default mappings...'); }
             
             // Create basic default field mappings based on actual XML fields
             $field_mappings = array(
@@ -1377,13 +1377,13 @@ class Bfpi_Importer {
                 'stock_quantity' => array('source' => 'quantity', 'processing' => 'direct'),
             );
             
-            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import - Using default field mappings: ' . print_r($field_mappings, true)); }
+            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import - Using default field mappings: ' . print_r($field_mappings, true)); }
         } else {
             // Check if field mappings have empty sources and fix them
             foreach ($field_mappings as $wc_field => &$mapping_config) {
                 // Ensure mapping_config is an array
                 if (!is_array($mapping_config)) {
-                    if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import - Invalid mapping config for ' . $wc_field . ': ' . print_r($mapping_config, true)); }
+                    if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import - Invalid mapping config for ' . $wc_field . ': ' . print_r($mapping_config, true)); }
                     continue;
                 }
                 
@@ -1393,7 +1393,7 @@ class Bfpi_Importer {
                         case 'name':
                             $mapping_config['source'] = 'product_name';
                             $mapping_config['processing'] = 'direct';
-                            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import - Auto-assigned name field to product_name'); }
+                            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import - Auto-assigned name field to product_name'); }
                             break;
                         case 'regular_price':
                             $mapping_config['source'] = 'price';
@@ -1411,19 +1411,19 @@ class Bfpi_Importer {
                 }
             }
             
-            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import - Updated field mappings: ' . print_r($field_mappings, true)); }
+            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import - Updated field mappings: ' . print_r($field_mappings, true)); }
         }
 
         // Ensure field_mappings is an array before foreach
         if (!is_array($field_mappings)) {
-            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import - Field mappings is not an array after all fixes! Type: ' . gettype($field_mappings)); }
+            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import - Field mappings is not an array after all fixes! Type: ' . gettype($field_mappings)); }
             $field_mappings = array();
         }
 
         foreach ($field_mappings as $wc_field => $mapping_config) {
             // Skip if not an array
             if (!is_array($mapping_config)) {
-                if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import - Skipping invalid mapping config for ' . $wc_field); }
+                if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import - Skipping invalid mapping config for ' . $wc_field); }
                 continue;
             }
             
@@ -1472,7 +1472,7 @@ class Bfpi_Importer {
                 $generated_sku = str_replace('{md5}', substr(md5($product_name . $row_number), 0, 8), $generated_sku);
                 
                 $mapped_data[$wc_field] = $generated_sku;
-                if (defined('WP_DEBUG') && WP_DEBUG) { error_log("WC XML CSV AI Import - Generated SKU: $generated_sku (pattern: $pattern, row: $row_number)"); }
+                if (defined('WP_DEBUG') && WP_DEBUG) { error_log("Bootflow Import - Generated SKU: $generated_sku (pattern: $pattern, row: $row_number)"); }
                 continue;
             }
             
@@ -1507,7 +1507,7 @@ class Bfpi_Importer {
             if ($value !== null) {
                 $mapped_data[$wc_field] = $value;
                 // Debug mapping
-                if (defined('WP_DEBUG') && WP_DEBUG) { error_log("WC XML CSV AI Import - Mapping $wc_field from $source_field: " . print_r($value, true)); }
+                if (defined('WP_DEBUG') && WP_DEBUG) { error_log("Bootflow Import - Mapping $wc_field from $source_field: " . print_r($value, true)); }
                 
                 // Extra debug for brand
                 if ($wc_field === 'brand') {
@@ -1517,7 +1517,7 @@ class Bfpi_Importer {
         }
 
         // Debug final mapped data
-        if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import - Final mapped data: ' . print_r($mapped_data, true)); }
+        if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import - Final mapped data: ' . print_r($mapped_data, true)); }
 
         return $mapped_data;
     }
@@ -1899,7 +1899,7 @@ class Bfpi_Importer {
      */
     private function validate_product_data($product_data, $existing_product_id = null) {
         // Debug: log what data we're validating
-        if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import - Validating product data: ' . print_r($product_data, true)); }
+        if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import - Validating product data: ' . print_r($product_data, true)); }
         
         // Check required fields - name is only required for new products
         $required_fields = array();
@@ -1911,7 +1911,7 @@ class Bfpi_Importer {
 
         foreach ($required_fields as $field) {
             if (empty($product_data[$field])) {
-                if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import - Missing required field: ' . $field . ' - Product data keys: ' . print_r(array_keys($product_data), true)); }
+                if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import - Missing required field: ' . $field . ' - Product data keys: ' . print_r(array_keys($product_data), true)); }
                 // translators: placeholder values
                 throw new Exception(sprintf(esc_html__('Required field "%s" is missing or empty.', 'bootflow-product-xml-csv-importer'), esc_html($field)));
             }

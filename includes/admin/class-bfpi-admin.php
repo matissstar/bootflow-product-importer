@@ -327,7 +327,7 @@ class Bfpi_Admin {
         
         echo '<div class="wrap bfpi-import-wrap">';
         echo '<div class="bootflow-header-row">';
-        echo '<h1>' . esc_html__('Bootflow – WooCommerce XML & CSV Importer', 'bootflow-product-xml-csv-importer') . '</h1>';
+        echo '<h1>' . esc_html__('Bootflow – Product XML & CSV Importer', 'bootflow-product-xml-csv-importer') . '</h1>';
         $this->render_language_switcher();
         echo '</div>';
         
@@ -1822,7 +1822,7 @@ class Bfpi_Admin {
             
         } catch (Exception $e) {
             // Debug: Log the error (remove this in production)
-            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import - Upload error: ' . $e->getMessage()); }
+            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import - Upload error: ' . $e->getMessage()); }
             
             wp_send_json_error(array(
                 'message' => $e->getMessage()
@@ -1848,7 +1848,7 @@ class Bfpi_Admin {
         }
         
         try {
-            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import - Parse structure started'); }
+            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import - Parse structure started'); }
             
             $file_path = sanitize_text_field(wp_unslash($_POST['file_path']));
             $file_type = sanitize_text_field(wp_unslash($_POST['file_type']));
@@ -1856,7 +1856,7 @@ class Bfpi_Admin {
             $per_page = intval(wp_unslash($_POST['per_page'] ?? 5));
             
             if (defined('WP_DEBUG') && WP_DEBUG) { 
-                error_log('WC XML CSV AI Import - Parse structure params: ' . wp_json_encode([
+                error_log('Bootflow Import - Parse structure params: ' . wp_json_encode([
                     'file_path' => $file_path,
                     'file_type' => $file_type,
                     'page' => $page,
@@ -1881,7 +1881,7 @@ class Bfpi_Admin {
                             // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
                             fclose($handle);
                             $file_ready = true;
-                            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import - File ready after ' . ($i + 1) . ' attempts'); }
+                            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import - File ready after ' . ($i + 1) . ' attempts'); }
                             break;
                         }
                     }
@@ -1897,22 +1897,22 @@ class Bfpi_Admin {
             
             if ($file_type === 'xml') {
                 $product_wrapper = sanitize_text_field(wp_unslash($_POST['product_wrapper']));
-                if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import - Using XML parser with wrapper: ' . $product_wrapper); }
+                if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import - Using XML parser with wrapper: ' . $product_wrapper); }
                 
                 $xml_parser = new Bfpi_XML_Parser();
                 $result = $xml_parser->parse_structure($file_path, $product_wrapper, $page, $per_page);
             } else {
-                if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import - Using CSV parser'); }
+                if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import - Using CSV parser'); }
                 $csv_parser = new Bfpi_CSV_Parser();
                 $result = $csv_parser->parse_structure($file_path, $page, $per_page);
             }
             
-            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import - Parse structure completed successfully'); }
+            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import - Parse structure completed successfully'); }
             wp_send_json_success($result);
             
         } catch (Exception $e) {
-            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import - Parse structure error: ' . $e->getMessage()); }
-            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import - Parse structure trace: ' . $e->getTraceAsString()); }
+            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import - Parse structure error: ' . $e->getMessage()); }
+            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import - Parse structure trace: ' . $e->getTraceAsString()); }
             
             wp_send_json_error(array(
                 'message' => $e->getMessage()
@@ -1944,7 +1944,7 @@ class Bfpi_Admin {
         
         try {
             // Debug: Log received data (remove this in production)
-            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import - Start import data received'); }
+            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import - Start import data received'); }
             
             // Decode JSON strings from FormData
             $field_mapping = array();
@@ -2017,7 +2017,7 @@ class Bfpi_Admin {
             
         } catch (Exception $e) {
             // Debug: Log the error (remove this in production)
-            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import - Start import error: ' . $e->getMessage()); }
+            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import - Start import error: ' . $e->getMessage()); }
             
             wp_send_json_error(array(
                 'message' => $e->getMessage()
@@ -2924,11 +2924,11 @@ class Bfpi_Admin {
         $settings = get_option('bfpi_settings', array());
         $secret = sanitize_text_field(wp_unslash($_GET['secret'] ?? $_REQUEST['secret'] ?? ''));
         
-        if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import Cron: Received secret: ' . $secret); }
-        if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import Cron: Expected secret: ' . ($settings['cron_secret_key'] ?? 'NOT SET')); }
+        if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import Cron: Received secret: ' . $secret); }
+        if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import Cron: Expected secret: ' . ($settings['cron_secret_key'] ?? 'NOT SET')); }
         
         if (empty($secret) || empty($settings['cron_secret_key']) || $secret !== $settings['cron_secret_key']) {
-            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import Cron: Invalid secret key'); }
+            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import Cron: Invalid secret key'); }
             wp_die(esc_html('Unauthorized'), 'Unauthorized', array('response' => 401));
         }
         
@@ -2981,12 +2981,12 @@ class Bfpi_Admin {
         }
         
         if (empty($scheduled_imports)) {
-            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import Cron: No imports ready to run'); }
+            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import Cron: No imports ready to run'); }
             echo 'No imports scheduled';
             exit;
         }
         
-        if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import Cron: Found ' . count($scheduled_imports) . ' imports to run (new=' . count($new_imports ?: array()) . ', stuck=' . count($stuck_imports ?: array()) . ')'); }
+        if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import Cron: Found ' . count($scheduled_imports) . ' imports to run (new=' . count($new_imports ?: array()) . ', stuck=' . count($stuck_imports ?: array()) . ')'); }
         
         // Process each scheduled import
         foreach ($scheduled_imports as $import) {
@@ -3004,7 +3004,7 @@ class Bfpi_Admin {
                         array('%s'),
                         array('%d')
                     );
-                    if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import Cron: RESUMING import ID ' . $import['id'] . ' from offset ' . $offset . '/' . $import['total_products']); }
+                    if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import Cron: RESUMING import ID ' . $import['id'] . ' from offset ' . $offset . '/' . $import['total_products']); }
                 } else {
                     // NEW RUN: Reset and start from 0
                     $offset = 0;
@@ -3019,7 +3019,7 @@ class Bfpi_Admin {
                         array('%s', '%d', '%s'),
                         array('%d')
                     );
-                    if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import Cron: Starting NEW import ID ' . $import['id']); }
+                    if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import Cron: Starting NEW import ID ' . $import['id']); }
                 }
                 
                 // Run the import in chunks with a TIME LIMIT
@@ -3028,7 +3028,7 @@ class Bfpi_Admin {
                 // Cap at 100 to avoid memory/timeout issues with large batches
                 $chunk_size = intval($import['batch_size'] ?? $settings['chunk_size'] ?? 50);
                 $chunk_size = min($chunk_size, 100); // Safety cap
-                if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import Cron: chunk_size=' . $chunk_size . ', starting offset=' . $offset); }
+                if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import Cron: chunk_size=' . $chunk_size . ', starting offset=' . $offset); }
                 
                 // Try to set generous time limit
                 if ( function_exists( 'set_time_limit' ) ) {
@@ -3050,27 +3050,27 @@ class Bfpi_Admin {
                     // CHECK TIME LIMIT before each chunk
                     $elapsed = time() - $cron_start_time;
                     if ($elapsed >= $max_execution_seconds) {
-                        if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import Cron: Time limit (' . $max_execution_seconds . 's) reached after ' . $iteration . ' chunks at offset ' . $offset . '. Will continue on next cron run.'); }
+                        if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import Cron: Time limit (' . $max_execution_seconds . 's) reached after ' . $iteration . ' chunks at offset ' . $offset . '. Will continue on next cron run.'); }
                         break;
                     }
                     
                     $result = $importer->process_import_chunk($offset, $chunk_size, $import['id']);
                     
-                    if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import Cron: Chunk #' . $iteration . ' offset=' . $offset . ', processed=' . ($result['processed'] ?? 0) . ', total_processed=' . ($result['total_processed'] ?? '?') . ', completed=' . ($result['completed'] ? 'YES' : 'NO') . ' [' . $elapsed . 's elapsed]'); }
+                    if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import Cron: Chunk #' . $iteration . ' offset=' . $offset . ', processed=' . ($result['processed'] ?? 0) . ', total_processed=' . ($result['total_processed'] ?? '?') . ', completed=' . ($result['completed'] ? 'YES' : 'NO') . ' [' . $elapsed . 's elapsed]'); }
                     
                     if ($result['completed']) {
                         $completed = true;
                     } else if (isset($result['locked']) && $result['locked']) {
                         // Another process is running, wait and retry (max 2 times)
                         if ($iteration > 2) {
-                            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import Cron: Still locked after retries, exiting'); }
+                            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import Cron: Still locked after retries, exiting'); }
                             break;
                         }
-                        if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import Cron: Locked, waiting 5s...'); }
+                        if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import Cron: Locked, waiting 5s...'); }
                         sleep(5);
                     } else if (isset($result['stopped']) && $result['stopped']) {
                         // Import was stopped/failed
-                        if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import Cron: Import stopped/failed'); }
+                        if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import Cron: Import stopped/failed'); }
                         break;
                     } else if (isset($result['skipped']) && $result['skipped']) {
                         // Chunk was skipped (already processed), use total_processed as next offset
@@ -3092,14 +3092,14 @@ class Bfpi_Admin {
                         array('%s'),
                         array('%d')
                     );
-                    if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import Cron: COMPLETED import ID ' . $import['id'] . ' in ' . $total_elapsed . 's (' . $iteration . ' chunks)'); }
+                    if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import Cron: COMPLETED import ID ' . $import['id'] . ' in ' . $total_elapsed . 's (' . $iteration . ' chunks)'); }
                 } else {
                     // Still processing - status stays as 'processing', next cron call will resume
-                    if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import Cron: Import ID ' . $import['id'] . ' paused at offset ' . $offset . ', elapsed=' . $total_elapsed . 's, will RESUME on next cron call'); }
+                    if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import Cron: Import ID ' . $import['id'] . ' paused at offset ' . $offset . ', elapsed=' . $total_elapsed . 's, will RESUME on next cron call'); }
                 }
                 
             } catch (Exception $e) {
-                if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import Cron: Error processing import ID ' . $import['id'] . ': ' . $e->getMessage()); }
+                if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import Cron: Error processing import ID ' . $import['id'] . ': ' . $e->getMessage()); }
                 
                 $wpdb->update(
                     $table_name,
@@ -3125,13 +3125,13 @@ class Bfpi_Admin {
         $secret = sanitize_text_field(wp_unslash($_GET['secret'] ?? ''));
         
         if (empty($import_id) || empty($secret)) {
-            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import: Missing import_id or secret'); }
+            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import: Missing import_id or secret'); }
             wp_die(esc_html('Invalid request'), 'Bad Request', array('response' => 400));
         }
         
         $stored_secret = get_option('bfpi_secret_' . $import_id);
         if (empty($stored_secret) || $secret !== $stored_secret) {
-            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import: Invalid secret for import #' . $import_id); }
+            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import: Invalid secret for import #' . $import_id); }
             wp_die(esc_html('Unauthorized'), 'Unauthorized', array('response' => 401));
         }
         
@@ -3139,13 +3139,13 @@ class Bfpi_Admin {
         $import = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$table_name} WHERE id = %d", $import_id), ARRAY_A);
         
         if (!$import) {
-            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import: Import #' . $import_id . ' not found'); }
+            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import: Import #' . $import_id . ' not found'); }
             echo 'Import not found';
             exit;
         }
         
         if (empty($import['schedule_type']) || $import['schedule_type'] === 'none') {
-            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import: Import #' . $import_id . ' has no schedule'); }
+            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import: Import #' . $import_id . ' has no schedule'); }
             echo 'No schedule configured';
             exit;
         }
@@ -3162,12 +3162,12 @@ class Bfpi_Admin {
         }
         
         if (!$should_run) {
-            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import: Import #' . $import_id . ' not ready to run yet'); }
+            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import: Import #' . $import_id . ' not ready to run yet'); }
             echo 'Not time to run yet';
             exit;
         }
         
-        if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import: Starting import #' . $import_id); }
+        if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import: Starting import #' . $import_id); }
         
         try {
             // Check if we need to download fresh XML from URL
@@ -3183,7 +3183,7 @@ class Bfpi_Admin {
                     // Delete old XML file if URL changed or new file downloaded
                     if (!empty($old_file) && $old_file !== $new_file_path && file_exists($old_file)) {
                         wp_delete_file($old_file);
-                        if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import: Deleted old file: ' . $old_file); }
+                        if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import: Deleted old file: ' . $old_file); }
                     }
                     
                     // Update file_url in database
@@ -3208,14 +3208,14 @@ class Bfpi_Admin {
             
             if ($result['completed']) {
                 $wpdb->update($table_name, array('status'=>'completed'), array('id'=>$import_id), array('%s'), array('%d'));
-                if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import: Completed import #' . $import_id); }
+                if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import: Completed import #' . $import_id); }
                 echo esc_html__('Import completed successfully', 'bootflow-product-xml-csv-importer');
             } else {
-                if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import: Partial import #' . $import_id . ' - ' . $result['processed'] . '/' . $result['total']); }
+                if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import: Partial import #' . $import_id . ' - ' . $result['processed'] . '/' . $result['total']); }
                 echo 'Processing: ' . intval($result['processed']) . '/' . intval($result['total']);
             }
         } catch (Exception $e) {
-            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import: Error in import #' . $import_id . ': ' . $e->getMessage()); }
+            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import: Error in import #' . $import_id . ': ' . $e->getMessage()); }
             $wpdb->update($table_name, array('status'=>'error'), array('id'=>$import_id), array('%s'), array('%d'));
             echo 'Error: ' . esc_html($e->getMessage());
         }
@@ -3317,10 +3317,10 @@ class Bfpi_Admin {
         $offset = intval(wp_unslash($_POST['offset'] ?? 0));
         $limit = intval(wp_unslash($_POST['limit'] ?? 50));
         
-        if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import: import_id=' . $import_id . ', offset=' . $offset . ', limit=' . $limit); }
+        if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import: import_id=' . $import_id . ', offset=' . $offset . ', limit=' . $limit); }
         
         if (empty($import_id)) {
-            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import: Missing import_id in process_batch'); }
+            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import: Missing import_id in process_batch'); }
             wp_send_json_error('Missing import ID');
         }
         
@@ -3329,38 +3329,38 @@ class Bfpi_Admin {
         $import = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$table} WHERE id = %d", $import_id));
         
         if (!$import) {
-            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import: Import not found: ' . $import_id); }
+            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import: Import not found: ' . $import_id); }
             wp_send_json_error('Import not found');
         }
         
         if ($import->status !== 'processing') {
-            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import: Import status is ' . $import->status . ' - ABORTING BATCH'); }
+            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import: Import status is ' . $import->status . ' - ABORTING BATCH'); }
             wp_send_json_error('Import not in processing status: ' . $import->status);
         }
         
-        if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import: Processing batch for import #' . $import_id . ', offset=' . $offset); }
+        if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import: Processing batch for import #' . $import_id . ', offset=' . $offset); }
         
         // DEBUG: Check if importer class exists
         if (!class_exists('Bfpi_Importer')) {
-            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import: Importer class does not exist, loading...'); }
+            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import: Importer class does not exist, loading...'); }
             require_once BFPI_PLUGIN_DIR . 'includes/class-bfpi-importer.php';
         }
-        if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import: Importer class loaded successfully'); }
+        if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import: Importer class loaded successfully'); }
         
         try {
-            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import: Creating Importer instance...'); }
+            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import: Creating Importer instance...'); }
             $importer = new Bfpi_Importer();
-            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import: Importer instance created, calling process_import_chunk...'); }
+            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import: Importer instance created, calling process_import_chunk...'); }
             
             $result = $importer->process_import_chunk($offset, $limit, $import_id);
             
-            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import: Batch result - processed=' . ($result['processed'] ?? 0) . ', errors=' . count($result['errors'] ?? [])); }
-            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import: Full result: ' . wp_json_encode($result)); }
+            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import: Batch result - processed=' . ($result['processed'] ?? 0) . ', errors=' . count($result['errors'] ?? [])); }
+            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import: Full result: ' . wp_json_encode($result)); }
             
             wp_send_json_success($result);
         } catch (Exception $e) {
-            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import: EXCEPTION in batch processing: ' . $e->getMessage()); }
-            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import: Exception trace: ' . $e->getTraceAsString()); }
+            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import: EXCEPTION in batch processing: ' . $e->getMessage()); }
+            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import: Exception trace: ' . $e->getTraceAsString()); }
             wp_send_json_error($e->getMessage());
         }
     }

@@ -109,7 +109,7 @@ $security_settings = get_option('bfpi_security_settings', array());
 
 <div class="wrap bfpi-settings-wrap">
     <div class="bootflow-header-row">
-        <h1><?php esc_html_e('XML/CSV AI Smart Import - Settings', 'bootflow-product-xml-csv-importer'); ?></h1>
+        <h1><?php esc_html_e('Bootflow Product Importer - Settings', 'bootflow-product-xml-csv-importer'); ?></h1>
         <?php $this->render_language_switcher(); ?>
     </div>
     

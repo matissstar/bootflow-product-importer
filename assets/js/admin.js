@@ -1,5 +1,5 @@
 /**
- * WooCommerce XML/CSV Smart AI Import - Admin JavaScript
+ * Bootflow Product Importer - Admin JavaScript
  */
 
 // Global function for onclick fallback

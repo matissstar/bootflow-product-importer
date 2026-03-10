@@ -33,7 +33,7 @@ class Bfpi_Logger {
         }
 
         // Format the message
-        $prefix = '[WC XML CSV AI Import]';
+        $prefix = '[Bootflow Import]';
         $formatted = sprintf('%s [%s] %s', $prefix, strtoupper($level), $message);
 
         // Log to error_log
@@ -73,7 +73,7 @@ class Bfpi_Logger {
      * @param string $message Message to log
      */
     public static function error($message) {
-        $prefix = '[WC XML CSV AI Import]';
+        $prefix = '[Bootflow Import]';
         $formatted = sprintf('%s [ERROR] %s', $prefix, $message);
         if (defined('WP_DEBUG') && WP_DEBUG) { error_log($formatted); }
     }

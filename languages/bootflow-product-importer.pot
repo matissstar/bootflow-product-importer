@@ -809,7 +809,7 @@ msgid "Bootflow PRO License"
 msgstr ""
 
 #: includes/admin/class-wc-xml-csv-ai-import-admin.php:255
-msgid "Bootflow – WooCommerce XML & CSV Importer"
+msgid "Bootflow – Product XML & CSV Importer"
 msgstr ""
 
 #: includes/admin/partials/step-2-mapping.php:226
@@ -4719,7 +4719,7 @@ msgstr ""
 
 #: bootflow-product-importer.php:32
 msgid ""
-"WooCommerce XML/CSV Smart Import requires WooCommerce to be installed and "
+"Bootflow Product Importer requires WooCommerce to be installed and "
 "active."
 msgstr ""
 
@@ -4769,7 +4769,7 @@ msgid "XML values: yes/no, true/false, 1/0"
 msgstr ""
 
 #: includes/admin/partials/settings-page.php:111
-msgid "XML/CSV AI Smart Import - Settings"
+msgid "Bootflow Product Importer - Settings"
 msgstr ""
 
 #: includes/admin/partials/step-2-mapping.php:2049

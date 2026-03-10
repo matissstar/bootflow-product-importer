@@ -29,7 +29,7 @@ if (!in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
 function bfpi_woocommerce_missing_notice() {
     ?>
     <div class="notice notice-error">
-        <p><?php esc_html_e('WooCommerce XML/CSV Smart Import requires WooCommerce to be installed and active.', 'bootflow-product-xml-csv-importer'); ?></p>
+        <p><?php esc_html_e('Bootflow Product Importer requires WooCommerce to be installed and active.', 'bootflow-product-xml-csv-importer'); ?></p>
     </div>
     <?php
 }

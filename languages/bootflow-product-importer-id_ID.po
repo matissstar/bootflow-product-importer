@@ -771,8 +771,8 @@ msgid "Bootflow PRO License"
 msgstr "Lisensi Bootflow PRO"
 
 #: includes/admin/class-wc-xml-csv-ai-import-admin.php:255
-msgid "Bootflow – WooCommerce XML & CSV Importer"
-msgstr "Bootflow – Pengimpor WooCommerce XML & CSV"
+msgid "Bootflow – Product XML & CSV Importer"
+msgstr "Bootflow – Product XML & CSV Importer"
 
 #: includes/admin/partials/step-2-mapping.php:226
 #: includes/admin/partials/step-2-mapping.php:1192
@@ -4527,8 +4527,8 @@ msgid "With Attributes"
 msgstr "Dengan Atribut"
 
 #: bootflow-product-importer.php:32
-msgid "WooCommerce XML/CSV Smart Import requires WooCommerce to be installed and active."
-msgstr "WooCommerce XML/CSV Smart Import memerlukan WooCommerce terinstal dan aktif."
+msgid "Bootflow Product Importer requires WooCommerce to be installed and active."
+msgstr "Bootflow Product Importer memerlukan WooCommerce terinstal dan aktif."
 
 #: includes/admin/partials/import-edit.php:368
 msgid "Write a PHP formula to automatically assign shipping classes based on product dimensions and weight. The formula should return the shipping class slug (e.g., \"S\", \"M\", \"L\", \"Smags\")."
@@ -4573,8 +4573,8 @@ msgid "XML values: yes/no, true/false, 1/0"
 msgstr "Nilai XML: yes/no, true/false, 1/0"
 
 #: includes/admin/partials/settings-page.php:111
-msgid "XML/CSV AI Smart Import - Settings"
-msgstr "XML/CSV AI Smart Import - Pengaturan"
+msgid "Bootflow Product Importer - Settings"
+msgstr "Bootflow Product Importer - Settings"
 
 #: includes/admin/partials/step-2-mapping.php:2049
 #: includes/admin/partials/step-2-mapping.php:3162

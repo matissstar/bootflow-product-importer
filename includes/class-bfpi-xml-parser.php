@@ -264,16 +264,16 @@ class Bfpi_XML_Parser {
     public function count_products($file_path, $product_wrapper) {
         try {
             // Debug info
-            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import - XML Parser count_products called with: ' . $file_path . ', wrapper: ' . $product_wrapper); }
+            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import - XML Parser count_products called with: ' . $file_path . ', wrapper: ' . $product_wrapper); }
             
             if (!file_exists($file_path)) {
-                if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import - XML file does not exist: ' . $file_path); }
+                if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import - XML file does not exist: ' . $file_path); }
                 return 0;
             }
 
             $reader = new XMLReader();
             if (!$reader->open($file_path)) {
-                if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import - Failed to open XML file: ' . $file_path); }
+                if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import - Failed to open XML file: ' . $file_path); }
                 return 0;
             }
 
@@ -285,7 +285,7 @@ class Bfpi_XML_Parser {
             }
 
             $reader->close();
-            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('WC XML CSV AI Import - Found ' . $count . ' products in XML'); }
+            if (defined('WP_DEBUG') && WP_DEBUG) { error_log('Bootflow Import - Found ' . $count . ' products in XML'); }
             return $count;
 
         } catch (Exception $e) {
