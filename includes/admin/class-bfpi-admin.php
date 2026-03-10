@@ -92,8 +92,6 @@ class Bfpi_Admin {
             array(
                 'ajax_url' => admin_url('admin-ajax.php'),
                 'nonce' => wp_create_nonce('bfpi_nonce'),
-                'show_text' => __('Show', 'bootflow-product-xml-csv-importer'),
-                'hide_text' => __('Hide', 'bootflow-product-xml-csv-importer'),
                 'strings' => array(
                     'uploading' => __('Uploading file...', 'bootflow-product-xml-csv-importer'),
                     'parsing' => __('Parsing file structure...', 'bootflow-product-xml-csv-importer'),
@@ -832,14 +830,13 @@ class Bfpi_Admin {
             
             // Merge mappings - save ALL fields that have processing_mode or source
             $all_mappings = array();
+            // Special taxonomy and engine keys - always save if present
+            $always_save_keys = array('categories', 'tags', 'brand', 'pricing_engine', 'shipping_class_engine', 'attributes_variations', 'shipping_class_formula');
             foreach ($field_mapping as $wc_field => $mapping_data) {
-                // Special handling for shipping_class_formula (uses [formula] instead of [processing_mode])
-                // IMPORTANT: Save even if formula is empty (user might want to clear it)
-                if ($wc_field === 'shipping_class_formula') {
+                // Special keys that should always be saved (taxonomy, engines, etc.)
+                if (in_array($wc_field, $always_save_keys, true)) {
                     $all_mappings[$wc_field] = $mapping_data;
-                    if (!empty($mapping_data['formula'])) {
-                    } else {
-                    }
+                    if (defined('WP_DEBUG') && WP_DEBUG) { error_log("Saving special field: {$wc_field}"); }
                 }
                 // Save field if it has processing_mode OR source OR update_on_sync flag
                 // This ensures update_on_sync checkbox state is always saved
@@ -1063,7 +1060,14 @@ class Bfpi_Admin {
         
         if (!empty($saved_custom_fields)) {        }
         
-
+        // Generate secret key
+        $import_secret = get_option('bfpi_secret_' . $import_id);
+        if (empty($import_secret)) {
+            $import_secret = wp_generate_password(32, false);
+            update_option('bfpi_secret_' . $import_id, $import_secret);
+        }
+        
+        $cron_url = admin_url('admin-ajax.php?action=bfpi_single_cron&import_id=' . $import_id . '&secret=' . $import_secret);
         
         // Load file structure for dropdowns - use XML Parser for proper nested field support
         $file_path = $import['file_path'];

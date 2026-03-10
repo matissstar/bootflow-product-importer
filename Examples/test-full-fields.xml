@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-    Bootflow Product Importer — FULL TEST FILE
-    Covers ALL mapping sections and fields:
-    ═══════════════════════════════════════════════════════════
-    1.  Basic Product Fields (sku, name, type, description, short_description, status)
-    2.  Pricing Engine (custom — test price markup rules)
+    Bootflow Product Importer — COMPREHENSIVE TEST FILE
+    Tests ALL mapping sections and fields supported by the importer:
+    ═══════════════════════════════════════════════════════════════════
+    1.  Basic Product Fields (sku, name, product_type, description, short_description, status)
+    2.  Pricing Engine (custom — price markup rules)
     3.  Pricing Fields (regular_price, sale_price, sale_price_dates_from/to, tax_status, tax_class)
     4.  Inventory Fields (manage_stock, stock_quantity, stock_status, backorders)
     5.  Physical Properties (weight, length, width, height, shipping_class)
-    6.  Shipping Class Engine (custom — test shipping class rules)
+    6.  Shipping Class Engine (custom — shipping class rules)
     7.  Media Fields (images, featured_image)
     8.  Categories & Tags — TAXONOMY (categories, tags, brand + mapping tables)
     9.  Product Options (featured, virtual, downloadable, sold_individually, reviews_allowed)
@@ -17,17 +17,26 @@
     12. Linked Products (upsell_ids, cross_sell_ids, grouped_products, parent_id)
     13. Advanced Fields (purchase_note, menu_order, button_text, external_url)
     14. SEO Fields (meta_title, meta_description, meta_keywords)
-    15. Attributes & Variations (custom UI — color, size, material + variations)
-    ═══════════════════════════════════════════════════════════
-    Contains 8 products testing all edge cases:
-    - Simple product (full data)
-    - Variable product (with attributes/variations)
-    - External/Affiliate product
-    - Grouped product
-    - Virtual + Downloadable product
-    - Product with hierarchical categories
-    - Product with multiple categories (separated)
-    - Product with sale dates, backorders, identifiers
+    15. Attributes & Variations (attributes + variations with ALL variation-level fields)
+    16. Custom Fields / Custom Meta (any arbitrary meta_key)
+    ═══════════════════════════════════════════════════════════════════
+
+    Contains 10 products — each tests different product types & edge cases:
+    ────────────────────────────────────────────────────────────────────
+    #1  Simple       — ALL fields filled, sale dates, identifiers, linked products
+    #2  Variable     — Variations with ALL variation-level fields (sku, price, sale_price,
+                        sale dates, stock, weight, dimensions, shipping_class, image,
+                        virtual, downloadable, download_limit/expiry, identifiers,
+                        backorders, description, tax_class, menu_order, custom meta)
+    #3  External     — Affiliate product with button_text + external_url
+    #4  Virtual+DL   — Virtual downloadable with download_limit/expiry, ISBN
+    #5  Grouped      — Grouped product with grouped_products children SKUs
+    #6  Backorder    — Stock=0, backorders=yes, status=draft, tax=shipping+reduced-rate
+    #7  Category map — Foreign-language category (mapping table test), cross/upsells
+    #8  Private      — Status=private, tax=zero-rate, sold_individually, handmade
+    #9  Pending      — Status=pending, minimal fields, tests defaults
+    #10 Variable DL  — Variable virtual/downloadable with download variations
+    ────────────────────────────────────────────────────────────────────
 -->
 <products>
 
@@ -66,7 +75,7 @@
         <images>https://picsum.photos/seed/headphones1/800/800,https://picsum.photos/seed/headphones2/800/800,https://picsum.photos/seed/headphones3/800/800</images>
         <featured_image>https://picsum.photos/seed/headphones-main/800/800</featured_image>
 
-        <!-- TAXONOMY — single category mode test -->
+        <!-- TAXONOMY -->
         <category>Electronics</category>
         <tags>wireless, bluetooth, headphones, audio, ANC</tags>
         <brand>SoundMax</brand>
@@ -78,7 +87,7 @@
         <sold_individually>no</sold_individually>
         <reviews_allowed>yes</reviews_allowed>
 
-        <!-- DOWNLOAD SETTINGS (N/A for this one, but test empty) -->
+        <!-- DOWNLOAD SETTINGS (empty for non-downloadable) -->
         <download_limit></download_limit>
         <download_expiry></download_expiry>
 
@@ -106,20 +115,25 @@
         <meta_description>Buy SoundMax Premium Wireless Bluetooth Headphones with Active Noise Cancellation. 30-hour battery, foldable design. Free shipping.</meta_description>
         <meta_keywords>bluetooth headphones, wireless headphones, ANC headphones, noise cancelling</meta_keywords>
 
-        <!-- ATTRIBUTES (for testing attribute mapping) -->
+        <!-- ATTRIBUTES (display-only, no variations) -->
         <attributes>
             <color>Black</color>
             <material>Plastic, Leather</material>
             <connectivity>Bluetooth 5.3</connectivity>
         </attributes>
+
+        <!-- CUSTOM FIELDS (arbitrary meta — for Custom Fields mapping) -->
+        <warranty_months>24</warranty_months>
+        <country_of_origin>China</country_of_origin>
+        <battery_life_hours>30</battery_life_hours>
     </product>
 
-    <!-- ═══════════════════ PRODUCT 2: Variable — with variations ═══════════════════ -->
+    <!-- ═══════════════════ PRODUCT 2: Variable — ALL variation-level fields ═══════════════════ -->
     <product>
         <sku>BPI-TEST-002</sku>
         <name>Men's Classic Cotton T-Shirt</name>
         <product_type>variable</product_type>
-        <description><![CDATA[<p>Timeless comfort meets modern style. Our Men's Classic Cotton T-Shirt is made from 100% organic cotton for a soft, breathable feel all day long.</p>]]></description>
+        <description><![CDATA[<p>Timeless comfort meets modern style. Our Men's Classic Cotton T-Shirt is made from 100% organic cotton for a soft, breathable feel all day long.</p><ul><li>100% GOTS certified organic cotton</li><li>Pre-shrunk fabric</li><li>Reinforced collar</li></ul>]]></description>
         <short_description>Classic 100% organic cotton t-shirt, available in multiple colors and sizes.</short_description>
         <status>publish</status>
 
@@ -144,7 +158,7 @@
         <images>https://picsum.photos/seed/tshirt1/800/800,https://picsum.photos/seed/tshirt2/800/800</images>
         <featured_image>https://picsum.photos/seed/tshirt-main/800/800</featured_image>
 
-        <!-- TAXONOMY — hierarchical category test: Clothing > Men > T-Shirts -->
+        <!-- TAXONOMY — hierarchical category: Clothing > Men > T-Shirts -->
         <category>Clothing > Men > T-Shirts</category>
         <tags>cotton, organic, t-shirt, men, casual</tags>
         <brand>EcoWear</brand>
@@ -169,7 +183,7 @@
         <grouped_products></grouped_products>
         <parent_id></parent_id>
 
-        <purchase_note>Machine wash cold. Do not bleach.</purchase_note>
+        <purchase_note>Machine wash cold at 30°C. Do not bleach. Tumble dry low.</purchase_note>
         <menu_order>2</menu_order>
         <button_text></button_text>
         <external_url></external_url>
@@ -185,23 +199,53 @@
             <material>100% Organic Cotton</material>
         </attributes>
 
+        <!-- VARIATIONS — testing ALL variation-level fields -->
         <variations>
+            <!-- Variation 1: ALL fields filled -->
             <variation>
                 <sku>BPI-TEST-002-RED-S</sku>
                 <color>Red</color>
                 <size>S</size>
                 <regular_price>29.99</regular_price>
+                <sale_price>24.99</sale_price>
+                <sale_price_dates_from>2026-06-01</sale_price_dates_from>
+                <sale_price_dates_to>2026-06-30</sale_price_dates_to>
+                <manage_stock>yes</manage_stock>
                 <stock_quantity>50</stock_quantity>
+                <stock_status>instock</stock_status>
+                <backorders>no</backorders>
                 <weight>0.18</weight>
+                <length>28</length>
+                <width>22</width>
+                <height>1.5</height>
+                <shipping_class>light</shipping_class>
+                <image>https://picsum.photos/seed/tshirt-red-s/800/800</image>
+                <description>Red small t-shirt, perfect for slim fit.</description>
+                <virtual>no</virtual>
+                <downloadable>no</downloadable>
+                <tax_class></tax_class>
+                <ean>5901234123464</ean>
+                <upc>590123412346</upc>
+                <gtin>05901234123464</gtin>
+                <isbn></isbn>
+                <mpn>EW-CTS-RED-S</mpn>
+                <menu_order>1</menu_order>
             </variation>
+            <!-- Variation 2: Partial fields -->
             <variation>
                 <sku>BPI-TEST-002-RED-M</sku>
                 <color>Red</color>
                 <size>M</size>
                 <regular_price>29.99</regular_price>
                 <stock_quantity>75</stock_quantity>
+                <stock_status>instock</stock_status>
                 <weight>0.2</weight>
+                <image>https://picsum.photos/seed/tshirt-red-m/800/800</image>
+                <ean>5901234123471</ean>
+                <mpn>EW-CTS-RED-M</mpn>
+                <menu_order>2</menu_order>
             </variation>
+            <!-- Variation 3: With sale price and dimensions -->
             <variation>
                 <sku>BPI-TEST-002-BLUE-L</sku>
                 <color>Blue</color>
@@ -209,17 +253,56 @@
                 <regular_price>29.99</regular_price>
                 <sale_price>24.99</sale_price>
                 <stock_quantity>30</stock_quantity>
+                <stock_status>instock</stock_status>
                 <weight>0.22</weight>
+                <length>32</length>
+                <width>26</width>
+                <height>2</height>
+                <image>https://picsum.photos/seed/tshirt-blue-l/800/800</image>
+                <ean>5901234123488</ean>
+                <mpn>EW-CTS-BLUE-L</mpn>
+                <menu_order>3</menu_order>
             </variation>
+            <!-- Variation 4: With backorders=notify and different shipping class -->
             <variation>
                 <sku>BPI-TEST-002-BLK-XL</sku>
                 <color>Black</color>
                 <size>XL</size>
                 <regular_price>31.99</regular_price>
                 <stock_quantity>40</stock_quantity>
+                <stock_status>instock</stock_status>
+                <backorders>notify</backorders>
                 <weight>0.24</weight>
+                <length>34</length>
+                <width>28</width>
+                <height>2</height>
+                <shipping_class>standard</shipping_class>
+                <image>https://picsum.photos/seed/tshirt-blk-xl/800/800</image>
+                <ean>5901234123495</ean>
+                <mpn>EW-CTS-BLK-XL</mpn>
+                <menu_order>4</menu_order>
+            </variation>
+            <!-- Variation 5: Backorder state, stock=0 -->
+            <variation>
+                <sku>BPI-TEST-002-WHT-XXL</sku>
+                <color>White</color>
+                <size>XXL</size>
+                <regular_price>33.99</regular_price>
+                <manage_stock>yes</manage_stock>
+                <stock_quantity>0</stock_quantity>
+                <stock_status>onbackorder</stock_status>
+                <backorders>yes</backorders>
+                <weight>0.26</weight>
+                <image>https://picsum.photos/seed/tshirt-wht-xxl/800/800</image>
+                <description>White XXL — currently on backorder, ships in 1-2 weeks.</description>
+                <ean>5901234123501</ean>
+                <mpn>EW-CTS-WHT-XXL</mpn>
+                <menu_order>5</menu_order>
             </variation>
         </variations>
+
+        <warranty_months>6</warranty_months>
+        <country_of_origin>Portugal</country_of_origin>
     </product>
 
     <!-- ═══════════════════ PRODUCT 3: External/Affiliate ═══════════════════ -->
@@ -227,7 +310,7 @@
         <sku>BPI-TEST-003</sku>
         <name>Sony WH-1000XM5 Wireless Headphones</name>
         <product_type>external</product_type>
-        <description><![CDATA[<p>Industry-leading noise cancellation. 30 hours of battery life. Crystal clear calls with 8 microphones and Auto NC Optimizer.</p>]]></description>
+        <description><![CDATA[<p>Industry-leading noise cancellation. 30 hours of battery life. Crystal clear calls with 8 microphones and Auto NC Optimizer.</p><ul><li>30-hour battery</li><li>Multipoint connection</li><li>Speak-to-Chat</li><li>Adaptive Sound Control</li></ul>]]></description>
         <short_description>Sony's flagship ANC headphones — available via Amazon.</short_description>
         <status>publish</status>
 
@@ -279,6 +362,7 @@
 
         <purchase_note></purchase_note>
         <menu_order>3</menu_order>
+        <!-- External product specific fields -->
         <button_text>Buy on Amazon</button_text>
         <external_url>https://www.amazon.com/dp/B0BX2L8PZL</external_url>
 
@@ -290,6 +374,9 @@
             <color>Black</color>
             <connectivity>Bluetooth 5.2, 3.5mm Jack</connectivity>
         </attributes>
+
+        <warranty_months>12</warranty_months>
+        <affiliate_commission>8%</affiliate_commission>
     </product>
 
     <!-- ═══════════════════ PRODUCT 4: Virtual + Downloadable ═══════════════════ -->
@@ -297,7 +384,7 @@
         <sku>BPI-TEST-004</sku>
         <name>Complete Web Development Course 2026</name>
         <product_type>simple</product_type>
-        <description><![CDATA[<p>Master HTML, CSS, JavaScript, React, Node.js, and MongoDB in this comprehensive 60-hour video course. Includes lifetime access and certificate of completion.</p>]]></description>
+        <description><![CDATA[<p>Master HTML, CSS, JavaScript, React, Node.js, and MongoDB in this comprehensive 60-hour video course. Includes lifetime access and certificate of completion.</p><h3>What you'll learn:</h3><ol><li>HTML5 & CSS3 fundamentals</li><li>JavaScript ES2025+</li><li>React 19 with hooks</li><li>Node.js & Express</li><li>MongoDB & Mongoose</li><li>Deployment on AWS/Vercel</li></ol>]]></description>
         <short_description>60-hour full-stack web development course with certificate.</short_description>
         <status>publish</status>
 
@@ -313,18 +400,19 @@
         <stock_status>instock</stock_status>
         <backorders>no</backorders>
 
-        <!-- No physical properties needed for virtual/downloadable -->
+        <!-- No physical properties for virtual/downloadable -->
         <weight></weight>
         <length></length>
         <width></width>
         <height></height>
         <shipping_class></shipping_class>
 
-        <images>https://picsum.photos/seed/course1/800/800</images>
+        <images>https://picsum.photos/seed/course1/800/800,https://picsum.photos/seed/course2/800/800</images>
         <featured_image>https://picsum.photos/seed/course-main/800/800</featured_image>
 
+        <!-- TAXONOMY — hierarchical category -->
         <category>Digital Products > Online Courses</category>
-        <tags>web development, coding, javascript, react, online course</tags>
+        <tags>web development, coding, javascript, react, online course, programming</tags>
         <brand>DevAcademy</brand>
 
         <featured>yes</featured>
@@ -348,7 +436,7 @@
         <grouped_products></grouped_products>
         <parent_id></parent_id>
 
-        <purchase_note>Your download link will be available in your account. Access your course at learn.devacademy.com.</purchase_note>
+        <purchase_note><![CDATA[Your download link will be available in your account. Access your course at learn.devacademy.com. Use code WELCOME2026 for 10% off your next course.]]></purchase_note>
         <menu_order>4</menu_order>
         <button_text></button_text>
         <external_url></external_url>
@@ -361,7 +449,12 @@
             <format>Video, PDF</format>
             <language>English, Latvian</language>
             <level>Beginner to Advanced</level>
+            <duration>60 hours</duration>
         </attributes>
+
+        <instructor>John Smith</instructor>
+        <course_modules>12</course_modules>
+        <certificate>yes</certificate>
     </product>
 
     <!-- ═══════════════════ PRODUCT 5: Grouped product ═══════════════════ -->
@@ -369,10 +462,11 @@
         <sku>BPI-TEST-005</sku>
         <name>Home Office Starter Bundle</name>
         <product_type>grouped</product_type>
-        <description><![CDATA[<p>Everything you need for a productive home office. This bundle includes our premium headphones, a wireless keyboard, and an ergonomic mouse — all at a special bundle price.</p>]]></description>
+        <description><![CDATA[<p>Everything you need for a productive home office. This bundle includes our premium headphones, a wireless keyboard, and an ergonomic mouse — all at a special bundle price.</p><p><strong>Bundle includes:</strong></p><ul><li>Premium Wireless Bluetooth Headphones (BPI-TEST-001)</li><li>Mechanical RGB Gaming Keyboard (BPI-TEST-006)</li><li>Ergonomic Vertical Wireless Mouse (BPI-TEST-007)</li></ul>]]></description>
         <short_description>Complete home office bundle: headphones + keyboard + mouse.</short_description>
         <status>publish</status>
 
+        <!-- Grouped products don't have their own price -->
         <regular_price></regular_price>
         <sale_price></sale_price>
         <sale_price_dates_from></sale_price_dates_from>
@@ -416,11 +510,11 @@
 
         <upsell_ids></upsell_ids>
         <cross_sell_ids>BPI-TEST-001</cross_sell_ids>
-        <!-- Grouped products — references child product SKUs -->
+        <!-- Grouped products — reference child product SKUs -->
         <grouped_products>BPI-TEST-001,BPI-TEST-006,BPI-TEST-007</grouped_products>
         <parent_id></parent_id>
 
-        <purchase_note>Bundle items will ship together within 2-3 business days.</purchase_note>
+        <purchase_note>Bundle items will ship together within 2-3 business days. Each item has its own warranty.</purchase_note>
         <menu_order>5</menu_order>
         <button_text></button_text>
         <external_url></external_url>
@@ -433,9 +527,11 @@
             <includes>Headphones, Keyboard, Mouse</includes>
             <warranty>2 Years</warranty>
         </attributes>
+
+        <bundle_savings>15%</bundle_savings>
     </product>
 
-    <!-- ═══════════════════ PRODUCT 6: Out of stock + backorders ═══════════════════ -->
+    <!-- ═══════════════════ PRODUCT 6: Out of stock + backorders + draft ═══════════════════ -->
     <product>
         <sku>BPI-TEST-006</sku>
         <name>Mechanical RGB Gaming Keyboard</name>
@@ -448,6 +544,7 @@
         <sale_price></sale_price>
         <sale_price_dates_from></sale_price_dates_from>
         <sale_price_dates_to></sale_price_dates_to>
+        <!-- tax_status=shipping tests the "Shipping only" tax option -->
         <tax_status>shipping</tax_status>
         <tax_class>reduced-rate</tax_class>
 
@@ -465,6 +562,7 @@
         <images>https://picsum.photos/seed/keyboard1/800/800,https://picsum.photos/seed/keyboard2/800/800</images>
         <featured_image>https://picsum.photos/seed/keyboard-main/800/800</featured_image>
 
+        <!-- TAXONOMY — deep hierarchy: Electronics > Computer Peripherals > Keyboards -->
         <category>Electronics > Computer Peripherals > Keyboards</category>
         <tags>keyboard, mechanical, gaming, RGB, Cherry MX</tags>
         <brand>KeyForge</brand>
@@ -504,9 +602,12 @@
             <backlight>Per-key RGB</backlight>
             <connection>USB-C</connection>
         </attributes>
+
+        <expected_restock_date>2026-04-15</expected_restock_date>
+        <country_of_origin>Taiwan</country_of_origin>
     </product>
 
-    <!-- ═══════════════════ PRODUCT 7: Category mapping test — different brand ═══════════════════ -->
+    <!-- ═══════════════════ PRODUCT 7: Category mapping test ═══════════════════ -->
     <product>
         <sku>BPI-TEST-007</sku>
         <name>Ergonomic Vertical Wireless Mouse</name>
@@ -575,9 +676,12 @@
             <dpi>800-4000</dpi>
             <connection>Bluetooth 5.0, 2.4GHz</connection>
         </attributes>
+
+        <warranty_months>24</warranty_months>
+        <country_of_origin>China</country_of_origin>
     </product>
 
-    <!-- ═══════════════════ PRODUCT 8: Private + pending + edge cases ═══════════════════ -->
+    <!-- ═══════════════════ PRODUCT 8: Private + sold_individually + zero-rate ═══════════════════ -->
     <product>
         <sku>BPI-TEST-008</sku>
         <name>Handmade Latvian Linen Table Runner</name>
@@ -632,7 +736,7 @@
         <grouped_products></grouped_products>
         <parent_id></parent_id>
 
-        <purchase_note>Handmade product — please allow 5-7 days for production. Wash at 30°C.</purchase_note>
+        <purchase_note>Handmade product — please allow 5-7 days for production. Wash at 30°C. Iron on medium heat.</purchase_note>
         <menu_order>8</menu_order>
         <button_text></button_text>
         <external_url></external_url>
@@ -647,6 +751,217 @@
             <pattern>Baltic Traditional</pattern>
             <origin>Latvia</origin>
         </attributes>
+
+        <artisan_name>Māra Liepiņa</artisan_name>
+        <production_time_days>5-7</production_time_days>
+        <care_instructions>Machine wash 30°C, iron medium heat, do not bleach</care_instructions>
+    </product>
+
+    <!-- ═══════════════════ PRODUCT 9: Pending review + minimal fields ═══════════════════ -->
+    <product>
+        <sku>BPI-TEST-009</sku>
+        <name>USB-C Hub 7-in-1</name>
+        <product_type>simple</product_type>
+        <description><![CDATA[<p>Compact 7-in-1 USB-C hub with HDMI 4K@60Hz, 2× USB-A 3.0, USB-C PD 100W, SD/microSD readers, and Gigabit Ethernet.</p>]]></description>
+        <short_description>7-in-1 USB-C hub: HDMI, USB-A, PD, SD, Ethernet.</short_description>
+        <status>pending</status>
+
+        <regular_price>45.00</regular_price>
+        <sale_price></sale_price>
+        <sale_price_dates_from></sale_price_dates_from>
+        <sale_price_dates_to></sale_price_dates_to>
+        <tax_status>taxable</tax_status>
+        <tax_class></tax_class>
+
+        <manage_stock>no</manage_stock>
+        <stock_quantity></stock_quantity>
+        <stock_status>instock</stock_status>
+        <backorders>no</backorders>
+
+        <weight>0.08</weight>
+        <length>10</length>
+        <width>3.5</width>
+        <height>1.2</height>
+        <shipping_class></shipping_class>
+
+        <images>https://picsum.photos/seed/usbhub1/800/800</images>
+        <featured_image>https://picsum.photos/seed/usbhub-main/800/800</featured_image>
+
+        <category>Electronics > Accessories</category>
+        <tags>usb-c, hub, adapter, hdmi, ethernet</tags>
+        <brand>TechConnect</brand>
+
+        <featured>no</featured>
+        <virtual>no</virtual>
+        <downloadable>no</downloadable>
+        <sold_individually>no</sold_individually>
+        <reviews_allowed>yes</reviews_allowed>
+
+        <download_limit></download_limit>
+        <download_expiry></download_expiry>
+
+        <ean>8712345678901</ean>
+        <upc>871234567890</upc>
+        <isbn></isbn>
+        <mpn>TC-HUB7-001</mpn>
+        <gtin>08712345678901</gtin>
+
+        <upsell_ids>BPI-TEST-001</upsell_ids>
+        <cross_sell_ids>BPI-TEST-006,BPI-TEST-007</cross_sell_ids>
+        <grouped_products></grouped_products>
+        <parent_id></parent_id>
+
+        <purchase_note></purchase_note>
+        <menu_order>9</menu_order>
+        <button_text></button_text>
+        <external_url></external_url>
+
+        <meta_title>USB-C Hub 7-in-1 — TechConnect</meta_title>
+        <meta_description>Compact USB-C hub with HDMI 4K, USB-A, PD charging, SD cards and Ethernet.</meta_description>
+        <meta_keywords>usb-c hub, usb hub, hdmi adapter, macbook hub</meta_keywords>
+
+        <attributes>
+            <ports>HDMI, 2×USB-A, USB-C PD, SD, microSD, RJ45</ports>
+            <compatibility>macOS, Windows, Linux, ChromeOS</compatibility>
+        </attributes>
+
+        <warranty_months>12</warranty_months>
+    </product>
+
+    <!-- ═══════════════════ PRODUCT 10: Variable with downloadable variations ═══════════════════ -->
+    <product>
+        <sku>BPI-TEST-010</sku>
+        <name>Professional Photo Preset Pack</name>
+        <product_type>variable</product_type>
+        <description><![CDATA[<p>Transform your photos with our professional Lightroom preset pack. Choose from Landscape, Portrait, or Street presets — or get all three in the Complete bundle.</p><p>Compatible with Lightroom Classic, Lightroom CC, and Lightroom Mobile.</p>]]></description>
+        <short_description>Professional Lightroom presets — Landscape, Portrait, Street, or Complete bundle.</short_description>
+        <status>publish</status>
+
+        <regular_price>39.99</regular_price>
+        <sale_price></sale_price>
+        <sale_price_dates_from></sale_price_dates_from>
+        <sale_price_dates_to></sale_price_dates_to>
+        <tax_status>taxable</tax_status>
+        <tax_class>digital-goods</tax_class>
+
+        <manage_stock>no</manage_stock>
+        <stock_quantity></stock_quantity>
+        <stock_status>instock</stock_status>
+        <backorders>no</backorders>
+
+        <weight></weight>
+        <length></length>
+        <width></width>
+        <height></height>
+        <shipping_class></shipping_class>
+
+        <images>https://picsum.photos/seed/preset1/800/800,https://picsum.photos/seed/preset2/800/800,https://picsum.photos/seed/preset3/800/800</images>
+        <featured_image>https://picsum.photos/seed/preset-main/800/800</featured_image>
+
+        <category>Digital Products > Photography > Lightroom Presets</category>
+        <tags>lightroom, presets, photography, photo editing, LR presets</tags>
+        <brand>ProPresets</brand>
+
+        <featured>yes</featured>
+        <virtual>yes</virtual>
+        <downloadable>yes</downloadable>
+        <sold_individually>no</sold_individually>
+        <reviews_allowed>yes</reviews_allowed>
+
+        <download_limit>10</download_limit>
+        <download_expiry>730</download_expiry>
+
+        <ean></ean>
+        <upc></upc>
+        <isbn></isbn>
+        <mpn>PP-LR-2026</mpn>
+        <gtin></gtin>
+
+        <upsell_ids>BPI-TEST-004</upsell_ids>
+        <cross_sell_ids></cross_sell_ids>
+        <grouped_products></grouped_products>
+        <parent_id></parent_id>
+
+        <purchase_note>Download link available in your account. Compatible with Lightroom Classic CC 2020+ and Lightroom Mobile.</purchase_note>
+        <menu_order>10</menu_order>
+        <button_text></button_text>
+        <external_url></external_url>
+
+        <meta_title>Professional Lightroom Presets — Landscape, Portrait, Street</meta_title>
+        <meta_description>Transform your photos with professional Lightroom presets. Choose Landscape, Portrait, or Street style.</meta_description>
+        <meta_keywords>lightroom presets, photo presets, photography, photo editing presets</meta_keywords>
+
+        <attributes>
+            <pack>Landscape, Portrait, Street, Complete</pack>
+            <format>XMP, DNG, lrtemplate</format>
+        </attributes>
+
+        <!-- Variations for downloadable/virtual products -->
+        <variations>
+            <variation>
+                <sku>BPI-TEST-010-LAND</sku>
+                <pack>Landscape</pack>
+                <regular_price>14.99</regular_price>
+                <sale_price>9.99</sale_price>
+                <sale_price_dates_from>2026-04-01</sale_price_dates_from>
+                <sale_price_dates_to>2026-04-30</sale_price_dates_to>
+                <stock_status>instock</stock_status>
+                <virtual>yes</virtual>
+                <downloadable>yes</downloadable>
+                <download_limit>10</download_limit>
+                <download_expiry>730</download_expiry>
+                <image>https://picsum.photos/seed/preset-land/800/800</image>
+                <description>20 Landscape presets: Golden Hour, Mountain, Ocean, Forest, Desert.</description>
+                <ean>9901234567001</ean>
+                <mpn>PP-LR-LAND</mpn>
+            </variation>
+            <variation>
+                <sku>BPI-TEST-010-PORT</sku>
+                <pack>Portrait</pack>
+                <regular_price>14.99</regular_price>
+                <stock_status>instock</stock_status>
+                <virtual>yes</virtual>
+                <downloadable>yes</downloadable>
+                <download_limit>10</download_limit>
+                <download_expiry>730</download_expiry>
+                <image>https://picsum.photos/seed/preset-port/800/800</image>
+                <description>20 Portrait presets: Studio, Natural Light, Moody, Film, Vintage.</description>
+                <ean>9901234567002</ean>
+                <mpn>PP-LR-PORT</mpn>
+            </variation>
+            <variation>
+                <sku>BPI-TEST-010-STR</sku>
+                <pack>Street</pack>
+                <regular_price>14.99</regular_price>
+                <stock_status>instock</stock_status>
+                <virtual>yes</virtual>
+                <downloadable>yes</downloadable>
+                <download_limit>10</download_limit>
+                <download_expiry>730</download_expiry>
+                <image>https://picsum.photos/seed/preset-str/800/800</image>
+                <description>20 Street presets: Urban, Neon, B&amp;W, Cinematic, Gritty.</description>
+                <ean>9901234567003</ean>
+                <mpn>PP-LR-STR</mpn>
+            </variation>
+            <variation>
+                <sku>BPI-TEST-010-ALL</sku>
+                <pack>Complete</pack>
+                <regular_price>39.99</regular_price>
+                <sale_price>29.99</sale_price>
+                <stock_status>instock</stock_status>
+                <virtual>yes</virtual>
+                <downloadable>yes</downloadable>
+                <download_limit>10</download_limit>
+                <download_expiry>730</download_expiry>
+                <image>https://picsum.photos/seed/preset-all/800/800</image>
+                <description>All 60 presets: Landscape + Portrait + Street bundles combined.</description>
+                <ean>9901234567004</ean>
+                <mpn>PP-LR-ALL</mpn>
+            </variation>
+        </variations>
+
+        <file_format>ZIP (contains XMP + DNG + lrtemplate)</file_format>
+        <lightroom_version>CC 2020+</lightroom_version>
     </product>
 
 </products>

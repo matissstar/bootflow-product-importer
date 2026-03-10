@@ -4687,6 +4687,97 @@ window.populateFieldSelectorsForRowGlobal = function($row) {
             console.log('★★★ COLLECTED SHIPPING CLASS ENGINE:', shippingClassEngineConfig);
         }
 
+        // ═══════════════════════════════════════════════════════════════
+        // Collect Taxonomy data: Categories, Tags, Brand
+        // These use .taxonomy-block containers, not .field-mapping-row
+        // ═══════════════════════════════════════════════════════════════
+        
+        // --- CATEGORIES ---
+        var $catBlock = $('.taxonomy-block[data-taxonomy="categories"]');
+        if ($catBlock.length) {
+            var catSource = $catBlock.find('textarea[name="field_mapping\\[categories\\]\\[source\\]"]').val() || '';
+            var catData = {
+                source: catSource,
+                cat_mode: $catBlock.find('input[name="field_mapping\\[categories\\]\\[cat_mode\\]"]:checked').val() || 'multiple',
+                cat_separator: $catBlock.find('input[name="field_mapping\\[categories\\]\\[cat_separator\\]"]').val() || ',',
+                cat_hier_sep: $catBlock.find('input[name="field_mapping\\[categories\\]\\[cat_hier_sep\\]"]').val() || '>',
+                cat_multi_sep: $catBlock.find('input[name="field_mapping\\[categories\\]\\[cat_multi_sep\\]"]').val() || '|',
+                cat_auto_create: $catBlock.find('input[name="field_mapping\\[categories\\]\\[cat_auto_create\\]"]').is(':checked') ? '1' : '0',
+                cat_match_existing: $catBlock.find('input[name="field_mapping\\[categories\\]\\[cat_match_existing\\]"]').is(':checked') ? '1' : '0',
+                cat_leaf_only: $catBlock.find('input[name="field_mapping\\[categories\\]\\[cat_leaf_only\\]"]').is(':checked') ? '1' : '0',
+                cat_also_tags: $catBlock.find('input[name="field_mapping\\[categories\\]\\[cat_also_tags\\]"]').is(':checked') ? '1' : '0',
+                cat_enable_mapping: $catBlock.find('input[name="field_mapping\\[categories\\]\\[cat_enable_mapping\\]"]').is(':checked') ? '1' : '0',
+                update_on_sync: $catBlock.find('input[name="field_mapping\\[categories\\]\\[update_on_sync\\]"]').is(':checked') ? '1' : '0'
+            };
+            // Collect category mapping table rows
+            var catMapping = [];
+            $catBlock.find('#cat-mapping-rows tr').each(function() {
+                var from = $(this).find('input[name*="[from]"]').val();
+                var to = $(this).find('select[name*="[to]"]').val();
+                if (from || to) {
+                    catMapping.push({ from: from || '', to: to || '' });
+                }
+            });
+            if (catMapping.length > 0) {
+                catData.cat_mapping = catMapping;
+            }
+            data.field_mapping.categories = catData;
+            console.log('★★★ COLLECTED CATEGORIES:', catData);
+        }
+        
+        // --- TAGS ---
+        var $tagBlock = $('.taxonomy-block[data-taxonomy="tags"]');
+        if ($tagBlock.length) {
+            var tagSource = $tagBlock.find('textarea[name="field_mapping\\[tags\\]\\[source\\]"]').val() || '';
+            var tagData = {
+                source: tagSource,
+                tag_separator: $tagBlock.find('input[name="field_mapping\\[tags\\]\\[tag_separator\\]"]').val() || ',',
+                tag_auto_create: $tagBlock.find('input[name="field_mapping\\[tags\\]\\[tag_auto_create\\]"]').is(':checked') ? '1' : '0',
+                tag_enable_mapping: $tagBlock.find('input[name="field_mapping\\[tags\\]\\[tag_enable_mapping\\]"]').is(':checked') ? '1' : '0',
+                update_on_sync: $tagBlock.find('input[name="field_mapping\\[tags\\]\\[update_on_sync\\]"]').is(':checked') ? '1' : '0'
+            };
+            // Collect tag mapping table rows
+            var tagMapping = [];
+            $tagBlock.find('#tag-mapping-rows tr').each(function() {
+                var from = $(this).find('input[name*="[from]"]').val();
+                var to = $(this).find('select[name*="[to]"]').val();
+                if (from || to) {
+                    tagMapping.push({ from: from || '', to: to || '' });
+                }
+            });
+            if (tagMapping.length > 0) {
+                tagData.tag_mapping = tagMapping;
+            }
+            data.field_mapping.tags = tagData;
+            console.log('★★★ COLLECTED TAGS:', tagData);
+        }
+        
+        // --- BRAND ---
+        var $brandBlock = $('.taxonomy-block[data-taxonomy="brand"]');
+        if ($brandBlock.length) {
+            var brandSource = $brandBlock.find('textarea[name="field_mapping\\[brand\\]\\[source\\]"]').val() || '';
+            var brandData = {
+                source: brandSource,
+                brand_auto_create: $brandBlock.find('input[name="field_mapping\\[brand\\]\\[brand_auto_create\\]"]').is(':checked') ? '1' : '0',
+                brand_enable_mapping: $brandBlock.find('input[name="field_mapping\\[brand\\]\\[brand_enable_mapping\\]"]').is(':checked') ? '1' : '0',
+                update_on_sync: $brandBlock.find('input[name="field_mapping\\[brand\\]\\[update_on_sync\\]"]').is(':checked') ? '1' : '0'
+            };
+            // Collect brand mapping table rows
+            var brandMapping = [];
+            $brandBlock.find('#brand-mapping-rows tr').each(function() {
+                var from = $(this).find('input[name*="[from]"]').val();
+                var to = $(this).find('select[name*="[to]"]').val();
+                if (from || to) {
+                    brandMapping.push({ from: from || '', to: to || '' });
+                }
+            });
+            if (brandMapping.length > 0) {
+                brandData.brand_mapping = brandMapping;
+            }
+            data.field_mapping.brand = brandData;
+            console.log('★★★ COLLECTED BRAND:', brandData);
+        }
+
         return data;
     }
 
@@ -7546,27 +7637,5 @@ window.populateFieldSelectorsForRowGlobal = function($row) {
 
         console.log('BPI: Taxonomy mapping handlers registered OK');
     }
-
-    /* ── Settings-page tab switching (scoped to .bfpi-settings-wrap) ── */
-    $(document).on('click', '.bfpi-settings-wrap .nav-tab', function (e) {
-        e.preventDefault();
-        var target = $(this).data('tab');
-        $('.bfpi-settings-wrap .nav-tab').removeClass('nav-tab-active');
-        $(this).addClass('nav-tab-active');
-        $('.bfpi-settings-wrap .tab-content').removeClass('active').hide();
-        $('#' + target).addClass('active').show();
-    });
-
-    /* ── Toggle password visibility ── */
-    $(document).on('click', '.bfpi-settings-wrap .toggle-password', function () {
-        var $input = $(this).prev('input');
-        if ($input.attr('type') === 'password') {
-            $input.attr('type', 'text');
-            $(this).text(bfpi_ajax.hide_text || 'Hide');
-        } else {
-            $input.attr('type', 'password');
-            $(this).text(bfpi_ajax.show_text || 'Show');
-        }
-    });
 
 })(jQuery);/* Cache bust: ' + Date.now() + ' */

@@ -2803,7 +2803,7 @@ class Bfpi_Importer {
         }
 
         // Shipping class - direct mapping or formula
-        if (isset($product_data['shipping_class']) && !empty($product_data['shipping_class']) && $this->should_update_field('shipping_class', $product_data['shipping_class'], false)) {
+        if (isset($product_data['shipping_class']) && !empty($product_data['shipping_class'])) {
             $shipping_class_slug = sanitize_title($product_data['shipping_class']);
             $shipping_class_term = get_term_by('slug', $shipping_class_slug, 'product_shipping_class');
             
@@ -2824,12 +2824,18 @@ class Bfpi_Importer {
                 $product->set_shipping_class_id($shipping_class_term->term_id);
             }
         } else {
-            // Shipping Class Engine always runs when enabled (not gated by update_on_sync)
-            // The engine uses weight/price rules that should always be re-evaluated on re-import
-            $engine_assigned = $this->apply_shipping_class_engine($product, $product_data);
+            // Shipping Class Engine always runs if enabled (it has its own enabled flag)
+            $sc_config = $this->config['field_mapping']['shipping_class_engine'] ?? null;
+            $engine_enabled = !empty($sc_config) && !empty($sc_config['enabled']);
             
-            if (!$engine_assigned && $this->should_update_field('shipping_class', null, false)) {
-                // Fallback: old formula-based auto-assignment (respects update_on_sync)
+            if ($engine_enabled) {
+                // Engine is explicitly enabled — always apply rules regardless of update_on_sync
+                $engine_assigned = $this->apply_shipping_class_engine($product, $product_data);
+                if (!$engine_assigned) {
+                    $this->auto_assign_shipping_class($product, $product_data);
+                }
+            } elseif ($this->should_update_field('shipping_class', null, false)) {
+                // No engine — use formula fallback only if update_on_sync is enabled
                 $this->auto_assign_shipping_class($product, $product_data);
             }
         }
