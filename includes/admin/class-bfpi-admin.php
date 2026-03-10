@@ -4026,6 +4026,7 @@ BFPI_JS;
             'isbn' => array('isbn', 'isbn13', 'isbn10'),
             'mpn' => array('mpn', 'manufacturer_part_number', 'part_number', 'partnumber'),
             'gtin' => array('gtin', 'gtin14', 'global_trade_item_number'),
+            'product_type' => array('product_type', 'type', 'producttype', 'item_type', 'itemtype'),
             'status' => array('status', 'product_status', 'availability', 'state', 'active'),
             'manage_stock' => array('manage_stock', 'managestock', 'track_stock', 'trackstock'),
             'stock_status' => array('stock_status', 'stockstatus', 'availability_status', 'in_stock', 'instock'),
