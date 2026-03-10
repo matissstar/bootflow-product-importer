@@ -92,6 +92,8 @@ class Bfpi_Admin {
             array(
                 'ajax_url' => admin_url('admin-ajax.php'),
                 'nonce' => wp_create_nonce('bfpi_nonce'),
+                'show_text' => __('Show', 'bootflow-product-xml-csv-importer'),
+                'hide_text' => __('Hide', 'bootflow-product-xml-csv-importer'),
                 'strings' => array(
                     'uploading' => __('Uploading file...', 'bootflow-product-xml-csv-importer'),
                     'parsing' => __('Parsing file structure...', 'bootflow-product-xml-csv-importer'),
@@ -1061,14 +1063,7 @@ class Bfpi_Admin {
         
         if (!empty($saved_custom_fields)) {        }
         
-        // Generate secret key
-        $import_secret = get_option('bfpi_secret_' . $import_id);
-        if (empty($import_secret)) {
-            $import_secret = wp_generate_password(32, false);
-            update_option('bfpi_secret_' . $import_id, $import_secret);
-        }
-        
-        $cron_url = admin_url('admin-ajax.php?action=bfpi_single_cron&import_id=' . $import_id . '&secret=' . $import_secret);
+
         
         // Load file structure for dropdowns - use XML Parser for proper nested field support
         $file_path = $import['file_path'];

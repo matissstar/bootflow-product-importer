@@ -7547,4 +7547,26 @@ window.populateFieldSelectorsForRowGlobal = function($row) {
         console.log('BPI: Taxonomy mapping handlers registered OK');
     }
 
+    /* ── Settings-page tab switching (scoped to .bfpi-settings-wrap) ── */
+    $(document).on('click', '.bfpi-settings-wrap .nav-tab', function (e) {
+        e.preventDefault();
+        var target = $(this).data('tab');
+        $('.bfpi-settings-wrap .nav-tab').removeClass('nav-tab-active');
+        $(this).addClass('nav-tab-active');
+        $('.bfpi-settings-wrap .tab-content').removeClass('active').hide();
+        $('#' + target).addClass('active').show();
+    });
+
+    /* ── Toggle password visibility ── */
+    $(document).on('click', '.bfpi-settings-wrap .toggle-password', function () {
+        var $input = $(this).prev('input');
+        if ($input.attr('type') === 'password') {
+            $input.attr('type', 'text');
+            $(this).text(bfpi_ajax.hide_text || 'Hide');
+        } else {
+            $input.attr('type', 'password');
+            $(this).text(bfpi_ajax.show_text || 'Show');
+        }
+    });
+
 })(jQuery);/* Cache bust: ' + Date.now() + ' */

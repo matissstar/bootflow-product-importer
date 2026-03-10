@@ -2044,3 +2044,15 @@
     color: #2271b1;
 }
 }
+
+/* ── Settings page tabs ── */
+.bfpi-settings-wrap .tab-content { display: none; }
+.bfpi-settings-wrap .tab-content.active { display: block; }
+
+/* Toggle-password button */
+.bfpi-settings-wrap .toggle-password {
+    cursor: pointer;
+    margin-left: 6px;
+    color: #2271b1;
+    user-select: none;
+}
